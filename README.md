@@ -3,7 +3,8 @@
 This Git repository is planned to hold a book tentatively titled *Data
 Plane Software Design*, in source form.
 
-Currently, there is nothing here.
+There is not much here yet. Only a skeleton structure, and very little
+actual content.
 
 ## Source Format
 

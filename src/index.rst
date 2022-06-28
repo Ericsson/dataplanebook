@@ -7,8 +7,8 @@ Data Plane Software Design
 ##########################
 
 .. note::
-   What you see here is only very early draft of this book. Mostly a
-   skeleton, what contents there is likely to be of low quality.
+   What you see here is only very early draft of this book. A skeleton
+   structure with little actual content.
 
 .. toctree::
    :maxdepth: 2
