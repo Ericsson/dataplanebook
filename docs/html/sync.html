@@ -1,0 +1,171 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Synchronization &#8212; Data Plane Software Design 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Caches" href="cache.html" />
+    <link rel="prev" title="Memory Management" href="mem.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="synchronization">
+<h1>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="staying-safe">
+<h2>Staying Safe<a class="headerlink" href="#staying-safe" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="thread-safety">
+<h3>Thread Safety<a class="headerlink" href="#thread-safety" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="asynchronous-signal-safety">
+<h3>Asynchronous Signal Safety<a class="headerlink" href="#asynchronous-signal-safety" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="preemption-safety">
+<h3>Preemption Safety<a class="headerlink" href="#preemption-safety" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="considerations">
+<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Read access frequency, and cardinality.</li>
+<li>Write access frequency, and cardinality.</li>
+<li>Needs changes be applied applied atomically across a set of data items?</li>
+<li>Resource management</li>
+</ul>
+<p>Messaging Versus Shared Memory</p>
+</div>
+<div class="section" id="amdahl-s-law">
+<h2>Amdahl’s Law<a class="headerlink" href="#amdahl-s-law" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="critical-section-length-and-impact">
+<h3>Critical Section Length and Impact<a class="headerlink" href="#critical-section-length-and-impact" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="c11-atomics">
+<h2>C11 Atomics<a class="headerlink" href="#c11-atomics" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="seqlocks">
+<h2>Seqlocks<a class="headerlink" href="#seqlocks" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="spinlocks-and-ticketlocks">
+<h2>Spinlocks and Ticketlocks<a class="headerlink" href="#spinlocks-and-ticketlocks" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="read-copy-update">
+<h2>Read-Copy-Update<a class="headerlink" href="#read-copy-update" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="per-core-data-structures">
+<h2>Per Core Data Structures<a class="headerlink" href="#per-core-data-structures" title="Permalink to this headline">¶</a></h2>
+<p>(Really per-thread data structures in DPDK.)</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Data Plane Software Design</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headers.html">Protocol Header Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mem.html">Memory Management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Synchronization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#staying-safe">Staying Safe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#considerations">Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#amdahl-s-law">Amdahl’s Law</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c11-atomics">C11 Atomics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seqlocks">Seqlocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spinlocks-and-ticketlocks">Spinlocks and Ticketlocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#read-copy-update">Read-Copy-Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#per-core-data-structures">Per Core Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cache.html">Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timers.html">Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modularization.html">Modularization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="mem.html" title="previous chapter">Memory Management</a></li>
+      <li>Next: <a href="cache.html" title="next chapter">Caches</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Ericsson AB.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/sync.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
