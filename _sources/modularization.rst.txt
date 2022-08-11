@@ -5,10 +5,14 @@
 Modularization
 **************
 
-Interfaces
-==========
+Module and Interfaces
+=====================
 
 Implementating run time polymorphism.
+
+A module of data plane application will more resemble that of a module
+inside an monolithic kernel design such as Linux, rather than an
+application sitting on top of the UNIX system call boundary.
 
 Layering and Dependency Inversion
 =================================

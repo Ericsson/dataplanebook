@@ -7,8 +7,9 @@ Data Plane Software Design
 ##########################
 
 .. note::
-   What you see here is only very early draft of this book. A skeleton
-   structure with little actual content.
+   What you see here is only very early draft of this book. It currently
+   consists of a skeleton structure, plus two chapters
+   :ref:`Introduction` and :ref:`Statistics` in draft versions.
 
 .. toctree::
    :maxdepth: 2
@@ -24,7 +25,7 @@ Data Plane Software Design
    sync
    cache
    datastructures
-   stats
+   stats/stats
    time
    timers
    crypto
@@ -32,6 +33,7 @@ Data Plane Software Design
    control
    slowpath
    antipatterns
+   glossary
 
 .. pipeline organization and work scheduling
    hardware accelerator and NIC accessing techniques (e.g., batching requests)

@@ -32,132 +32,450 @@
           <div class="body" role="main">
             
   <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p><em>Section author: Mattias Rönnblom &lt;<a class="reference external" href="mailto:mattias&#46;ronnblom&#37;&#52;&#48;ericsson&#46;com">mattias<span>&#46;</span>ronnblom<span>&#64;</span>ericsson<span>&#46;</span>com</a>&gt;</em></p>
 <p>This text is an attempt at a guide to the structure and implemention
 of data plane applications. The focus lies on the part of the software
 which handles the bulk of the packets, often with a very tight latency
-budget. The book is about life in the fast path.</p>
-<p>The applications of this book usually implements some kind of
-networking stack. Although the book anchored them in the Data Plane
-Development Kit (DPDK) platform, most patterns and principles apply
-more widely, such as a networking stack of an operating system kernel.</p>
-<p>As with all software architecture, it’s easier to grasp a pattern or a
-principles if it’s anchored in something concrete. The concrete here
-is the DPDK APIs.</p>
-<p>A module of data plane application will more resemble that of a module
-inside an monolithic kernel design such as Linux, rather than an
-application sitting on top of the UNIX system call boundary.</p>
-<div class="section" id="the-data-plane">
-<span id="index-0"></span><h2>The Data Plane<a class="headerlink" href="#the-data-plane" title="Permalink to this headline">¶</a></h2>
-<p>The <em>data plane</em> is the part of the network through which the actual
+budget. This book is about life in the fast path.</p>
+<p>The applications of this book usually implements some kind of network
+stack. Although the book anchored them in the <a class="reference internal" href="#dpdk"><span class="std std-ref">Data Plane Development Kit</span></a> (DPDK)
+platform, most patterns and principles apply more widely, such as the
+network stack of an operating system kernel.</p>
+<div class="section" id="audience">
+<span id="id2"></span><h2>Audience<a class="headerlink" href="#audience" title="Permalink to this headline">¶</a></h2>
+<p>This book is written for software developers, software architects and
+system engineers. The assumption is that the reader possesses good
+general software development skills, including good knowledge of the C
+language, and basic understanding of operating system level concepts,
+computer networks, and computer processors.</p>
+</div>
+<div class="section" id="networking-planes">
+<span id="id3"></span><h2>Networking Planes<a class="headerlink" href="#networking-planes" title="Permalink to this headline">¶</a></h2>
+<p>The functionality of a computer network can divided into three logical
+layers; the data, control and management plane.</p>
+<p class="plantuml">
+<img src="_images/plantuml-4a0e149f52db4cd3ebf880ef8aca5d461c8ec638.png" alt="&#64;startuml
+
+rectangle mp as &quot;Management Plane&quot; {
+}
+rectangle cp as &quot;Control Plane&quot; {
+}
+rectangle dp as &quot;Data Plane&quot; {
+}
+
+mp -- cp
+cp -- dp
+
+&#64;enduml"/>
+</p>
+<p>This section will describe what role the different layers take on.</p>
+<p>In certain networks, the separation is externally visible, and the
+protocols used between the entities in the different layers are
+standardized. An example of such a network is the <a class="reference internal" href="glossary.html#term-ran"><span class="xref std std-term">RAN</span></a> of a 5G
+cellular network, where the Centralized Unit (CU) primarily handles
+control plane type tasks, and the Distributed Unit (DU) handles the
+data plane.</p>
+<p>In an IP network router, the separation into planes may exist only
+internally (or indeed, not at all). The protocols and means of
+communication between the different planes are properitary <a class="footnote-reference" href="#rfc5810" id="id4">[1]</a>
+.</p>
+<p>A pragmatic rule of a thumb for what type of processing goes into
+which plane is the rate of change, or rate of operations, the process
+entails.</p>
+<p>The data plane usually handle one or two orders of magnitude more
+operations per second that does the control plane. The ratio between
+the management plane and the control plane is roughly the same.</p>
+<p>A <a class="reference internal" href="#network-function"><span class="std std-ref">network function</span></a> may be able to handle
+million of packets per second, a couple of thousands control plane
+operations per second, and a handful of management plane type
+operations per second.</p>
+<div class="section" id="data-plane">
+<span id="id5"></span><h3>Data Plane<a class="headerlink" href="#data-plane" title="Permalink to this headline">¶</a></h3>
+<p>The <em>data plane</em> the part of the network through which the actual
 user data traverse. A <em>user</em> here is an application on some end system
 (in a TCP/IP network, a <em>host</em>).</p>
-<p>Synonyms used are <em>forwarding plane</em>, primarily in the context of IP
-routers, or <em>user plane</em>, often in a telecommunications context.</p>
+<p>Commonly used synonyms are <a class="reference internal" href="glossary.html#term-forwarding-plane"><span class="xref std std-term">forwarding plane</span></a>, in the context of
+IP routers or <a class="reference internal" href="glossary.html#term-layer-2"><span class="xref std std-term">layer 2</span></a> switch implementations, or <a class="reference internal" href="glossary.html#term-user-plane"><span class="xref std std-term">user
+plane</span></a>, in the telecommunications sphere.</p>
+</div>
+<div class="section" id="control-plane">
+<span id="id6"></span><h3>Control Plane<a class="headerlink" href="#control-plane" title="Permalink to this headline">¶</a></h3>
+<p>The <em>control plane</em> manages network topology and connection
+establishment (e.g., for networks connection-oriented at the data
+link, network or transport layer).</p>
+<p>In an IP network, a router’s control plane uses protocols such as
+<a class="reference internal" href="glossary.html#term-bgp"><span class="xref std std-term">BGP</span></a> to exchange routing and reachability information with
+control plane entities on adjacent routers in the network. The router
+builds a network topology and configure the <a class="reference internal" href="glossary.html#term-fib"><span class="xref std std-term">forwarding
+information base</span></a> (FIB) in the router’s data plane accordingly.</p>
+<p>In a 3GPP <a class="reference internal" href="glossary.html#term-ran"><span class="xref std std-term">RAN</span></a>, the control plane handles issues related to
+mobility and bearer manangement for <a class="reference internal" href="glossary.html#term-ue"><span class="xref std std-term">UEs</span></a>, among other things.</p>
+<p>An <a class="reference internal" href="glossary.html#term-atm"><span class="xref std std-term">ATM</span></a> network’s control plane manages the establishment and
+release of virtual circuits (VCs).</p>
+</div>
+<div class="section" id="management-plane">
+<span id="id7"></span><h3>Management Plane<a class="headerlink" href="#management-plane" title="Permalink to this headline">¶</a></h3>
+<p>The management plane includes functionality for configuration and
+performance management of the network and its nodes.</p>
+<p>In an IP router, the management plane may have clients, servers or
+agents terminating network management protocols such as <a class="reference internal" href="glossary.html#term-snmp"><span class="xref std std-term">SNMP</span></a>
+and <a class="reference internal" href="glossary.html#term-netconf"><span class="xref std std-term">NETCONF</span></a>, shell access such as <a class="reference internal" href="glossary.html#term-ssh"><span class="xref std std-term">SSH</span></a>, and logging
+protocols such as <a class="reference internal" href="glossary.html#term-syslog"><span class="xref std std-term">syslog</span></a>.</p>
+<p>In this book, no distinction is made between control and management
+plane, since this make little relevance for the data plane - the focus
+of this book.</p>
+</div>
+</div>
+<div class="section" id="data-plane-applications">
+<span id="data-plane-application"></span><h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this headline">¶</a></h2>
+<p>For the purpose of this book, a <em>data plane application</em> is a piece of
+software which implements a part of the data plane, on a particular
+node in the network.</p>
+<p>This book concerns itself with applications written in a
+general-purpose programming language, run on a symmetric
+multi-processing (SMP) computer processor.</p>
+<p>At the core of the data plane application is some sort of a
+<a class="reference internal" href="glossary.html#term-network-stack"><span class="xref std std-term">network stack</span></a>. To manage complexity and achieve good
+performance, the network stack’s <a class="reference internal" href="glossary.html#term-domain-logic"><span class="xref std std-term">domain logic</span></a> may be split in
+two; the <a class="reference internal" href="#fast-path"><span class="std std-ref">fast path</span></a> and the <a class="reference internal" href="#slow-path"><span class="std std-ref">slow path</span></a>.</p>
+<p>The application’s <a class="reference internal" href="#fast-path"><span class="std std-ref">fast path</span></a> is usually written in
+C. In many cases, <a class="reference internal" href="#data-plane-control"><span class="std std-ref">data plane control</span></a> may be
+implemented in virtually any language.</p>
+<p>Generally, the data plane has a tight per-packet hardware resource
+(e.g., CPU core cycles or DDR bytes read/written per packet) and/or
+energy (i.e., Joule/packet) budget. Per-packet CPU usage typically
+range from a couple of hundred to a couple of thousands core clock
+cycles, on the average. Packets that traverse the slow path generally
+consume much more resources.</p>
+<p>A typical characteristic of the data plane application is that the
+core functionality is not very complex, in comparison with for example
+a desktop or an enterprise application. In terms of fast path code
+size, this usually translates to in the range from ten thousand lines
+of code for very small applications, to a couple of hundred thousand.</p>
+<p>An application which performs very little per-packet processing is
+often referred to as <a class="reference internal" href="glossary.html#term-low-touch-application"><span class="xref std std-term">low touch</span></a>. The
+term implies only a small part of the packet, usually the header, is
+ever visited, but this book will not make this limitation, but only
+use the term to suggest it spend comparable few CPU core cycles per
+packet.</p>
+<p>A <a class="reference internal" href="glossary.html#term-high-touch-application"><span class="xref std std-term">high touch application</span></a> has a relatively high per-packet
+processing latency. High touch applications often visit the entirety
+of the packet, including the payload. For the purpose of this book,
+even an application classified as high touch is low-touch enough to
+benefit from avoiding the overhead associated with packets passing
+through the kernel’s network stack.</p>
+<p>In summary, a data plane application needs to solve a problem which is
+relatively low complexity from a domain logic point of view, but the
+solution must be very efficient, performant, and usually employ a
+high degree of parallelism.</p>
+<p>Virtual and appliance-type switches and routers, firewalls,
+<a class="reference internal" href="glossary.html#term-nat"><span class="xref std std-term">NAT</span></a> boxes, network attached storage (NAS), intrusion detection
+systems, 5G <a class="reference internal" href="glossary.html#term-cn"><span class="xref std std-term">CN</span></a> and <a class="reference internal" href="glossary.html#term-ran"><span class="xref std std-term">RAN</span></a> implementations, and L4-L7 load
+balancers are all examples of systems which user data processing may
+be realized as one or more data plane applications.</p>
+<div class="section" id="low-latency-non-data-plane-applications">
+<h3>Low Latency Non Data Plane Applications<a class="headerlink" href="#low-latency-non-data-plane-applications" title="Permalink to this headline">¶</a></h3>
+<p>There are types of applications, for example low-latency financial
+trading applications, that, even though they are not a part of the
+implementation of the network, still can make use technologies and
+techniques of the data plane.</p>
+<p>Indeed, an application that receives stimuli at high rate over a
+network (or some other I/O device), quickly and reliably performs some
+kind of low latency processing and finally provides a response of some
+sort, may qualifiy as a data plane application, although in the
+literal sense it is not.</p>
+</div>
+<div class="section" id="low-capacity-data-plane">
+<h3>Low Capacity Data Plane<a class="headerlink" href="#low-capacity-data-plane" title="Permalink to this headline">¶</a></h3>
+<p>The are data plane applications that have comparably lax performance
+requirements, both in terms of throughput, <a class="reference internal" href="glossary.html#term-wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>
+and efficient use of computer hardware. Thus, they can avoid many of
+the sometimes cumbersome and challenging techniques of this book.</p>
+<p>Such an application could well sit on top of a general-purpose
+operating system network stack. Its authors have more freedom when it
+comes to the choice of programming languages and program structure.</p>
+<p>Low capacity data plane applications are not within the scope of this
+book.</p>
 </div>
 <div class="section" id="data-plane-development-kit">
-<h2>Data Plane Development Kit<a class="headerlink" href="#data-plane-development-kit" title="Permalink to this headline">¶</a></h2>
+<span id="dpdk"></span><h3>Data Plane Development Kit<a class="headerlink" href="#data-plane-development-kit" title="Permalink to this headline">¶</a></h3>
 <p>The <a class="reference external" href="http://www.dpdk.org/">Data Plane Development Kit</a> (DPDK) is an
-Open Source software platform for data plane applications. DPDK comes
-in the form of a set of link libraries, accessed through C APIs.</p>
-<p>The initial design was made by the Intel engineer Venky Venkatesan.</p>
-<p>A DPDK-based application runs as a user space process.</p>
+Open Source software platform for data plane applications. DPDK serves
+in the role of the <a class="reference internal" href="glossary.html#term-data-plane-platform"><span class="xref std std-term">data plane platform</span></a> for the applications of
+this book.</p>
+<p>The initial DPDK design was done by the Intel engineer Venky
+Venkatesan.</p>
+<p>DPDK comes in the form of a set of link libraries, accessed through C
+APIs. A DPDK-based application runs as a user space process.</p>
 <p>The original purpose of DPDK was to allow the user to bypass the
-operating system’s networking stack, avoiding a substantial amount of
-overhead. In addition, being outside the kernel, DPDK avoided the some
-licensing issues, allowing for properitary application networking
-applications on Linux. It also changed out the challenging programming
-environment of the kernel, with something that - at least at a first
-glance - is less challenging.</p>
-<p>To allow for the kernel bypass, the Network Interface Controller (NIC)
+operating system’s network stack, avoiding a substantial amount of
+overhead. In addition, for the Linux case, being a user space process
+makes sure the provisions of the GNU General Public License (GPL)
+license of the kernel does not apply, allowing for proprietary data
+plane applications.</p>
+<p>With DPDK, the developer need not face the challenging programming
+environment of the kernel, and instead only have to deal with the
+somewhat less challenging DPDK programming model.</p>
+<p>For DPDK to bypass the kernel, the Network Interface Controller (NIC)
 hardware (or a virtual function thereof) is mapped in the process’
 address space. Instead, or in addition to, the kernel’s NIC driver,
 the application uses a driver provided by DPDK, for that particular
 hardware. In addition to the NIC driver, a packet buffer memory
-manager is needed as well, but not much else in terms of
-infrastructure.</p>
-<p>This “for-I/O only” way of using DPDK is still common place today.</p>
-<p>A non-trivial DPDK application will, as its functionality grows, often
-become to resemble a special-purpose network stack, with some
-kernel-like support functionality (e.g., for timer management and work
-scheduling).</p>
+manager is needed, but not much else in terms of infrastructure.</p>
+<p>This “I/O only” way of using DPDK is still commonplace today.</p>
+<p>Any non-trivial DPDK application will, as its core functionality
+grows, begin to require the kind of support functionality (e.g., for
+timer management and work scheduling) found in an operating system
+kernel.</p>
 <p>With time, DPDK has included more and more of this kind of reusable
-support facilities. DPDK still largely adheres to the original library
-approach, as opposed to becoming an integrated special-purpose
-operating system for data plane applications.</p>
-<p>DPDK was originally developed for custom off the shelf (COTS) desktops
-and servers, but has worked itself into the world of networking ASICs
-as well, where the traditional network processing unit (NPU) have been
-replaced with a general-purpose multi-core CPU complex, augemented
-with various networking-specific accelerators and occassionally CPU
-core instruction set architecture (ISA) extensions as well.</p>
-<p>DPDK has largely dislodged the Open Data Plane (ODP). ODP is a project
-with a similar goal, but which was closer to the non-x86 and network
-communications vendors eco systems. DPDK lacked in the area of support
-for various accelerators that were found in such processors, but has
-gradually caught up with ODP.</p>
+platform type facilities. DPDK still largely adheres to the original
+library approach, with a smörgåsbord of functionality, as opposed to
+becoming an integrated special-purpose OS-like run-time environment
+for data plane applications.</p>
+<p>Early on, DPDK only targeted commercial off the shelf (COTS) desktops
+and servers, but has since worked itself into the world of
+special-purpose networking ASICs. In such <a class="reference internal" href="glossary.html#term-dpu"><span class="xref std std-term">DPUs</span></a>, the
+traditional <cite>network processing unit &lt;NPU&gt;</cite> (NPU) have been replaced
+with a general-purpose multi-core CPU complex, augemented with various
+networking-specific accelerators and the occasional CPU instruction
+set architecture (ISA) extension.</p>
+<p>DPDK has largely dislodged the <a class="reference external" href="https://opendataplane.org/">Open Data Plane</a> (ODP). ODP is a project with a similar
+goal, but grew inside the non-x86 and <a class="reference internal" href="glossary.html#term-dpu"><span class="xref std std-term">data processing
+unit</span></a> (DPU) eco system. Part of the rationale for ODP was that
+DPDK lacked in support for various accelerators found in such
+processors, but DPDK has since gradually caught up with ODP.</p>
 </div>
-<div class="section" id="data-plane-applications">
-<h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this headline">¶</a></h2>
-<p>For the purpose of this book, a <em>data plane application</em> is a piece of
-software which implements a part of the data plane. At the core of the
-data plane application is some sort of a <em>network stack</em> (also known
-as a <em>protocol stack</em>).</p>
-<p>This book concerns itself with applications written in a
-general-purpose programming language (e.g., C), run on a symmetric
-multi-processing (SMP) computer processor.</p>
-<p>A data plane application sits on top of a data plane platform. This
-book assumes the division of concern between the platform and the
-application to be that of DPDK, as opposed to a more opinionated
+<div class="section" id="data-plane-fast-path">
+<span id="fast-path"></span><h3>Data Plane Fast Path<a class="headerlink" href="#data-plane-fast-path" title="Permalink to this headline">¶</a></h3>
+<p>A common pattern is to split the per-packet data plane processing
+logic into two parts.</p>
+<p>The fast path is designed to handle the bulk of the packets.  The
+processing of packets which the fast path is not equipped to handle is
+delegated to the <a class="reference internal" href="#slow-path"><span class="std std-ref">slow path</span></a>.</p>
+<p>The reason for dividing the data plane application into a slow and
+fast path is to reduce complexity in the performance-sensitive and
+demanding fast path environment, and instead move it to the usually
+more relaxed and easier-to-deal-with slow path part of the data plane.</p>
+<p>Some data plane applications do not make this distinction, and
+essentially do everything in the fast path application.</p>
+<p>The fast path sits on top of a <a class="reference internal" href="glossary.html#term-data-plane-platform"><span class="xref std std-term">data plane platform</span></a>. This book
+assumes the division of concern between the platform and the
+application to be that of <a class="reference internal" href="#dpdk">DPDK</a>, as opposed to a more opinionated
 platform like <a class="reference external" href="http://fd.io/">Vector Packet Processing</a> (VPP).</p>
-<p>Generally, the data plane has a tight per-packet hardware resource
-(e.g., CPU core cycles or DDR bytes read/written per packet) and/or
-energy (i.e., Joule/packet) budget, often in the from a couple of
-hundred to a couple of thousands cycles spent in total per packet.</p>
-<p>A typical characteristic of the data plane application is that the
-core functionality - the <em>domain logic</em> - is not very complex, in
-comparison with for example a desktop or enterprise application.</p>
-<p>An application which performs very little per-packet processing is
-often referred to as <em>low touch</em>. The term implies only a small part
-of the packet, usually the header, is ever visited, but this book will
-not make this limitation, but only use the term to suggest it uses
-comparable few CPU core cycles to finish its job.</p>
-<p>A <em>high touch</em> application has a relatively high per-packet processing
-latency. <em>High touch</em> application often read the whole packet,
-including the payload. For the purpose of this book, even the high
-touch application is “low-touch” enough to benefit from avoiding the
-operating system kernel.</p>
-<p>In summary, a data plane application needs to do something reasonably
-simple, but very quickly and efficiently</p>
-<p>Virtual switches and routers, deep packet inspection, firewalls, NAT
-boxes, network attached storage (NAS), intrusion detection systems, 5G
-core and radio access network (RAN) implementations, and L4-L7 load
-balancers as all examples of system which can be realized with one or
-more data plane applications.</p>
-<div class="section" id="low-latency-non-data-plane-applications">
-<h3>Low Latency Non Data Plane Applications<a class="headerlink" href="#low-latency-non-data-plane-applications" title="Permalink to this headline">¶</a></h3>
-<p>There are other classes of applications, for example low-latency
-financial trading applications, that, even though they are not a part
-of the implementation of the network, still are similar enough to make
-use of similiar technologies and techniques.</p>
-<p>Indeed, any application that will receive stimuli over a network, and
-very quickly and/or very oftenly must provide a response of some sort,
-may fit under the characteristics of a data plane application,
-although in the literal sense they are not.</p>
 </div>
-<div class="section" id="low-capacity-data-plane">
-<h3>Low Capacity Data Plane<a class="headerlink" href="#low-capacity-data-plane" title="Permalink to this headline">¶</a></h3>
-<p>The are data plane applications that have comparably generous budgets,
-both in terms of throughput, latency and efficient use of computer
-hardware. Thus, they can avoid the cumbersome and challenging
-techniques of this book.</p>
-<p>Such an application could well use general-purpose operating system
-networking stack. Its author has much more freedom when it comes to
-the choice of programming languages and program structure.</p>
-<p>On the other hand, such applications have a tendence to have a much
-higher complexity in terms of the actual functionality required.</p>
-<p>Such applications are out of the scope of this book.</p>
+<div class="section" id="data-plane-slow-path">
+<span id="slow-path"></span><h3>Data Plane Slow Path<a class="headerlink" href="#data-plane-slow-path" title="Permalink to this headline">¶</a></h3>
+<p>The slow path handles <a class="reference internal" href="glossary.html#term-exception-traffic"><span class="xref std std-term">exception traffic</span></a>. For network stacks
+taking a <a class="reference internal" href="glossary.html#term-flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as Open vSwitch, the
+exception packets consists of the first packet encountered in a
+particular flow. For other data plane applications it may be certain
+flows, rather than certain packets within a flow, that are considered
+exception traffic. It may also be certain types of unusual packets,
+which processing is delegated to the slow path. In an IP context, such
+packets may be those requiring reassembly or that include IP options,
+or certain ICMP packets.</p>
+<p>The slow path can also be used to terminate complex protocols, such as
+TCP (e.g., carrying <a class="reference internal" href="glossary.html#term-management-plane"><span class="xref std std-term">management plane</span></a> or <a class="reference internal" href="glossary.html#term-control-plane"><span class="xref std std-term">control plane</span></a>
+protocol traffic).</p>
+<p>The slow path can be a standalone process, the operating system’s
+network stack, or threads within the same process as the fast path.</p>
+<p>In case the slow path is hosted in a separate process, this process
+typically does not directly use DPDK.</p>
+<p>Packets that traverse the slow path, as the name suggets, will
+experience greater <a class="reference internal" href="glossary.html#term-wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>. The source of this
+latency is both that more CPU cycles are spent processing the packet,
+and operating system scheduling latency (since the slow path threads
+may not be run on a dedicated CPU core).</p>
+<p>The slow path throughput is often several orders of magnitude lower
+than the fast path. That said, the slow path will usually also have
+soft real-time requirements in terms of latency, latency jitter, and
+throughput, although more relaxed than the fast path.</p>
+<p>The division of the data plane into a slow and fast path potentially
+opens up for denial of service (DoS) attacks. An attacker may be able
+to, using only moderately-high packet rates, overwhelm the system, if
+the packets are crafted in such a way, they all require expensive slow
+path processing.</p>
 </div>
+<div class="section" id="data-plane-control">
+<span id="id9"></span><h3>Data Plane Control<a class="headerlink" href="#data-plane-control" title="Permalink to this headline">¶</a></h3>
+<p>The data plane fast and slow path handles the processing of data plane
+packets, but there are other kinds of input to and output from a data
+plane application.</p>
+<p>The data plane application needs to provide interfaces to allow for
+querying and manipulating its configuration and access statistics and
+state information. It may need to produce log entries or traces
+messages. The data plane application may interact with both entities
+in the control plane (either directly, or via some proxy) and platform
+type services.</p>
+<p>Data plane control is conceptually a part of the data plane, and not
+the control plane.</p>
+<p>Data plane control may be implemented as a module within the fast path
+process. In case the data plane control interface implementation is
+complex, it may warrant a sepa</p>
+<p>Complex data plane control interfaces may warrant having the data
+plane control function implemented as a separate process. Such a split
+reduces the complexity hosted by the fast path process, making
+debugging easier. In addition, it also paves way for a clean
+separation between the two functions. In addition, a separate process
+makes it easy to use a different language for data plane control.</p>
+<p>In case data plane control is a separate process, there will be an
+internal interface between the data plane control process. This
+internal interface must be terminated in the fast path process, like
+using <a class="reference internal" href="#control-threads"><span class="std std-ref">control threads</span></a>.</p>
+<p>In some applications it may be feasible to run data plane control
+processing on the <a class="reference internal" href="glossary.html#term-lcore"><span class="xref std std-term">lcore</span></a> worker threads. A shared memory
+interface, making inter-process communcation relativiely inexpensive,
+to the outside world may facilite such a design. Care must be taken to
+avoid excessive <a class="reference internal" href="glossary.html#term-processing-latency"><span class="xref std std-term">processing latency</span></a> for data plane control
+requests.</p>
+<p>In some context, the term slow path is used for a software component
+serving in the data plane control role. Such usage of the word is
+misleading. The <a class="reference internal" href="glossary.html#term-slow-path"><span class="xref std std-term">slow path</span></a> handles user data (only slower),
+which is distinct from the task of data plane control.</p>
+<div class="section" id="control-threads">
+<span id="id10"></span><h4>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this headline">¶</a></h4>
+<p>In data plane applications that follows the DPDK pattern with one (and
+only one) thread per CPU core, it usually makes sense to have
+additional threads in the same process to terminate interfaces to the
+process-external world.</p>
+<p>The reason for not using the per-core worker threads for such tasks is
+to avoid introducing latency jitter in the fast path
+processing. Handling a control plane request may be very costly in
+terms of amount of computation required, during which the worker
+thread won’t be handling packets queued up for processing.</p>
+<p>In case the interface to the data plane application is some sort of
+file descriptor (e.g., referencing a socket) the system calls alone
+may introduce a noticable jitter. Add to this the actual request
+processing latency, which may introduce delays in the millisecond
+class or more.</p>
+<p>This book will use the term <a class="reference internal" href="glossary.html#term-control-thread"><span class="xref std std-term">control threads</span></a>
+for such threads.</p>
+</div>
+</div>
+<div class="section" id="reference-architectures">
+<h3>Reference Architectures<a class="headerlink" href="#reference-architectures" title="Permalink to this headline">¶</a></h3>
+<p>This sections contains some examples of how a data plane application
+can be organized.</p>
+<div class="section" id="reference-architecture-a">
+<h4>Reference Architecture A<a class="headerlink" href="#reference-architecture-a" title="Permalink to this headline">¶</a></h4>
+<p>This example shows an data plane application architecture where data
+plane control is split into two parts; one agent inside the fast path
+process, and another, with the bulk of the domain logic, as a separate
+data plane control process.</p>
+<p>The operating system kernel is used to perform the actual slow path
+processing, suggesting that the protocol handled by the data plane
+fast path is one that the kernel implements (e.g., IP).</p>
+<p>The data plane fast path application and its constituents are deployed
+together, as one process. The data plane control function is hosted by
+another process. The data plane application is a logical grouping of
+these two applications, possibly on the level of software packaging
+and/or from a process monitoring and application life cycle management
+point of view.</p>
+<p class="plantuml">
+<img src="_images/plantuml-f1c55274707533dbc6186b37eea6720d3853e7eb.png" alt="&#64;startuml
+
+rectangle cp as &quot;Control Plane&quot; {
+}
+
+rectangle dp_app as &quot;Data Plane Application&quot; #line.dashed {
+   rectangle fp_app as &quot;Data Plane Fast Path Application&quot; {
+      rectangle dpc_agent as &quot;Data Plane Control Agent&quot;
+      rectangle fp as &quot;Data Plane Fast Path&quot;
+      rectangle platform as &quot;Data Plane Platform&quot;
+   }
+
+   dpc_agent --&gt; fp
+   dpc_agent --&gt; platform
+   fp --&gt; platform
+
+   rectangle dpc_app as &quot;Data Plane Control Application&quot; {
+      rectangle dpc as &quot;Data Plane Control&quot;
+   }
+
+   dpc --&gt; dpc_agent
+}
+
+cp --&gt; dpc
+
+rectangle kernel as &quot;Operating System Kernel&quot; {
+   rectangle kernel_stack as &quot;Kernel Network Stack&quot;
+}
+
+fp --&gt; kernel_stack : Slow Path
+
+&#64;enduml"/>
+</p>
+</div>
+<div class="section" id="reference-architecture-b">
+<h4>Reference Architecture B<a class="headerlink" href="#reference-architecture-b" title="Permalink to this headline">¶</a></h4>
+<p>This architecture groups data plane control and the fast path into the
+same application, deployed in the same process.</p>
+<p>Architecture B is also more centralized in that it doesn’t employ the
+kernel’s network stack as the slow path, but instead carry its own
+slow path domain logic.</p>
+<p>Usually, the control and the slow path processing is run on threads
+separate from those processing user data packets. The system could
+either have separate threads for those two tasks, or share the same
+thread(s). Both the slow path and the control processing usually have
+soft real time requirement (i.e., some reasonable upper bound for
+latency), but the slow path is usually more strict and thus the use of
+RT scheduling policy (e.g., SCHED_RR), but with different priority
+levels may be feasible.</p>
+<p>However, careful design and implementation and/or lax latency fast
+path jitter requirements may allow such processing to be performed on
+the lcore worker threads.</p>
+<p class="plantuml">
+<img src="_images/plantuml-d636fbfb9b9b4ff0a736e4db999e7ad09bcd2405.png" alt="&#64;startuml
+
+rectangle cp as &quot;Control Plane&quot; {
+}
+
+rectangle dp_app as &quot;Data Plane Application&quot; {
+   rectangle dpc as &quot;Data Plane Control&quot;
+   rectangle fp as &quot;Data Plane Fast Path&quot;
+   rectangle sp as &quot;Data Plane Slow Path&quot;
+   rectangle platform as &quot;Data Plane Platform&quot;
+}
+
+dpc --&gt; fp
+dpc --&gt; platform
+fp --&gt; platform
+fp -- sp
+
+cp --&gt; dpc
+
+&#64;enduml"/>
+</p>
+</div>
+</div>
+</div>
+<div class="section" id="network-function">
+<span id="id11"></span><h2>Network Function<a class="headerlink" href="#network-function" title="Permalink to this headline">¶</a></h2>
+<p>A data plane application is usually package and deployed together with
+a number of supporting platform type functions, providing services
+such as process monitoring and management, and log handling. The data
+plane application may also be co-located with control plane or
+management plane components.</p>
+<p>This book will refer to this entity as a <em>network function</em>. This
+usually equivalent to a network <em>node</em>, although there are networks
+where the prevailing terminology is that a logical node is made up of
+multiple network functions.</p>
+<p>The network function may carry its own operating system kernel, to be
+deployed in a Virtual Machine (VM), in which it’s said to be a
+Virtulized Network Function (VNF).</p>
+<p>In case the data plane application and the supporting components are
+deployed in a container, the package will contain only the user space
+parts of the operating system (such as the C runtime library). In that
+case, it’s a Container Network Function (CNF). CNFs are usually more
+minimal, with much less platform type services included and no
+co-located control plane components.</p>
+<p>A third deployment alternative is as a Physical Network Function
+(PNF) - a network appliance where the software runs on purpose-built
+hardware.</p>
+<p>A carefully crafted data plane application, in combination with
+carefully selected applicance hardware, may faciliate application
+portability across all above-mentioned deployments.</p>
 </div>
 <div class="section" id="hardware-platforms">
 <h2>Hardware Platforms<a class="headerlink" href="#hardware-platforms" title="Permalink to this headline">¶</a></h2>
@@ -205,13 +523,14 @@ system kernels, it didn’t get a proper memory model until in ISO/IEC
 of modern CPUs. Their behaviour very difficult indeed to understand,
 or to predict, both in performance and functional correctness (e.g.,
 memory models).</p>
-<p>As a result, debugging is also harder. Low-level hardware
-characteristics that the software developer in many cases need not
-care about in other application domains.</p>
+<p>As a result, debugging the data plane fast path is also harder than
+many other applications. In the fast path, the programmer need to care
+about low-level hardware characteristics are not relevant in most
+other application domains.</p>
 <p>Data plane development is one of the few domains, together with
 operating system kernels, virtual machines and compilers, where still
 reasons for the developer to understand and occasionally even write
-assembler code.</p>
+assembly code.</p>
 <p>Understanding the C11 memory model and lock-less programming, which is
 often useful or even essential, is also notiously difficult. Bugs in
 such code is very difficult to test for.</p>
@@ -219,26 +538,35 @@ such code is very difficult to test for.</p>
 <div class="section" id="staffing-data-plane-projects">
 <h3>Staffing Data Plane Projects<a class="headerlink" href="#staffing-data-plane-projects" title="Permalink to this headline">¶</a></h3>
 <p>In essence, the typical data plane software project takes on a small
-task - in terms of man hours - but a difficult one. If manned with
-people without the appropriate skills, but attempts are made to
-compensate with more people, this</p>
-<p>An attempt to compesate a team’s lack of skill with higher head count
-can easily become fatal. This approach risk project’s code base from
-small, nimble and performant application, to a huge, slow, beast,
-which main characterist is it’s ability to display non-deterministic
+task - in terms of man hours - but a difficult one. Manning a project
+with people without the appropriate skills, and attempting to
+compensate with higher head count, is a receipt for disaster.</p>
+<p>This approach risk make the project’s code base not the small, nimble
+and performant application targeted, but instead a huge, slow beast,
+which main characteristic is its ability to display non-deterministic
 behavior.</p>
-<p>Well-crafted data plane programs are often challenging to understand.
+<p>Well-crafted data plane programs are often a challenge to comprehend.
 Poorly written data plane code is beyond human capabilities to
 decipher.</p>
 <p>Data plane applications tend to be in the range from ten thousand to a
-couple of hundred thousand lines of code, and thus cannot accomodate a
+couple of hundred thousand lines of code, and thus cannot accommodate a
 large team. Also, such applications tend to have higher coupling
 between the different parts, which further restricts the team size.</p>
 <p>Data plane software development requires highly specialized skills and
 is also very cognitively demanding. That’s the downside. The upside is
 that you don’t need very many people.</p>
-<p>If there’s anywhere the Mythical Man-Month applies, it’s in the
-context of data plane software development.</p>
+<p>If there’s anywhere the lessons of the <a class="reference internal" href="glossary.html#term-mythical-man-month"><span class="xref std std-term">Mythical Man-Month</span></a>
+applies, it’s in the context of data plane software development.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="rfc5810" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[1]</a></td><td>Attempts have been made to standardize the separation
+of control and data plane and the protocols used to communicate
+between the planes in an IP router. See
+<a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5810.txt">RFC 5810</a>.</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -262,9 +590,10 @@ context of data plane software development.</p>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#the-data-plane">The Data Plane</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-plane-development-kit">Data Plane Development Kit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#audience">Audience</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#networking-planes">Networking Planes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data-plane-applications">Data Plane Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-function">Network Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hardware-platforms">Hardware Platforms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#people">People</a></li>
 </ul>
@@ -278,7 +607,6 @@ context of data plane software development.</p>
 <li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cache.html">Caches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timers.html">Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>
@@ -286,6 +614,7 @@ context of data plane software development.</p>
 <li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a></li>
 <li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 
 <div class="relations">

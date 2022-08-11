@@ -34,16 +34,18 @@
 <h1>Data Plane Software Design<a class="headerlink" href="#data-plane-software-design" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">What you see here is only very early draft of this book. A skeleton
-structure with little actual content.</p>
+<p class="last">What you see here is only very early draft of this book. It currently
+consists of a skeleton structure, plus two chapters
+<a class="reference internal" href="intro.html#introduction"><span class="std std-ref">Introduction</span></a> and <span class="xref std std-ref">Statistics</span> in draft versions.</p>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#the-data-plane">The Data Plane</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#data-plane-development-kit">Data Plane Development Kit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#audience">Audience</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#networking-planes">Networking Planes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#data-plane-applications">Data Plane Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#network-function">Network Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#hardware-platforms">Hardware Platforms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#people">People</a></li>
 </ul>
@@ -106,14 +108,6 @@ structure with little actual content.</p>
 <li class="toctree-l2"><a class="reference internal" href="datastructures.html#tables">Tables</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Statistics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="stats.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats.html#counter-organization">Counter Organization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats.html#dpdk-device-statistics">DPDK Device Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats.html#dpdk-metrics-library">DPDK Metrics Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats.html#dpdk-telemetry-library">DPDK Telemetry Library</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="time.html#system-time-access">System Time Access</a></li>
 <li class="toctree-l2"><a class="reference internal" href="time.html#dpdk-cycles-api">DPDK Cycles API</a></li>
@@ -130,7 +124,7 @@ structure with little actual content.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modularization.html">Modularization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modularization.html#interfaces">Interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modularization.html#module-and-interfaces">Module and Interfaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modularization.html#layering-and-dependency-inversion">Layering and Dependency Inversion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modularization.html#modular-deployment">Modular Deployment</a></li>
 </ul>
@@ -146,6 +140,7 @@ structure with little actual content.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </div>
 <div class="section" id="indices-and-tables">
@@ -185,7 +180,6 @@ structure with little actual content.</p>
 <li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cache.html">Caches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timers.html">Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>
@@ -193,6 +187,7 @@ structure with little actual content.</p>
 <li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a></li>
 <li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 
 <div class="relations">
