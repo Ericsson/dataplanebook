@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.imgmath',
     'sphinx.ext.githubpages',
+    'sphinxcontrib.plantuml',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -53,6 +54,8 @@ templates_path = ['templates']
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
+show_authors = True
+
 # The master toctree document.
 master_doc = 'index'
 
@@ -62,6 +65,8 @@ master_doc = 'index'
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 language = None
+
+highlight_language = 'C'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -104,7 +109,7 @@ html_theme = 'alabaster'
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'DataplaneApplicationswithDPDKdoc'
+htmlhelp_basename = 'DataPlaneSoftwareDesign'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -131,7 +136,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'DataplaneApplicationswithDPDK.tex', 'Dataplane Applications with DPDK Documentation',
+    (master_doc, 'DataPlaneSoftwareDesign.tex',
+     'Data Plane Software Design',
      'Mattias Rönnblom', 'manual'),
 ]
 
@@ -141,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'dataplaneapplicationswithdpdk', 'Dataplane Applications with DPDK Documentation',
+    (master_doc, 'dataplanesoftwaredesign', 'Data Plane Software Design',
      [author], 1)
 ]
 
@@ -152,8 +158,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'DataplaneApplicationswithDPDK', 'Dataplane Applications with DPDK Documentation',
-     author, 'DataplaneApplicationswithDPDK', 'One line description of project.',
+    (master_doc, 'DataPlaneSoftwareDesign', 'Data Plane Software Design',
+     author, 'DataPlaneSoftwareDesign', 'A book on data plane software design.',
      'Miscellaneous'),
 ]
 
