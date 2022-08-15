@@ -1,0 +1,4 @@
+CPU,Worker Core Count,Shared No Sync,Shared Spinlock,Shared Atomics,Shared Buffered,Per Core,Per Core Spinlock,Per Core Seqcount
+Cascade Lake Xeon,4,27,436,56,18,5,7,4
+Cascade Lake Xeon,20,273,8236,626,18,4,7,4
+BCM2711 ARM A72,4,26,36,85,24,4,4,8
