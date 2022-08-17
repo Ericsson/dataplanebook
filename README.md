@@ -11,6 +11,11 @@ actual content.
 The book uses the [Sphinx](https://www.sphinx-doc.org/) toolkit. The
 source format is reStructuredText (RST).
 
+## Online Version
+
+An online version of the book can be found at:
+https://ericsson.github.io/dataplanebook/
+
 ## Dependencies
 
 The author is using Sphinx v1.8.5, but it may well be the case other
