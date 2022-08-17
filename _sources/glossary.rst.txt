@@ -14,6 +14,11 @@ Glossary
       and an action part, which specifies what should be done to
       matching packet (e.g., drop or accept).
 
+   Amdahl's law
+      Amdahl's law gives the theoretical performance gains
+      (in terms of reduced :term:`processing latency`) when multiple
+      processors are used to complete a partly parallel task.
+
    ATM
       Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
       telecommunications network, that has largely fallen into disuse.
@@ -26,7 +31,7 @@ Glossary
    Data plane platform
       The part of the data plane applications that provides hardware
       abstractions and the assoicated hardware drivers, and other
-      operating system-like services like job scheduling, memory
+      operating system-like services like work scheduling, memory
       management, and timers. :ref:`DPDK` is the reference data
       plane platform of this book.
 
@@ -58,6 +63,20 @@ Glossary
       interfaces external to the network function (e.g., for
       configuration or observability).
 
+   Critical section
+      Critical section (also known as *critical region*) is a section
+      of the program which cannot be executed by more than one thread
+      in parallel. This may be achived by means of a lock.
+
+   Domain logic
+      Domain logic, also known as *business logic*, is the part of
+      a program that directly correspond to it's core function. For
+      a network stack, it's the part the implements the protocol
+      processing logic. For example, in an IP stack generating a ICMP
+      Time Exceeded when the Time to Live (TTL) has reached 0 is
+      domain logic. The part of the stack responsible to retrieve
+      the packet via the Ethernet driver is not.
+
    DPU
       A Data Processing Unit (DPU) is processor designed for data
       plane applications. A DPU is built around a complex of
@@ -76,18 +95,18 @@ Glossary
       database. It may also be an ARP request, or a fragmented IP
       packet, for a limited-feature fast path IP stack.
 
-   Domain logic
-      Domain logic, also known as *business logic*, is the part of
-      a program that directly correspond to it's core function. For
-      a network stack, it's the part the implements the protocol
-      processing logic. For example, in an IP stack generating a ICMP
-      Time Exceeded when the Time to Live (TTL) has reached 0 is
-      domain logic. The part of the stack responsible to retrieve
-      the packet via the Ethernet driver is not.
+   False sharing
+      False sharing occurs when multiple CPU cores accesses two or
+      more pieces of logically disjoint data resides on the same CPU
+      cache line. For false sharing to have any detrimental effects,
+      at least one core need to write to the cache line. The effect is
+      a performance degradation, the size of which depends on the
+      frequency of access. False sharing does not affect the
+      correctness of the program.
 
-   Fast path
-      The part of the data plane application that handles the bulk of
-      the packets.
+   :ref:`Fast path <Fast Path>`
+      The dataplane fast path is part of the data plane application that
+      handles the bulk of the packets.
 
    FIB
       A Forward Information Base (FIB) holds information on where to
@@ -108,6 +127,23 @@ Glossary
       A data plane fast path application that on average spends relativily
       many CPU clock cycles and other hardware resources for every packet.
 
+   Huge Pages
+      The virtual address space is divided into pages, usually 4 kB
+      in size. The hardware keeps a cache of translation between
+      virtual and physical in a Translation Look-aside Buffer (TLB).
+      For applications accessing a large amount of memory (i.e., with
+      a large working set size), the TLB cache may be missed, causing
+      expensive traps to the kernel. Increasing the page size for
+      part of the virtual memory is a way to avoid this issue. Such
+      pages are often very much large (e.g., 2 MB or 1 GB), and thus
+      are often referred to as "huge pages".
+
+   ISA
+      An Instruction Set Architecture (ISA) specifies the interface
+      between software and the CPU hardware. The ISA defines things like
+      the available machine language instructions (and how they
+      are encoded), registers, data types and memory models.
+
    Layer 2
       The data link layer is the second layer in OSI model, and handles
       data transmission between different nodes on the same physical
@@ -127,9 +163,28 @@ Glossary
       for the data plane fast path. This thread is pinned to a particular
       by DPDK, and should be the only thread scheduled on that lcore.
 
+   Load
+      A load machine instruction reads a chunk of data (usually 8-512
+      bits) from memory and puts it into a CPU register.
+
    Low touch application
       A data plane fast path application that on average spends relativily
       few CPU clock cycles and other hardware resources for every packet.
+
+   LTO
+      Link-time Optimization (LTO) is a compiler mode of operation,
+      where optimizations are deferred to the link stage, allowing
+      optimization to be done across program's or shared library's
+      different compilation units. The inlining of a function residing
+      in a different .c file than the caller is possible, for
+      example. LTO increases build times to such a large degree that
+      it is often impractical to use.
+
+   MIB
+     A Management Information Base (MIB) is a :term:`SNMP` data model.
+     The term is sometimes also used to refer to an instance of a
+     particular model. IEFT has defined a number of MIBs (e.g., for
+     TCP and IP).
 
    :ref:`Management plane <Management Plane>`
       The part of the network that handles configuration and
@@ -167,6 +222,14 @@ Glossary
       he observes that the communcation overhead grows in non-linear
       fashion as people are added to the project.
 
+   Preemption Safety
+      A operation is preemption safe in case the preemption of a
+      thread's execution (e.g., a kernel-induced process context
+      switch occurs) does not threaten the correctness of the program,
+      or have very detrimental effects performance. In this book, the
+      preemption unsafe constructs covered only cause performance
+      degradation, although at time very serious such.
+
    Processing Latency
       For the purpose of this book, processing latency is the CPU time
       spent on a particular task (i.e., the number of CPU core
@@ -182,13 +245,32 @@ Glossary
       latency and internal queuing latency). This is not how the term
       is used in this book.
 
+   Program order
+      Operations are said to be done in program order if their results
+      are globally visible in the same order as the operations were
+      specified in the program's source code.
+
    RAN
       The Radio Access Network (RAN) is the network that sits between
       the :term:`UE` and the :term:`CN` in a mobile telecommuncations
       system.
 
+   RFS
+      See :term:`RSS`.
+
+   RSS
+      Receive Side Scaling. A NIC function which distributes packets
+      to different NIC RX descriptor queues, usually based on the
+      source and destination IP. If transport layer fields are taken
+      into a account, the same function is sometimes called
+      Receive Flow Scaling (RFS).
+
    Slow path
       The part of a data plane application that process exception traffic.
+
+   Sequence counter
+      A sequence counter is a low-overhead reader-writer synchronization
+      mechanism.
 
    SNMP
       The Simple Network Management Protocol is a network management
@@ -196,30 +278,69 @@ Glossary
       management, current-day use is primarily for network monitoring.
 
    Spinlock
-      A type of lock where a thread that attempts but fails to acquire
-      a lock immediately retries again, and keeps doing so ("spins"),
-      until the lock operation is successful. This sort of lock is common
-      in operating systems kernels, but unusual in regular user space
-      applications, because of issues related to preemption safety.
+      A type of lock where a thread failing to acquire a lock
+      immediately retries, and keeps doing so ("spins"), until the
+      lock operation is successful. Spinlocks are common in operating
+      systems kernels, but unusual in user space applications, since
+      they are not :term:`preemption safe <preemption safety>`.
 
    SSH
       Secure Shell (SSH) is a protocol for remote shell access and
       command execution. It may also be used as a secure transport
       layer (e.g., for :term:`NETCONF`).
 
+   Store
+      A store machine instruction takes the contents of a CPU register
+      (usually 8-512 bits of data) and writes it into memory.
+
    Syslog
       Long the de facto standard logging standard on UNIX systems,
-      syslog is now a specified (or rather, documented) in IEFT
+      syslog is now specified (or more accurately, documented) in IEFT
       `RFC 5424 <https://www.rfc-editor.org/rfc/rfc5424.txt>`_.
 
+   TLS
+      In C11, and long before in GNU C, a static or extern storage
+      class variable may be declared as being kept in Thread Local
+      Storage (TLS). Such variables exists in one copy per thread in
+      the process. C11 uses ``thread_local`` to mark a variable thread
+      local, but in DPDK the practice is to instead use the GCC
+      extensions ``__thread``.
+
    UE
-      User Equipment (UE) is 3GPP term for a mobile terminal. This is
-      the equivalent of a *host* in a TCP/IP network.
+      User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
+      roughly equivalent of a *host* in a TCP/IP network. To complicate
+      things, a UE is also almost always a *host* as well, since the
+      mobile network is used as a data link layer for IP.
 
    User plane
-      A synonym to :ref:`Data Plane`, commonly used in the context of
+      A synonym to :term:`data plane`, commonly used in the context of
       telecommunications networks.
 
    Wall-clock Latency
-      Wall-clock latency is the latency in terms of the passage of
-      physical time (i.e., what a wall-clock measures).
+      Wall-clock latency, or wall-time latency, is the latency in
+      terms of the passage of physical time (i.e., what a wall clock
+      measures). A commonly used synonym (e.g., in the context of
+      manufacturing) is *lead time*. The wall-clock latency may be
+      longer or shorter than the :term:`processing latency`.
+
+   Work scheduler
+      For the purpose of this book, a work scheduler (also known as a
+      job scheduler) is a data plane fast path function that assign
+      items of work to the worker lcores. Work scheduling in its
+      simpliest forms can be the use of :term:`RSS` in the NIC. A DPDK
+      Event Device is a form of work scheduler. In a data plane
+      application, a job is usually, but not always, processing a
+      packet (at a certain stage in the pipeline, or the complete
+      processing, for run-to-completion designs).
+
+   Working set size
+     The amount of memory actively being used by a program, as opposed
+     to memory merely allocated, and then left unused. This book will
+     used this term to denote *actively used* to mean memory that is
+     being repeatedly and oftenly used, as opposed to memory that
+     is only rarely used (e.g., during initialization). The reason for
+     this definition is that the primary use for the term is in the
+     context of CPU cache pressure. The total amount of memory ever
+     used by the application is usually less of a concearn, for these
+     types of applications. The working set includes both instructions
+     and data.

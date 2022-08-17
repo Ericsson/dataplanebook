@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Glossary &#8212; Data Plane Software Design 0.0.1 documentation</title>
+    <title>Glossary &#8212; Data Plane Software Design 0.0.2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,6 +39,10 @@ data plane applications, ACLs usually have a match part,
 where the user specifies which packets this rule should apply to,
 and an action part, which specifies what should be done to
 matching packet (e.g., drop or accept).</dd>
+<dt id="term-amdahl-s-law">Amdahl’s law</dt>
+<dd>Amdahl’s law gives the theoretical performance gains
+(in terms of reduced <a class="reference internal" href="#term-processing-latency"><span class="xref std std-term">processing latency</span></a>) when multiple
+processors are used to complete a partly parallel task.</dd>
 <dt id="term-atm">ATM</dt>
 <dd>Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
 telecommunications network, that has largely fallen into disuse.
@@ -49,7 +53,7 @@ routers to exchange routing and reachability information.</dd>
 <dt id="term-data-plane-platform">Data plane platform</dt>
 <dd>The part of the data plane applications that provides hardware
 abstractions and the assoicated hardware drivers, and other
-operating system-like services like job scheduling, memory
+operating system-like services like work scheduling, memory
 management, and timers. <a class="reference internal" href="intro.html#dpdk"><span class="std std-ref">Data Plane Development Kit</span></a> is the reference data
 plane platform of this book.</dd>
 <dt id="term-communications-processor">Communications Processor</dt>
@@ -74,6 +78,18 @@ as the User Plane, or the Forwarding Plane.</dd>
 <dd>The part of the data plane application that terminates
 interfaces external to the network function (e.g., for
 configuration or observability).</dd>
+<dt id="term-critical-section">Critical section</dt>
+<dd>Critical section (also known as <em>critical region</em>) is a section
+of the program which cannot be executed by more than one thread
+in parallel. This may be achived by means of a lock.</dd>
+<dt id="term-domain-logic">Domain logic</dt>
+<dd>Domain logic, also known as <em>business logic</em>, is the part of
+a program that directly correspond to it’s core function. For
+a network stack, it’s the part the implements the protocol
+processing logic. For example, in an IP stack generating a ICMP
+Time Exceeded when the Time to Live (TTL) has reached 0 is
+domain logic. The part of the stack responsible to retrieve
+the packet via the Ethernet driver is not.</dd>
 <dt id="term-dpu">DPU</dt>
 <dd>A Data Processing Unit (DPU) is processor designed for data
 plane applications. A DPU is built around a complex of
@@ -90,17 +106,17 @@ such requires checking against security policies and the
 installation of a new entry in the fast path’s forwarding
 database. It may also be an ARP request, or a fragmented IP
 packet, for a limited-feature fast path IP stack.</dd>
-<dt id="term-domain-logic">Domain logic</dt>
-<dd>Domain logic, also known as <em>business logic</em>, is the part of
-a program that directly correspond to it’s core function. For
-a network stack, it’s the part the implements the protocol
-processing logic. For example, in an IP stack generating a ICMP
-Time Exceeded when the Time to Live (TTL) has reached 0 is
-domain logic. The part of the stack responsible to retrieve
-the packet via the Ethernet driver is not.</dd>
-<dt id="term-fast-path">Fast path</dt>
-<dd>The part of the data plane application that handles the bulk of
-the packets.</dd>
+<dt id="term-false-sharing">False sharing</dt>
+<dd>False sharing occurs when multiple CPU cores accesses two or
+more pieces of logically disjoint data resides on the same CPU
+cache line. For false sharing to have any detrimental effects,
+at least one core need to write to the cache line. The effect is
+a performance degradation, the size of which depends on the
+frequency of access. False sharing does not affect the
+correctness of the program.</dd>
+<dt id="term-fast-path"><a class="reference internal" href="intro.html#fast-path"><span class="std std-ref">Fast path</span></a></dt>
+<dd>The dataplane fast path is part of the data plane application that
+handles the bulk of the packets.</dd>
 <dt id="term-fib">FIB</dt>
 <dd>A Forward Information Base (FIB) holds information on where to
 forward a packet.</dd>
@@ -116,6 +132,21 @@ and IP router implementations.</dd>
 <dt id="term-high-touch-application">High touch application</dt>
 <dd>A data plane fast path application that on average spends relativily
 many CPU clock cycles and other hardware resources for every packet.</dd>
+<dt id="term-huge-pages">Huge Pages</dt>
+<dd>The virtual address space is divided into pages, usually 4 kB
+in size. The hardware keeps a cache of translation between
+virtual and physical in a Translation Look-aside Buffer (TLB).
+For applications accessing a large amount of memory (i.e., with
+a large working set size), the TLB cache may be missed, causing
+expensive traps to the kernel. Increasing the page size for
+part of the virtual memory is a way to avoid this issue. Such
+pages are often very much large (e.g., 2 MB or 1 GB), and thus
+are often referred to as “huge pages”.</dd>
+<dt id="term-isa">ISA</dt>
+<dd>An Instruction Set Architecture (ISA) specifies the interface
+between software and the CPU hardware. The ISA defines things like
+the available machine language instructions (and how they
+are encoded), registers, data types and memory models.</dd>
 <dt id="term-layer-2">Layer 2</dt>
 <dd>The data link layer is the second layer in OSI model, and handles
 data transmission between different nodes on the same physical
@@ -132,9 +163,25 @@ where hardware threading is employed).</dd>
 <dd>An operating system software thread responsible for processing packets
 for the data plane fast path. This thread is pinned to a particular
 by DPDK, and should be the only thread scheduled on that lcore.</dd>
+<dt id="term-load">Load</dt>
+<dd>A load machine instruction reads a chunk of data (usually 8-512
+bits) from memory and puts it into a CPU register.</dd>
 <dt id="term-low-touch-application">Low touch application</dt>
 <dd>A data plane fast path application that on average spends relativily
 few CPU clock cycles and other hardware resources for every packet.</dd>
+<dt id="term-lto">LTO</dt>
+<dd>Link-time Optimization (LTO) is a compiler mode of operation,
+where optimizations are deferred to the link stage, allowing
+optimization to be done across program’s or shared library’s
+different compilation units. The inlining of a function residing
+in a different .c file than the caller is possible, for
+example. LTO increases build times to such a large degree that
+it is often impractical to use.</dd>
+<dt id="term-mib">MIB</dt>
+<dd>A Management Information Base (MIB) is a <a class="reference internal" href="#term-snmp"><span class="xref std std-term">SNMP</span></a> data model.
+The term is sometimes also used to refer to an instance of a
+particular model. IEFT has defined a number of MIBs (e.g., for
+TCP and IP).</dd>
 <dt id="term-management-plane"><a class="reference internal" href="intro.html#management-plane"><span class="std std-ref">Management plane</span></a></dt>
 <dd>The part of the network that handles configuration and
 monitoring.</dd>
@@ -164,6 +211,13 @@ Engineering</em>, Fredrick Brooks of IBM debunks the myth that a
 software project can be estimated in man months. In particular,
 he observes that the communcation overhead grows in non-linear
 fashion as people are added to the project.</dd>
+<dt id="term-preemption-safety">Preemption Safety</dt>
+<dd>A operation is preemption safe in case the preemption of a
+thread’s execution (e.g., a kernel-induced process context
+switch occurs) does not threaten the correctness of the program,
+or have very detrimental effects performance. In this book, the
+preemption unsafe constructs covered only cause performance
+degradation, although at time very serious such.</dd>
 <dt id="term-processing-latency">Processing Latency</dt>
 <dd><p class="first">For the purpose of this book, processing latency is the CPU time
 spent on a particular task (i.e., the number of CPU core
@@ -178,39 +232,89 @@ latency that occurs within the router (i.e., both CPU related
 latency and internal queuing latency). This is not how the term
 is used in this book.</p>
 </dd>
+<dt id="term-program-order">Program order</dt>
+<dd>Operations are said to be done in program order if their results
+are globally visible in the same order as the operations were
+specified in the program’s source code.</dd>
 <dt id="term-ran">RAN</dt>
 <dd>The Radio Access Network (RAN) is the network that sits between
 the <a class="reference internal" href="#term-ue"><span class="xref std std-term">UE</span></a> and the <a class="reference internal" href="#term-cn"><span class="xref std std-term">CN</span></a> in a mobile telecommuncations
 system.</dd>
+<dt id="term-rfs">RFS</dt>
+<dd>See <a class="reference internal" href="#term-rss"><span class="xref std std-term">RSS</span></a>.</dd>
+<dt id="term-rss">RSS</dt>
+<dd>Receive Side Scaling. A NIC function which distributes packets
+to different NIC RX descriptor queues, usually based on the
+source and destination IP. If transport layer fields are taken
+into a account, the same function is sometimes called
+Receive Flow Scaling (RFS).</dd>
 <dt id="term-slow-path">Slow path</dt>
 <dd>The part of a data plane application that process exception traffic.</dd>
+<dt id="term-sequence-counter">Sequence counter</dt>
+<dd>A sequence counter is a low-overhead reader-writer synchronization
+mechanism.</dd>
 <dt id="term-snmp">SNMP</dt>
 <dd>The Simple Network Management Protocol is a network management
 protocol for IP networks. Originally intended for configuration
 management, current-day use is primarily for network monitoring.</dd>
 <dt id="term-spinlock">Spinlock</dt>
-<dd>A type of lock where a thread that attempts but fails to acquire
-a lock immediately retries again, and keeps doing so (“spins”),
-until the lock operation is successful. This sort of lock is common
-in operating systems kernels, but unusual in regular user space
-applications, because of issues related to preemption safety.</dd>
+<dd>A type of lock where a thread failing to acquire a lock
+immediately retries, and keeps doing so (“spins”), until the
+lock operation is successful. Spinlocks are common in operating
+systems kernels, but unusual in user space applications, since
+they are not <a class="reference internal" href="#term-preemption-safety"><span class="xref std std-term">preemption safe</span></a>.</dd>
 <dt id="term-ssh">SSH</dt>
 <dd>Secure Shell (SSH) is a protocol for remote shell access and
 command execution. It may also be used as a secure transport
 layer (e.g., for <a class="reference internal" href="#term-netconf"><span class="xref std std-term">NETCONF</span></a>).</dd>
+<dt id="term-store">Store</dt>
+<dd>A store machine instruction takes the contents of a CPU register
+(usually 8-512 bits of data) and writes it into memory.</dd>
 <dt id="term-syslog">Syslog</dt>
 <dd>Long the de facto standard logging standard on UNIX systems,
-syslog is now a specified (or rather, documented) in IEFT
+syslog is now specified (or more accurately, documented) in IEFT
 <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5424.txt">RFC 5424</a>.</dd>
+<dt id="term-tls">TLS</dt>
+<dd>In C11, and long before in GNU C, a static or extern storage
+class variable may be declared as being kept in Thread Local
+Storage (TLS). Such variables exists in one copy per thread in
+the process. C11 uses <code class="docutils literal notranslate"><span class="pre">thread_local</span></code> to mark a variable thread
+local, but in DPDK the practice is to instead use the GCC
+extensions <code class="docutils literal notranslate"><span class="pre">__thread</span></code>.</dd>
 <dt id="term-ue">UE</dt>
-<dd>User Equipment (UE) is 3GPP term for a mobile terminal. This is
-the equivalent of a <em>host</em> in a TCP/IP network.</dd>
+<dd>User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
+roughly equivalent of a <em>host</em> in a TCP/IP network. To complicate
+things, a UE is also almost always a <em>host</em> as well, since the
+mobile network is used as a data link layer for IP.</dd>
 <dt id="term-user-plane">User plane</dt>
-<dd>A synonym to <a class="reference internal" href="intro.html#data-plane"><span class="std std-ref">Data Plane</span></a>, commonly used in the context of
+<dd>A synonym to <a class="reference internal" href="#term-data-plane"><span class="xref std std-term">data plane</span></a>, commonly used in the context of
 telecommunications networks.</dd>
 <dt id="term-wall-clock-latency">Wall-clock Latency</dt>
-<dd>Wall-clock latency is the latency in terms of the passage of
-physical time (i.e., what a wall-clock measures).</dd>
+<dd>Wall-clock latency, or wall-time latency, is the latency in
+terms of the passage of physical time (i.e., what a wall clock
+measures). A commonly used synonym (e.g., in the context of
+manufacturing) is <em>lead time</em>. The wall-clock latency may be
+longer or shorter than the <a class="reference internal" href="#term-processing-latency"><span class="xref std std-term">processing latency</span></a>.</dd>
+<dt id="term-work-scheduler">Work scheduler</dt>
+<dd>For the purpose of this book, a work scheduler (also known as a
+job scheduler) is a data plane fast path function that assign
+items of work to the worker lcores. Work scheduling in its
+simpliest forms can be the use of <a class="reference internal" href="#term-rss"><span class="xref std std-term">RSS</span></a> in the NIC. A DPDK
+Event Device is a form of work scheduler. In a data plane
+application, a job is usually, but not always, processing a
+packet (at a certain stage in the pipeline, or the complete
+processing, for run-to-completion designs).</dd>
+<dt id="term-working-set-size">Working set size</dt>
+<dd>The amount of memory actively being used by a program, as opposed
+to memory merely allocated, and then left unused. This book will
+used this term to denote <em>actively used</em> to mean memory that is
+being repeatedly and oftenly used, as opposed to memory that
+is only rarely used (e.g., during initialization). The reason for
+this definition is that the primary use for the term is in the
+context of CPU cache pressure. The total amount of memory ever
+used by the application is usually less of a concearn, for these
+types of applications. The working set includes both instructions
+and data.</dd>
 </dl>
 </div>
 
@@ -242,6 +346,7 @@ physical time (i.e., what a wall-clock measures).</dd>
 <li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cache.html">Caches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats/stats.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timers.html">Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>

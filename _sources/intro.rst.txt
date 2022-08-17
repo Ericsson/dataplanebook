@@ -665,7 +665,8 @@ applies, it's in the context of data plane software development.
 
 .. rubric:: Footnotes
 
-.. [#RFC5810]  Attempts have been made to standardize the separation
-   of control and data plane and the protocols used to communicate
-   between the planes in an IP router. See
-   `RFC 5810 <https://www.rfc-editor.org/rfc/rfc5810.txt>`_.
+.. [#RFC5810]
+     Attempts have been made to standardize the separation
+     of control and data plane and the protocols used to communicate
+     between the planes in an IP router. See
+     `RFC 5810 <https://www.rfc-editor.org/rfc/rfc5810.txt>`_.
