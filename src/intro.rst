@@ -59,9 +59,9 @@ This section will describe what role the different layers take on.
 In certain networks, the separation is externally visible, and the
 protocols used between the entities in the different layers are
 standardized. An example of such a network is the :term:`RAN` of a 5G
-cellular network, where the Centralized Unit (CU) primarily handles
-control plane type tasks, and the Distributed Unit (DU) handles the
-data plane.
+cellular network, where the Centralized Unit Control Plane (CU-CP)
+primarily handles control plane type tasks, and the Distributed Unit
+(DU) handles the data plane.
 
 In an IP network router, the separation into planes may exist only
 internally (or indeed, not at all). The protocols and means of

@@ -8,7 +8,7 @@ struct ep_session_stats
 
 struct ep_stats
 {
-	rte_seqcount_t sc; /* protecting all counters */
+	rte_seqcount_t sc;
 	struct ep_session_stats sessions[EP_MAX_SESSIONS];
 	uint64_t total_bytes;
 	uint64_t total_pkts;
