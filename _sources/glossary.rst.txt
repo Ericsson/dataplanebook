@@ -316,6 +316,35 @@ Glossary
       A synonym to :term:`data plane`, commonly used in the context of
       telecommunications networks.
 
+   Vector packet processing
+
+      Vector packet processing is a network stack design pattern,
+      where the packets traverse the different layers in network stack
+      in batches ("vectors"), rather than as individual packets. The
+      implementation-level layers may coorelate with the layers of the
+      :term:`network protocol suite` being implemented, but may also
+      be more fine-grained (e.g., IP processing may be split into two
+      or three such "sub layers"), or just different altogheter. In a
+      traditional network stack, a packet traverse the whole stack up
+      until completion (e.g., the packet is dropped, forwarded, or
+      handed off to a local application).
+
+      The benefit of vector packet processing is reduced instruction
+      cache pressure, and improve temporal locality for data related
+      to a particular layer. It also reduces the number of required
+      function calls. A drawback is that the reduced readability and
+      an increase in code complexity, especially if manual loop
+      unrolling is used.
+
+      Besides vector packet processing is passing vectors of packets
+      between layers, the sub layer processing code allows the
+      compiler to use SIMD instructions to a much higher degree that
+      would be possible in a single-packet-per-layer design.
+
+      One prominent use of the Vector packet processing pattern is the
+      Open Source network router and switch platform with the same
+      name - `Vector Packet Processing <http://fd.io/>`_
+
    Wall-clock Latency
       Wall-clock latency, or wall-time latency, is the latency in
       terms of the passage of physical time (i.e., what a wall clock

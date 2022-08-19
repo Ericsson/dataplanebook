@@ -162,6 +162,16 @@ development team goes down the <a class="reference internal" href="#shared-lock-
 path, the statistics feature alone will consume several order of
 magnitudes more than the budget <em>for the whole application</em>, assuming
 the fast path is allocated to a handful of cores or more.</p>
+<div class="section" id="vector-processing">
+<h5>Vector Processing<a class="headerlink" href="#vector-processing" title="Permalink to this headline">¶</a></h5>
+<p>If the fast path processing is organized as per the <a class="reference internal" href="../glossary.html#term-vector-packet-processing"><span class="xref std std-term">vector
+packet processing</span></a> design pattern, the
+counter update overhead can potentially be reduced.</p>
+<p>For example, if the lcore worker thread is handed a vector of 32
+packets by the <a class="reference internal" href="../glossary.html#term-work-scheduler"><span class="xref std std-term">work scheduler</span></a>, all destined for Example
+Protocol-level processing, the <code class="docutils literal notranslate"><span class="pre">total_pkts</span></code> need only be updated
+once.</p>
+</div>
 </div>
 <div class="section" id="space-efficiency">
 <span id="id4"></span><h4>Space Efficiency<a class="headerlink" href="#space-efficiency" title="Permalink to this headline">¶</a></h4>
@@ -246,24 +256,24 @@ or per-interface) counters, so the issue with high contention counters
 need to be solved regardless.</p>
 </div>
 </div>
-<div class="section" id="propagation-delay">
-<h3>Propagation Delay<a class="headerlink" href="#propagation-delay" title="Permalink to this headline">¶</a></h3>
-<p><em>Propagation delay</em> here refers to the <a class="reference internal" href="../glossary.html#term-wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>
-between the point in time when the counted event occured, until the
-counter is updated and available to a potential reader. The result of
-<a class="reference internal" href="../glossary.html#term-domain-logic"><span class="xref std std-term">domain logic</span></a> processing that casused the counter update (e.g,
-a packet being modified), and the counter update itself, are never
-presented in an atomic manner to the parties outside the fast path
-process. This would imply that somehow the delivery of packets from
-the data plane and the delivery of counter updates to the external
-world could be done atomically.</p>
+<div class="section" id="update-propagation-delay">
+<h3>Update Propagation Delay<a class="headerlink" href="#update-propagation-delay" title="Permalink to this headline">¶</a></h3>
+<p><em>Update propagation delay</em> in this chapter refers to the
+<a class="reference internal" href="../glossary.html#term-wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a> between the point in time when the counted
+event occured, until the counter is updated and available to a
+potential reader. The result of <a class="reference internal" href="../glossary.html#term-domain-logic"><span class="xref std std-term">domain logic</span></a> processing that
+casused the counter update (e.g, a packet being modified), and the
+counter update itself, are never presented in an atomic manner to the
+parties outside the fast path process. This would imply that somehow
+the delivery of packets from the data plane and the delivery of
+counter updates to the external world could be done atomically.</p>
 <p>The counter implementation patterns presented in this chapter, unless
-otherwise mentioned, all have a very short propagation delay. It boils
-down to the time it takes for the result of a CPU <a class="reference internal" href="../glossary.html#term-store"><span class="xref std std-term">store</span></a>
-instruction become globally visible. This process shouldn’t take more
-than a couple of hundred nanoseconds, at most.</p>
-<p>One way to reason about propagation delay requirements is to think
-about how quickly a user, or any kind of data plane
+otherwise mentioned, all have a very short update propagation
+delay. It boils down to the time it takes for the result of a CPU
+<a class="reference internal" href="../glossary.html#term-store"><span class="xref std std-term">store</span></a> instruction become globally visible. This process
+shouldn’t take more than a couple of hundred nanoseconds, at most.</p>
+<p>One way to reason about update propagation delay requirements is to
+think about how quickly a user, or any kind of data plane
 application-external agent, could retrieve counters which should
 reflect a particular packet having been received, processed, or sent.</p>
 <p>For example, if serving a control plane request has a practical
@@ -660,10 +670,8 @@ time.</p>
 
 	<span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
 
-	<span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span> <span class="o">=</span> <span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span>
-				       <span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
-	<span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span> <span class="o">=</span> <span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span>
-					<span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+	<span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span> <span class="o">=</span> <span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">;</span>
+	<span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span> <span class="o">=</span> <span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">;</span>
 
 	<span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
 <span class="p">}</span>
@@ -691,7 +699,7 @@ thread</span></a> wanting to reset all, or a subset of, the statistics would:</p
 <li>Store zeros to the counter variables</li>
 <li>Release the statistics lock</li>
 </ol>
-<p>The implementation could look something like <a class="footnote-reference" href="#id31" id="id13">[3]</a>:</p>
+<p>The implementation could look something like <a class="footnote-reference" href="#id30" id="id13">[3]</a>:</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">ep_stats_lock</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="p">{</span>
@@ -1058,8 +1066,8 @@ the API header file may slightly improve the performance <a class="footnote-refe
 in non-<a class="reference internal" href="../glossary.html#term-lto"><span class="xref std std-term">LTO</span></a> builds, since the function can then be inlined by
 the compiler.</p>
 </div>
-<div class="section" id="id23">
-<h4>Propagation Delay<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="propagation-delay">
+<h4>Propagation Delay<a class="headerlink" href="#propagation-delay" title="Permalink to this headline">¶</a></h4>
 <p>Per-core buffering may introduce a noticable delay between the counted
 event occuring, and the time when the counter is updated and the
 results are available to a potential reader.</p>
@@ -1086,7 +1094,7 @@ handed 32 packets, the delay will be less than ~13 us.</p>
 </div>
 </div>
 <div class="section" id="per-core-counters">
-<span id="id24"></span><h3>Per Core Counters<a class="headerlink" href="#per-core-counters" title="Permalink to this headline">¶</a></h3>
+<span id="id23"></span><h3>Per Core Counters<a class="headerlink" href="#per-core-counters" title="Permalink to this headline">¶</a></h3>
 <p>In DPDK, per-core data structures (usually in the form of nested C
 struct) are usually implemented by having as many instances of the
 struct as the maximum number of support DPDK lcores
@@ -1138,8 +1146,8 @@ two different cores are hosted by the same cache line, this shared
 cache line will partly defeat the purpose of using per-core data
 structures. <em>False sharing</em> does not impact correctness.</p>
 </div>
-<div class="section" id="id25">
-<h4>Aritmethic Operations<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id24">
+<h4>Aritmethic Operations<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
 <p>Since the statistics are duplicated across all lcores, no
 lcore-to-lcore writer synchronization is required.</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
@@ -1172,8 +1180,8 @@ lcore-to-lcore writer synchronization is required.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id26">
-<h4>Reading<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id25">
+<h4>Reading<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
 <p>To retrieve the value of a counter, a reader needs to take a sum over
 all instances of that counter, in all the per-core statistics structs.</p>
 <p>A reader may choose to either iterate over all possible lcores (i.e.,
@@ -1229,8 +1237,8 @@ value. What the control plane thread will see is neither 4294967295,
 nor 4294967296, but 8589934591.</p>
 <p>This phenomena is known as load or store <em>tearing</em>.</p>
 </div>
-<div class="section" id="id27">
-<h4>Inter Counter Consistency<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id26">
+<h4>Inter Counter Consistency<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
 <p>The atomic store used by the counter producer thread (e.g., the lcore
 worker) is only atomic for a particular counter, and the statistics
 may be in a transient state of inconsistency, seen over a set of
@@ -1261,7 +1269,7 @@ statistics data may be an option.</p>
 
 <span class="k">struct</span> <span class="n">ep_stats</span>
 <span class="p">{</span>
-	<span class="n">rte_seqcount_t</span> <span class="n">sc</span><span class="p">;</span> <span class="cm">/* protecting all counters */</span>
+	<span class="n">rte_seqcount_t</span> <span class="n">sc</span><span class="p">;</span>
 	<span class="k">struct</span> <span class="n">ep_session_stats</span> <span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span>
 	<span class="kt">uint64_t</span> <span class="n">total_bytes</span><span class="p">;</span>
 	<span class="kt">uint64_t</span> <span class="n">total_pkts</span><span class="p">;</span>
@@ -1334,12 +1342,12 @@ spinlocks. Since a writer would only contend with a reader for such a
 lock, the level of contentions will be very low, and thus the overhead
 to acquire the lock will be as well.</p>
 </div>
-<div class="section" id="id28">
-<h4>Performance<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id27">
+<h4>Performance<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
 <p>Keeping per-core instances of statistics data structures is generally
 the most CPU cycle-efficient way to implement counters.</p>
 <p>Add a sequence counter or a spinlock to improve consistency adds
-overhead, but from what the <a class="reference internal" href="#performance-comparison"><span class="std std-ref">micro benchmarks</span></a> suggests, it is very small. <a class="footnote-reference" href="#ignorantauthor" id="id29">[6]</a></p>
+overhead, but from what the <a class="reference internal" href="#performance-comparison"><span class="std std-ref">micro benchmarks</span></a> suggests, it is very small. <a class="footnote-reference" href="#ignorantauthor" id="id28">[6]</a></p>
 <p>The largest threat to the viability of the <a class="reference internal" href="#per-core-counters"><span class="std std-ref">Per Core Counters</span></a>
 approach is space efficiency. The amount of statistics memory grows
 linearly with the lcore worker count. This is not an issue in cases
@@ -1351,7 +1359,7 @@ CPU cores, especially on memory-constrained systems.</p>
 </div>
 </div>
 <div class="section" id="performance-comparison">
-<span id="id30"></span><h3>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this headline">¶</a></h3>
+<span id="id29"></span><h3>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this headline">¶</a></h3>
 <p>The relative performance of the different approaches to counter
 implementation varies with a number of factors.</p>
 <ul class="simple">
@@ -1412,12 +1420,14 @@ spinlock variant performs as well as the per-core variant which only
 uses atomic stores - a fact which the author find difficult to
 explain.</p>
 <p>DPDK 22.07rc4 was used for both systems.</p>
+<p>In both the Raspberry Pi and Xeon server case, the test
+application and DPDK was compiled with``-O3 -march=native``.</p>
 </div>
 <div class="section" id="benchmark-results">
 <h4>Benchmark Results<a class="headerlink" href="#benchmark-results" title="Permalink to this headline">¶</a></h4>
 <p>The counter update overhead is expressed in CPU core cycles.</p>
-<table border="1" class="docutils" id="id32">
-<caption><span class="caption-text">Per-counter Update Overhead</span><a class="headerlink" href="#id32" title="Permalink to this table">¶</a></caption>
+<table border="1" class="docutils" id="id31">
+<caption><span class="caption-text">Per-counter Update Overhead</span><a class="headerlink" href="#id31" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="11%" />
 <col width="11%" />
@@ -1477,8 +1487,8 @@ explain.</p>
 <p>The different benchmark programs use the various implements the
 various patterns described earlier in this chapter, in a manner very
 similiar to the example code.</p>
-<table border="1" class="colwidths-given docutils" id="id33">
-<caption><span class="caption-text">Benchmark Counter Implementation Descriptions</span><a class="headerlink" href="#id33" title="Permalink to this table">¶</a></caption>
+<table border="1" class="colwidths-given docutils" id="id32">
+<caption><span class="caption-text">Benchmark Counter Implementation Descriptions</span><a class="headerlink" href="#id32" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="25%" />
 <col width="75%" />
@@ -1539,7 +1549,7 @@ because of this.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id9">[2]</a></td><td>Exceptions are, among other, some energy efficiency-related scenarios.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id31" rules="none">
+<table class="docutils footnote" frame="void" id="id30" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id13">[3]</a></td><td>It’s unclear to the author what is the appropriate semantics
@@ -1569,7 +1579,7 @@ otherwise.</td></tr>
 <table class="docutils footnote" frame="void" id="ignorantauthor" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id29">[6]</a></td><td>The author does not have any practical experience with the use
+<tr><td class="label"><a class="fn-backref" href="#id28">[6]</a></td><td>The author does not have any practical experience with the use
 spinlock-protected or sequence counter-protected <em>per-core</em>
 statistics in real applications.</td></tr>
 </tbody>

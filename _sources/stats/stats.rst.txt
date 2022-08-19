@@ -163,6 +163,18 @@ path, the statistics feature alone will consume several order of
 magnitudes more than the budget *for the whole application*, assuming
 the fast path is allocated to a handful of cores or more.
 
+Vector Processing
+"""""""""""""""""
+
+If the fast path processing is organized as per the :term:`vector
+packet processing<Vector packet processing>` design pattern, the
+counter update overhead can potentially be reduced.
+
+For example, if the lcore worker thread is handed a vector of 32
+packets by the :term:`work scheduler`, all destined for Example
+Protocol-level processing, the ``total_pkts`` need only be updated
+once.
+
 .. _Space Efficiency:
 
 Space Efficiency
@@ -262,27 +274,27 @@ Usually, the data plane fast path includes some non-flow (e.g., global
 or per-interface) counters, so the issue with high contention counters
 need to be solved regardless.
 
-Propagation Delay
------------------
+Update Propagation Delay
+------------------------
 
-*Propagation delay* here refers to the :term:`wall-clock latency`
-between the point in time when the counted event occured, until the
-counter is updated and available to a potential reader. The result of
-:term:`domain logic` processing that casused the counter update (e.g,
-a packet being modified), and the counter update itself, are never
-presented in an atomic manner to the parties outside the fast path
-process. This would imply that somehow the delivery of packets from
-the data plane and the delivery of counter updates to the external
-world could be done atomically.
+*Update propagation delay* in this chapter refers to the
+:term:`wall-clock latency` between the point in time when the counted
+event occured, until the counter is updated and available to a
+potential reader. The result of :term:`domain logic` processing that
+casused the counter update (e.g, a packet being modified), and the
+counter update itself, are never presented in an atomic manner to the
+parties outside the fast path process. This would imply that somehow
+the delivery of packets from the data plane and the delivery of
+counter updates to the external world could be done atomically.
 
 The counter implementation patterns presented in this chapter, unless
-otherwise mentioned, all have a very short propagation delay. It boils
-down to the time it takes for the result of a CPU :term:`store`
-instruction become globally visible. This process shouldn't take more
-than a couple of hundred nanoseconds, at most.
+otherwise mentioned, all have a very short update propagation
+delay. It boils down to the time it takes for the result of a CPU
+:term:`store` instruction become globally visible. This process
+shouldn't take more than a couple of hundred nanoseconds, at most.
 
-One way to reason about propagation delay requirements is to think
-about how quickly a user, or any kind of data plane
+One way to reason about update propagation delay requirements is to
+think about how quickly a user, or any kind of data plane
 application-external agent, could retrieve counters which should
 reflect a particular packet having been received, processed, or sent.
 
@@ -1121,6 +1133,9 @@ uses atomic stores - a fact which the author find difficult to
 explain.
 
 DPDK 22.07rc4 was used for both systems.
+
+In both the Raspberry Pi and Xeon server case, the test
+application and DPDK was compiled with``-O3 -march=native``.
 
 Benchmark Results
 ^^^^^^^^^^^^^^^^^

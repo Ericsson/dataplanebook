@@ -289,6 +289,31 @@ mobile network is used as a data link layer for IP.</dd>
 <dt id="term-user-plane">User plane</dt>
 <dd>A synonym to <a class="reference internal" href="#term-data-plane"><span class="xref std std-term">data plane</span></a>, commonly used in the context of
 telecommunications networks.</dd>
+<dt id="term-vector-packet-processing">Vector packet processing</dt>
+<dd><p class="first">Vector packet processing is a network stack design pattern,
+where the packets traverse the different layers in network stack
+in batches (“vectors”), rather than as individual packets. The
+implementation-level layers may coorelate with the layers of the
+<a class="reference internal" href="#term-network-protocol-suite"><span class="xref std std-term">network protocol suite</span></a> being implemented, but may also
+be more fine-grained (e.g., IP processing may be split into two
+or three such “sub layers”), or just different altogheter. In a
+traditional network stack, a packet traverse the whole stack up
+until completion (e.g., the packet is dropped, forwarded, or
+handed off to a local application).</p>
+<p>The benefit of vector packet processing is reduced instruction
+cache pressure, and improve temporal locality for data related
+to a particular layer. It also reduces the number of required
+function calls. A drawback is that the reduced readability and
+an increase in code complexity, especially if manual loop
+unrolling is used.</p>
+<p>Besides vector packet processing is passing vectors of packets
+between layers, the sub layer processing code allows the
+compiler to use SIMD instructions to a much higher degree that
+would be possible in a single-packet-per-layer design.</p>
+<p class="last">One prominent use of the Vector packet processing pattern is the
+Open Source network router and switch platform with the same
+name - <a class="reference external" href="http://fd.io/">Vector Packet Processing</a></p>
+</dd>
 <dt id="term-wall-clock-latency">Wall-clock Latency</dt>
 <dd>Wall-clock latency, or wall-time latency, is the latency in
 terms of the passage of physical time (i.e., what a wall clock
