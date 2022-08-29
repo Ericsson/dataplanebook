@@ -1,25 +1,25 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en_US">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Work Scheduling &#8212; Data Plane Software Design 0.0.2 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Ethernet Devices" href="eth.html" />
     <link rel="prev" title="Threading" href="threading.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -29,49 +29,52 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="work-scheduling">
+  <section id="work-scheduling">
 <h1>Work Scheduling<a class="headerlink" href="#work-scheduling" title="Permalink to this headline">¶</a></h1>
 <p>(Work scheduling is a too-narrow title. This chapter should cover the
 overall organization of the processing.)</p>
-<div class="section" id="hardware-ingress-load-balancing">
+<section id="hardware-ingress-load-balancing">
 <h2>Hardware Ingress Load Balancing<a class="headerlink" href="#hardware-ingress-load-balancing" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="receive-side-and-receive-flow-scaling">
+<section id="receive-side-and-receive-flow-scaling">
 <h3>Receive Side and Receive Flow Scaling<a class="headerlink" href="#receive-side-and-receive-flow-scaling" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="dpdk-generic-flow">
+</section>
+<section id="dpdk-generic-flow">
 <h3>DPDK Generic Flow<a class="headerlink" href="#dpdk-generic-flow" title="Permalink to this headline">¶</a></h3>
-</div>
-</div>
-<div class="section" id="run-to-completion">
+</section>
+</section>
+<section id="run-to-completion">
 <h2>Run to Completion<a class="headerlink" href="#run-to-completion" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="pipeline">
+</section>
+<section id="pipeline">
 <h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="optimization-points">
+<section id="optimization-points">
 <h3>Optimization Points<a class="headerlink" href="#optimization-points" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Minimize packet header and buffer meta data core-to-core transition</li>
-<li>Minimize instruction cache footprint for a particular core</li>
-<li>Minimize cache working set related to per-flow, per-stage data</li>
-<li>Minimize cache working set related to per-stage data</li>
+<li><p>Minimize packet header and buffer meta data core-to-core transition</p></li>
+<li><p>Minimize instruction cache footprint for a particular core</p></li>
+<li><p>Minimize cache working set related to per-flow, per-stage data</p></li>
+<li><p>Minimize cache working set related to per-stage data</p></li>
 </ul>
-</div>
-<div class="section" id="scheduled-pipeline">
+</section>
+<section id="scheduled-pipeline">
 <h3>Scheduled Pipeline<a class="headerlink" href="#scheduled-pipeline" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="dpdk-eventdev">
+<section id="dpdk-eventdev">
 <h4>DPDK Eventdev<a class="headerlink" href="#dpdk-eventdev" title="Permalink to this headline">¶</a></h4>
-</div>
-</div>
-</div>
-<div class="section" id="dpdk-service-cores">
+</section>
+</section>
+</section>
+<section id="dpdk-service-cores">
 <h2>DPDK Service Cores<a class="headerlink" href="#dpdk-service-cores" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -86,7 +89,7 @@ overall organization of the processing.)</p>
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
@@ -111,7 +114,7 @@ overall organization of the processing.)</p>
 <li class="toctree-l1"><a class="reference internal" href="modularization.html">Modularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a></li>
-<li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Anti Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 
@@ -125,17 +128,23 @@ overall organization of the processing.)</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -144,8 +153,8 @@ overall organization of the processing.)</p>
       &copy;2022, Ericsson AB.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/work.rst.txt"

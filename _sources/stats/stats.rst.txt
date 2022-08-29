@@ -56,7 +56,7 @@ model - allows for a number of other types, such as *Unsigned32*,
 chapter also apply for managing and presenting state information to
 external parties (e.g., the control plane).
 
-There exist a wide varity of network management protocols to access
+There exist a wide variety of network management protocols to access
 statistics-type information, where SNMP is just one among many. The
 mechanism to access statistics from outside the :term:`fast path`
 process, and the data plane application, will be discussed in a future
@@ -101,7 +101,7 @@ requirements for fast path statistics:
 * Performance
 * Correctness
 * Propagation delay
-* Time corrolation
+* Time correlation
 * Consistency across multiple counters
 * Counter Reset
 * Writer parallelism
@@ -218,7 +218,7 @@ used.
 
 Another consideration is if memory consumption are required to
 correlate with the number of active flows, or if it is acceptable to
-statically pre-allocated statistics memory for the maximum number of
+statically preallocated statistics memory for the maximum number of
 flows supported.
 
 Prototyping may be required to determined how the counter
@@ -279,9 +279,9 @@ Update Propagation Delay
 
 *Update propagation delay* in this chapter refers to the
 :term:`wall-clock latency` between the point in time when the counted
-event occured, until the counter is updated and available to a
+event occurred, until the counter is updated and available to a
 potential reader. The result of :term:`domain logic` processing that
-casused the counter update (e.g, a packet being modified), and the
+caused the counter update (e.g, a packet being modified), and the
 counter update itself, are never presented in an atomic manner to the
 parties outside the fast path process. This would imply that somehow
 the delivery of packets from the data plane and the delivery of
@@ -361,7 +361,7 @@ the network stack :term:`domain logic` processing in the same struct
 as the core domain logic state. In case the domain logic state is
 protected by a lock, the counter updates could be performed under the
 protection of the same lock, at very little additional cost, provided
-the counters belongs to that object (as oppposed to counters related
+the counters belongs to that object (as opposed to counters related
 to some aggregate of such objects, or global counters).
 
 A potential reader would use the same lock to serialize access to the
@@ -375,7 +375,7 @@ is done differently compared to accesses of domain object state.
 
 The example implementations in this chapter use a simple,
 self-contained, fix size, statically allocated struct, but the various
-pattern applies to more elobrate, dynamically allocated data
+pattern applies to more elaborate, dynamically allocated data
 structures as well.
 
 One way to reduce the amount of memory used (or at least make the
@@ -403,7 +403,7 @@ workers).
 
 In case where a data plane application has only one lcore worker
 thread, or there are multiple lcore workers, but there is no overlap
-between what counters the different threads manipulate in parallell,
+between what counters the different threads manipulate in parallel,
 there is no need for writer-writer synchronization. The only concern
 in this case, is reader-writer synchronization, assuming there is a
 separate reader thread (e.g., a :term:`control thread`). The solution
@@ -483,7 +483,7 @@ and an *atomic* :term:`load` for the consumer side.
 In this solution, there is only a single instance of the statistics
 struct, accessed by using atomic instructions.
 
-Aritmethic Operations
+Arithmetic Operations
 ^^^^^^^^^^^^^^^^^^^^^
 
 Below is the ``ep_stats_update()`` function updated to use atomic
@@ -603,7 +603,7 @@ So, even though the critical section is just a load, an add, and a
 store machine instruction (or something along those lines), the lock
 may cause significant overhead.
 
-Aritmethic Operations
+Arithmetic Operations
 ^^^^^^^^^^^^^^^^^^^^^
 
 Adding to one or more counters is only a matter of taking the lock,
@@ -618,12 +618,12 @@ Reading
 Reading counter values is very straight-forward, but *not*
 :term:`preemption safe<Preemption safety>`. In case the reader thread
 is preempted when it has acquired the lock, but not yet released it,
-all the lcore worker threads will eventuelly be waiting to acquire the
+all the lcore worker threads will eventually be waiting to acquire the
 lock, and will continue to make progress only when the reader thread
 is re-scheduled and may continue processing and release the lock.
 
 Thus, care must be taken that the :term:`control thread` (or some
-other reader) is not preempted, at least not for any long durations of
+other reader) is not preempted, at least not for any long duration of
 time.
 
 .. literalinclude:: stats_shared_lock_protected_read.c
@@ -649,7 +649,7 @@ Another option is to use explicit locking for reader (or, for reader
 thread` wanting to reset all, or a subset of, the statistics would:
 
 1. Acquire the statistics lock
-2. Optionally read out the pre-reset state of the statistics
+2. Optionally read out state of the statistics (prior to reset)
 3. Store zeros to the counter variables
 4. Release the statistics lock
 
@@ -773,7 +773,7 @@ array. This is convenient and makes for a clean API, but does prohibit
 any non-lcore worker threads from performing counter updates (a
 non-lcore thread does not have an lcore id) via the write buffer.
 
-Aritmethic Operations
+Arithmetic Operations
 ^^^^^^^^^^^^^^^^^^^^^
 
 The use of the ``stat_wb.h`` API to increment a set of counters could
@@ -857,12 +857,12 @@ the compiler.
 Propagation Delay
 ^^^^^^^^^^^^^^^^^
 
-Per-core buffering may introduce a noticable delay between the counted
-event occuring, and the time when the counter is updated and the
-results are available to a potential reader.
+Per-core buffering may introduce a noticeable delay between the
+counted event occurring, and the time when the counter is updated and
+the results are available to a potential reader.
 
 In case the write buffer is not flushed, the execution of the buffered
-add operations may be delayed indefinately.
+add operations may be delayed indefinitely.
 
 A simple and often effective model is to force a write buffer flush
 for every batch of work items (e.g., packets) a lcore worker
@@ -871,18 +871,19 @@ process. In low-load situations, the lcore is usually asked by the
 situation, the statistics overhead will increase, since the flush
 operation is performed with relatively few counter updates
 buffered. However, the demand for the fast path to be CPU cycle
-efficient is lower during low load. [#nodemand] During high load, the
-lcore worker will start to experience larger batcher, and counter
+efficient is lower during low load. [#nodemand]_ During high load, the
+lcore worker will start to experience larger batches, and counter
 flushes will contain more operations, reducing per-counter update
 overhead.
 
-As an example, assume a pipelined fast path application with a
-per-processing stage :term:`processing latency` of 1000 core clock
-cycles, running on a CPU operating at 2,5 GHz. When a batch of packets
-have been processed, the lcore calls ``stat_wb_flush()``. If only a
-single packet is being processed, the delay introduced by buffering is
-at most ~400 ns. If a burst of packets arrive, an the lcore is being
-handed 32 packets, the delay will be less than ~13 us.
+As an example, assume a fast path application where the processing is
+organized as a pipeline, with a per-pipeline stage :term:`processing
+latency` of 1000 core clock cycles, running on a CPU operating at 2,5
+GHz. When a batch of packets have been processed, the lcore calls
+``stat_wb_flush()``. If only a single packet is being processed, the
+delay introduced by buffering is at most ~400 ns. If a burst of
+packets arrive, an the lcore is being handed 32 packets, the delay
+will be less than ~13 us.
 
 .. _Per Core Counters:
 
@@ -901,7 +902,7 @@ effectively become a per DPDK lcore data structure.
 
 The DPDK lcore id, numbered from 0 to ``RTE_LCORE_MAX-1``, is then
 used as a index into the array of instances. The lcore id may be
-retrived relativley cheaply with ``rte_lcore_id()``.
+retrieved relatively cheaply with ``rte_lcore_id()``.
 
 If the per-core data structures are large, it's better to have an
 array of pointers, and only allocated as many as the actual lcore
@@ -929,7 +930,7 @@ similar struct definition as :ref:`Shared Non Synchronized Counters`.
    cache line will partly defeat the purpose of using per-core data
    structures. *False sharing* does not impact correctness.
 
-Aritmethic Operations
+Arithmetic Operations
 ^^^^^^^^^^^^^^^^^^^^^
 
 Since the statistics are duplicated across all lcores, no
@@ -971,8 +972,8 @@ counters, but see the discussion on transactions and consistency.
 
 In the unlikely case atomicity would be violated, the results may be
 disastrous from a correctness point of view. For example, consider a
-64-bit counter that currently has the value 4294967295
-(0xFFFFFFFF). Just as the counter is being read by some control plane
+64-bit counter that currently has the value 4294967295 (FFFFFFFF in
+hexadecimal). Just as the counter is being read by some control plane
 thread, it's also being incremented by one by the owning lcore worker
 thread. If the lcore worker store, or the control plane load operation
 fail to be atomic, the read may read the least significant 32 bits
@@ -992,7 +993,7 @@ different counters, for a short period of time.
 
 For example, if a 1000-byte EP packet is processed, the reader may see
 a ``bytes`` counter where that packet is accounted for, but a ``pkts``
-which is not yet updated. Similiarly, it may read an updated
+which is not yet updated. Similarly, it may read an updated
 ``total_bytes``, but a not-yet-updated session-level ``bytes``
 counter.
 
@@ -1001,7 +1002,7 @@ system (which should only very rarely happen in a correctly configured
 deployment), the time window of the counters being inconsistency is
 likely to be very short indeed, but not zero-sized.  If the counters
 are updated at a very high rate, the risk for a reader of seeing some
-inconsistenies might still be considerable.
+inconsistencies might still be considerable.
 
 The counter state will converge toward a consistent state. This is
 often enough, but for application where it is not, and the efficiency
@@ -1072,8 +1073,7 @@ implementation varies with a number of factors.
   modified).
 * The amount of overlap between two or more cores' counter working set.
 * Worker core count.
-* CPU implementation details (e.g., memory model and latencies to
-  caches).
+* CPU implementation details (e.g., memory model and cache latency).
   
 The benchmarking application simulates a fairly low-touch data plane
 application, spending ~1000 clock cycles/packet for domain logic
@@ -1088,8 +1088,8 @@ examples.
 
 The application modifies two global counters, and two flow-related
 counters per packet. How many counters are incremented per packet, and
-how many are related to a flow, and how many are global as oppposed to
-per-flow (or the equivalent), varies wildy between applications. This
+how many are related to a flow, and how many are global as opposed to
+per-flow (or the equivalent), varies wildly between applications. This
 benchmark is at the low end of counter usage.
 
 In the benchmark, load balancing of packets over cores works in such a
@@ -1117,7 +1117,7 @@ System under Test Hardware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The "Cascade Lake Xeon" is a server with a 20-core Intel Xeon Gold
-6230N CPU. To improve determism, the Intel Turbo function is disabled,
+6230N CPU. To improve determinism, the Intel Turbo function is disabled,
 and all CPU cores run the nominal clock frequency - 2,3 GHz. The
 compiler used is GCC 10.3.0.
 
@@ -1132,7 +1132,7 @@ spinlock variant performs as well as the per-core variant which only
 uses atomic stores - a fact which the author find difficult to
 explain.
 
-DPDK 22.07rc4 was used for both systems.
+DPDK 22.07 was used for both systems.
 
 In both the Raspberry Pi and Xeon server case, the test
 application and DPDK was compiled with``-O3 -march=native``.
@@ -1148,7 +1148,7 @@ The counter update overhead is expressed in CPU core cycles.
 
 The different benchmark programs use the various implements the
 various patterns described earlier in this chapter, in a manner very
-similiar to the example code.
+similar to the example code.
 
 .. list-table:: Benchmark Counter Implementation Descriptions
    :widths: 25 75
@@ -1183,11 +1183,10 @@ Telemetry Library
 .. rubric:: Footnotes
 
 .. [#cyclesvslogic]
-   The rule of a thumb that more :term:`processing latency` means more
-   :term:`domain logic` doesn't always hold true. In particular,
-   applications that copy, encrypt or decrypt the packet payload will
-   spend a lot of CPU cycles doing so, but will not require more counters
-   because of this.
+   The reverse is not necessarily true. For example, applications that
+   copy, encrypt or decrypt the packet payload will have generally
+   have high processing latency, but not at the cost of increased
+   domain logic complexity or more counter updates.
 
 .. [#sleep]
    Exceptions are, among other, some energy efficiency-related scenarios.

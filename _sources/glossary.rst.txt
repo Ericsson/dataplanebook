@@ -30,16 +30,39 @@ Glossary
 
    Data plane platform
       The part of the data plane applications that provides hardware
-      abstractions and the assoicated hardware drivers, and other
+      abstractions and the associated hardware drivers, and other
       operating system-like services like work scheduling, memory
       management, and timers. :ref:`DPDK` is the reference data
       plane platform of this book.
+
+   eBPF
+      Extended Berkeley Packet Filter (eBPF) is a low-level
+      programming language. The original version of BPF was, just as
+      the name suggests, used for network packet filtering. The
+      current Linux kernel support more eBPF-related uses cases,
+      allowing eBPF program to be attached to other events than an
+      arriving network packet, such as a system call.
+
+      eBPF has a :term:`ISA`-independent byte code format. A developer
+      (or a tool) has the option of authoring the eBPF program in this
+      byte code format, or a subset of C. In the latter case, the LLVM
+      clang compiler (and its eBPF backend) may be used to compile the
+      source code into a eBPF byte code.
+
+      The Linux kernel has a virtual machine (including a
+      just-in-time compiler) for eBPF byte code.
+
+      DPDK also comes with an eBPF virtual machine, similar to that
+      found in the Linux kernel.
+
+      A characterizing property of eBPF programs is that there is always
+      an upper bound to their execution time.
 
    Communications Processor
       An older name for a :term:`DPU`.
 
    :ref:`Control plane <Control Plane>`
-      The part of the network that negiotates, computes or otherwise handles
+      The part of the network that negotiates, computes or otherwise handles
       higher-level policies, such as how routing is set up, and makes sure
       they take affect in the Data Plane.
 
@@ -49,6 +72,19 @@ Glossary
       requests into calls into the fast path's internal APIs. Unlike
       their lcore worker thread counterparts, the control threads usually
       don't run on dedicated CPU cores.
+
+   Concurrency
+     Two or more tasks are considered to be execution concurrently if
+     their processing seems to occur roughly across the same time
+     span, giving the course-grained impression of
+     :term:`parallelism`.
+
+     If the tasks are run by software threads running on a multi-core
+     CPU, their execution may indeed be parallel. If more ready-to-run
+     threads are available than there are CPU cores available,
+     multitasking, with the assistance of the kernel's process
+     scheduler, may be employed to maintain concurrency (without full
+     parallelism).
 
    CN
       The Core Network (CN) is the network that sits between the :term:`RAN`
@@ -66,7 +102,7 @@ Glossary
    Critical section
       Critical section (also known as *critical region*) is a section
       of the program which cannot be executed by more than one thread
-      in parallel. This may be achived by means of a lock.
+      in parallel. This may be achieved by means of a lock.
 
    Domain logic
       Domain logic, also known as *business logic*, is the part of
@@ -105,7 +141,7 @@ Glossary
       correctness of the program.
 
    :ref:`Fast path <Fast Path>`
-      The dataplane fast path is part of the data plane application that
+      The data plane fast path is part of the data plane application that
       handles the bulk of the packets.
 
    FIB
@@ -116,15 +152,32 @@ Glossary
       A flow cache is a data structure which is logically an overlay
       on top of the complete :term:`FIB`. Systems that employ a
       flow cache avoid having to perform a potentially costly FIB lookup
-      (among other processing, such as :term:`ACL` lookups) for every
-      packet in a flow.
+      (among other processing, such as :term:`ACL` lookup operations) for
+      every packet in a flow.
 
    Forwarding plane
       A synonym to data plane, often used for in the context of switches
       and IP router implementations.
 
+   Hardware threading
+      In a CPU core employing hardware threading, such as a
+      :term:`SMT` system, has two or more hardware threads. From a
+      software point of view, each such hardware thread looks just
+      like a (virtual) CPU core, with its own set of registers, a
+      stack, etc. However, on the level of the physical
+      implementation, each hardware thread share, to a varying degree,
+      underlying CPU core resources (e.g., core-private caches,
+      instruction decoders, or arithmetic logic units) with one or
+      more hardware threads on the same core. Such co-located threads
+      are usually referred to as siblings threads or just siblings.
+
+      The number of hardware threads is fixed, and unlikely their
+      software counter parts, hardware threads do not migrate across
+      physical CPU cores. Virtual thread would have been a more
+      appropriate term for a hardware thread.
+
    High touch application
-      A data plane fast path application that on average spends relativily
+      A data plane fast path application that on average spends relatively
       many CPU clock cycles and other hardware resources for every packet.
 
    Huge Pages
@@ -168,7 +221,7 @@ Glossary
       bits) from memory and puts it into a CPU register.
 
    Low touch application
-      A data plane fast path application that on average spends relativily
+      A data plane fast path application that on average spends relatively
       few CPU clock cycles and other hardware resources for every packet.
 
    LTO
@@ -212,15 +265,35 @@ Glossary
 
    Network stack
       A network stack, also known as a protocol stack, is an
-      implemention, usually in software, of a family or
+      implementation, usually in software, of a family or
       :term:`suite<network protocol suite>` of network protocols.
 
    Mythical Man-Month
       In the book titled *The Mythical Man-Month: Essays on Software
       Engineering*, Fredrick Brooks of IBM debunks the myth that a
-      software project can be estimated in man months. In particular,
-      he observes that the communcation overhead grows in non-linear
+      software project can be estimated in man-months. In particular,
+      he observes that the communication overhead grows in non-linear
       fashion as people are added to the project.
+
+   Parallelism
+      The term parallel, as used in this book, is reserved for
+      situations when two or more tasks are literally performed during
+      the same, or at least overlapping, time period. To result of
+      various time sharing schemes (e.g., multitasking or temporal
+      hardware threading), the term :term:`concurrency` is used
+      instead.
+
+      This books mostly concern itself with parallelism on the level
+      of software threads, and their execution on CPU cores. In that
+      case, parallel execution of two threads only occurs they are
+      literally executed on different CPU cores (or :term:`hardware
+      threads <Hardware threading>` on the same core), at the same
+      time.
+
+      A superscalar CPU core is also parallel in the sense that two
+      or more instructions from the same instruction stream may be
+      executed at the same time (e.g., using different core execution
+      units, or at different stages at the CPU pipeline).
 
    Preemption Safety
       A operation is preemption safe in case the preemption of a
@@ -252,7 +325,7 @@ Glossary
 
    RAN
       The Radio Access Network (RAN) is the network that sits between
-      the :term:`UE` and the :term:`CN` in a mobile telecommuncations
+      the :term:`UE` and the :term:`CN` in a mobile telecommunications
       system.
 
    RFS
@@ -265,12 +338,18 @@ Glossary
       into a account, the same function is sometimes called
       Receive Flow Scaling (RFS).
 
-   Slow path
-      The part of a data plane application that process exception traffic.
-
    Sequence counter
       A sequence counter is a low-overhead reader-writer synchronization
       mechanism.
+
+   Slow path
+      The part of a data plane application that process exception traffic.
+
+   SMT
+      Simultaneous multithreading (SMT) is a :term:`hardware
+      threading` technique implemented on the level of the CPU
+      core. An SMT core work on two or more instruction streams in
+      parallel.
 
    SNMP
       The Simple Network Management Protocol is a network management
@@ -289,12 +368,16 @@ Glossary
       command execution. It may also be used as a secure transport
       layer (e.g., for :term:`NETCONF`).
 
+   System call
+     A system call, or syscall for short, is a function call crossing
+     the user-kernel space boundary.
+
    Store
       A store machine instruction takes the contents of a CPU register
       (usually 8-512 bits of data) and writes it into memory.
 
    Syslog
-      Long the de facto standard logging standard on UNIX systems,
+      Long the *de facto* standard logging standard on UNIX systems,
       syslog is now specified (or more accurately, documented) in IEFT
       `RFC 5424 <https://www.rfc-editor.org/rfc/rfc5424.txt>`_.
 
@@ -321,10 +404,10 @@ Glossary
       Vector packet processing is a network stack design pattern,
       where the packets traverse the different layers in network stack
       in batches ("vectors"), rather than as individual packets. The
-      implementation-level layers may coorelate with the layers of the
+      implementation-level layers may correlate with the layers of the
       :term:`network protocol suite` being implemented, but may also
       be more fine-grained (e.g., IP processing may be split into two
-      or three such "sub layers"), or just different altogheter. In a
+      or three such "sub layers"), or just different altogether. In a
       traditional network stack, a packet traverse the whole stack up
       until completion (e.g., the packet is dropped, forwarded, or
       handed off to a local application).
@@ -343,7 +426,13 @@ Glossary
 
       One prominent use of the Vector packet processing pattern is the
       Open Source network router and switch platform with the same
-      name - `Vector Packet Processing <http://fd.io/>`_
+      name - :term:`VPP`.
+
+   VPP
+      `Vector Packet Processing <http://fd.io/>`_ (VPP) is a Open
+      Source data plane platform, with built-in router and switch
+      applications. It optionally uses DPDK for packet I/O, but
+      otherwise does not make use of DPDK as a platform.
 
    Wall-clock Latency
       Wall-clock latency, or wall-time latency, is the latency in
@@ -355,8 +444,8 @@ Glossary
    Work scheduler
       For the purpose of this book, a work scheduler (also known as a
       job scheduler) is a data plane fast path function that assign
-      items of work to the worker lcores. Work scheduling in its
-      simpliest forms can be the use of :term:`RSS` in the NIC. A DPDK
+      items of work to the worker lcores. Work scheduling in one of its
+      most simple forms is the use of :term:`RSS` in the NIC. A DPDK
       Event Device is a form of work scheduler. In a data plane
       application, a job is usually, but not always, processing a
       packet (at a certain stage in the pipeline, or the complete
@@ -366,10 +455,10 @@ Glossary
      The amount of memory actively being used by a program, as opposed
      to memory merely allocated, and then left unused. This book will
      used this term to denote *actively used* to mean memory that is
-     being repeatedly and oftenly used, as opposed to memory that
-     is only rarely used (e.g., during initialization). The reason for
-     this definition is that the primary use for the term is in the
-     context of CPU cache pressure. The total amount of memory ever
-     used by the application is usually less of a concearn, for these
-     types of applications. The working set includes both instructions
-     and data.
+     being repeatedly and frequently accessed, as opposed to memory
+     that is only rarely used (e.g., during initialization). The
+     reason for this definition is that the primary use for the term
+     is in the context of CPU cache pressure. The total amount of
+     memory ever used by the application is usually less of a
+     concern, for these types of applications. The working set
+     includes both instructions and data.

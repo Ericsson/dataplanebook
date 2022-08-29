@@ -1,24 +1,24 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en_US">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Glossary &#8212; Data Plane Software Design 0.0.2 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Antipatterns" href="antipatterns.html" />
+    <link rel="prev" title="Anti Patterns" href="antipatterns.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -28,112 +28,157 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="glossary">
+  <section id="glossary">
 <h1>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h1>
-<dl class="glossary docutils">
-<dt id="term-acl">ACL</dt>
-<dd>An Access Control List (ACL) regulates access to a resource. In
+<dl class="glossary">
+<dt id="term-ACL">ACL<a class="headerlink" href="#term-ACL" title="Permalink to this term">¶</a></dt><dd><p>An Access Control List (ACL) regulates access to a resource. In
 data plane applications, ACLs usually have a match part,
 where the user specifies which packets this rule should apply to,
 and an action part, which specifies what should be done to
-matching packet (e.g., drop or accept).</dd>
-<dt id="term-amdahl-s-law">Amdahl’s law</dt>
-<dd>Amdahl’s law gives the theoretical performance gains
-(in terms of reduced <a class="reference internal" href="#term-processing-latency"><span class="xref std std-term">processing latency</span></a>) when multiple
-processors are used to complete a partly parallel task.</dd>
-<dt id="term-atm">ATM</dt>
-<dd>Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
+matching packet (e.g., drop or accept).</p>
+</dd>
+<dt id="term-Amdahl-s-law">Amdahl’s law<a class="headerlink" href="#term-Amdahl-s-law" title="Permalink to this term">¶</a></dt><dd><p>Amdahl’s law gives the theoretical performance gains
+(in terms of reduced <a class="reference internal" href="#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a>) when multiple
+processors are used to complete a partly parallel task.</p>
+</dd>
+<dt id="term-ATM">ATM<a class="headerlink" href="#term-ATM" title="Permalink to this term">¶</a></dt><dd><p>Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
 telecommunications network, that has largely fallen into disuse.
-As opposed to IP, ATM is connection-oriented on the data link layer.</dd>
-<dt id="term-bgp">BGP</dt>
-<dd>The Border Gateway Protocol (BGP) is a protocol used by Internet
-routers to exchange routing and reachability information.</dd>
-<dt id="term-data-plane-platform">Data plane platform</dt>
-<dd>The part of the data plane applications that provides hardware
-abstractions and the assoicated hardware drivers, and other
+As opposed to IP, ATM is connection-oriented on the data link layer.</p>
+</dd>
+<dt id="term-BGP">BGP<a class="headerlink" href="#term-BGP" title="Permalink to this term">¶</a></dt><dd><p>The Border Gateway Protocol (BGP) is a protocol used by Internet
+routers to exchange routing and reachability information.</p>
+</dd>
+<dt id="term-Data-plane-platform">Data plane platform<a class="headerlink" href="#term-Data-plane-platform" title="Permalink to this term">¶</a></dt><dd><p>The part of the data plane applications that provides hardware
+abstractions and the associated hardware drivers, and other
 operating system-like services like work scheduling, memory
 management, and timers. <a class="reference internal" href="intro.html#dpdk"><span class="std std-ref">Data Plane Development Kit</span></a> is the reference data
-plane platform of this book.</dd>
-<dt id="term-communications-processor">Communications Processor</dt>
-<dd>An older name for a <a class="reference internal" href="#term-dpu"><span class="xref std std-term">DPU</span></a>.</dd>
-<dt id="term-control-plane"><a class="reference internal" href="intro.html#control-plane"><span class="std std-ref">Control plane</span></a></dt>
-<dd>The part of the network that negiotates, computes or otherwise handles
+plane platform of this book.</p>
+</dd>
+<dt id="term-eBPF">eBPF<a class="headerlink" href="#term-eBPF" title="Permalink to this term">¶</a></dt><dd><p>Extended Berkeley Packet Filter (eBPF) is a low-level
+programming language. The original version of BPF was, just as
+the name suggests, used for network packet filtering. The
+current Linux kernel support more eBPF-related uses cases,
+allowing eBPF program to be attached to other events than an
+arriving network packet, such as a system call.</p>
+<p>eBPF has a <a class="reference internal" href="#term-ISA"><span class="xref std std-term">ISA</span></a>-independent byte code format. A developer
+(or a tool) has the option of authoring the eBPF program in this
+byte code format, or a subset of C. In the latter case, the LLVM
+clang compiler (and its eBPF backend) may be used to compile the
+source code into a eBPF byte code.</p>
+<p>The Linux kernel has a virtual machine (including a
+just-in-time compiler) for eBPF byte code.</p>
+<p>DPDK also comes with an eBPF virtual machine, similar to that
+found in the Linux kernel.</p>
+<p>A characterizing property of eBPF programs is that there is always
+an upper bound to their execution time.</p>
+</dd>
+<dt id="term-Communications-Processor">Communications Processor<a class="headerlink" href="#term-Communications-Processor" title="Permalink to this term">¶</a></dt><dd><p>An older name for a <a class="reference internal" href="#term-DPU"><span class="xref std std-term">DPU</span></a>.</p>
+</dd>
+<dt id="term-Control-plane"><a class="reference internal" href="intro.html#control-plane"><span class="std std-ref">Control plane</span></a><a class="headerlink" href="#term-Control-plane" title="Permalink to this term">¶</a></dt><dd><p>The part of the network that negotiates, computes or otherwise handles
 higher-level policies, such as how routing is set up, and makes sure
-they take affect in the Data Plane.</dd>
-<dt id="term-control-thread"><a class="reference internal" href="intro.html#control-threads"><span class="std std-ref">Control thread</span></a></dt>
-<dd>A control thread is a thread running as a part fast path process,
+they take affect in the Data Plane.</p>
+</dd>
+<dt id="term-Control-thread"><a class="reference internal" href="intro.html#control-threads"><span class="std std-ref">Control thread</span></a><a class="headerlink" href="#term-Control-thread" title="Permalink to this term">¶</a></dt><dd><p>A control thread is a thread running as a part fast path process,
 responsible for serving process-external interfaces, translating
 requests into calls into the fast path’s internal APIs. Unlike
 their lcore worker thread counterparts, the control threads usually
-don’t run on dedicated CPU cores.</dd>
-<dt id="term-cn">CN</dt>
-<dd>The Core Network (CN) is the network that sits between the <a class="reference internal" href="#term-ran"><span class="xref std std-term">RAN</span></a>
-and the Internet in a mobile telecommunications system, such as LTE.</dd>
-<dt id="term-data-plane"><a class="reference internal" href="intro.html#data-plane"><span class="std std-ref">Data plane</span></a></dt>
-<dd>The part of the network that handles that actual user data. Also known
-as the User Plane, or the Forwarding Plane.</dd>
-<dt id="term-data-plane-control"><a class="reference internal" href="intro.html#data-plane-control"><span class="std std-ref">Data plane control</span></a></dt>
-<dd>The part of the data plane application that terminates
+don’t run on dedicated CPU cores.</p>
+</dd>
+<dt id="term-Concurrency">Concurrency<a class="headerlink" href="#term-Concurrency" title="Permalink to this term">¶</a></dt><dd><p>Two or more tasks are considered to be execution concurrently if
+their processing seems to occur roughly across the same time
+span, giving the course-grained impression of
+<a class="reference internal" href="#term-Parallelism"><span class="xref std std-term">parallelism</span></a>.</p>
+<p>If the tasks are run by software threads running on a multi-core
+CPU, their execution may indeed be parallel. If more ready-to-run
+threads are available than there are CPU cores available,
+multitasking, with the assistance of the kernel’s process
+scheduler, may be employed to maintain concurrency (without full
+parallelism).</p>
+</dd>
+<dt id="term-CN">CN<a class="headerlink" href="#term-CN" title="Permalink to this term">¶</a></dt><dd><p>The Core Network (CN) is the network that sits between the <a class="reference internal" href="#term-RAN"><span class="xref std std-term">RAN</span></a>
+and the Internet in a mobile telecommunications system, such as LTE.</p>
+</dd>
+<dt id="term-Data-plane"><a class="reference internal" href="intro.html#data-plane"><span class="std std-ref">Data plane</span></a><a class="headerlink" href="#term-Data-plane" title="Permalink to this term">¶</a></dt><dd><p>The part of the network that handles that actual user data. Also known
+as the User Plane, or the Forwarding Plane.</p>
+</dd>
+<dt id="term-Data-plane-control"><a class="reference internal" href="intro.html#data-plane-control"><span class="std std-ref">Data plane control</span></a><a class="headerlink" href="#term-Data-plane-control" title="Permalink to this term">¶</a></dt><dd><p>The part of the data plane application that terminates
 interfaces external to the network function (e.g., for
-configuration or observability).</dd>
-<dt id="term-critical-section">Critical section</dt>
-<dd>Critical section (also known as <em>critical region</em>) is a section
+configuration or observability).</p>
+</dd>
+<dt id="term-Critical-section">Critical section<a class="headerlink" href="#term-Critical-section" title="Permalink to this term">¶</a></dt><dd><p>Critical section (also known as <em>critical region</em>) is a section
 of the program which cannot be executed by more than one thread
-in parallel. This may be achived by means of a lock.</dd>
-<dt id="term-domain-logic">Domain logic</dt>
-<dd>Domain logic, also known as <em>business logic</em>, is the part of
+in parallel. This may be achieved by means of a lock.</p>
+</dd>
+<dt id="term-Domain-logic">Domain logic<a class="headerlink" href="#term-Domain-logic" title="Permalink to this term">¶</a></dt><dd><p>Domain logic, also known as <em>business logic</em>, is the part of
 a program that directly correspond to it’s core function. For
 a network stack, it’s the part the implements the protocol
 processing logic. For example, in an IP stack generating a ICMP
 Time Exceeded when the Time to Live (TTL) has reached 0 is
 domain logic. The part of the stack responsible to retrieve
-the packet via the Ethernet driver is not.</dd>
-<dt id="term-dpu">DPU</dt>
-<dd>A Data Processing Unit (DPU) is processor designed for data
+the packet via the Ethernet driver is not.</p>
+</dd>
+<dt id="term-DPU">DPU<a class="headerlink" href="#term-DPU" title="Permalink to this term">¶</a></dt><dd><p>A Data Processing Unit (DPU) is processor designed for data
 plane applications. A DPU is built around a complex of
 general-purpose CPU cores, augmented by networking-specific
 accelerators and high performance network I/O interfaces.
 Older processor generations with the same basic architecture
-was referred to as communication processors.</dd>
-<dt id="term-exception-traffic">Exception traffic</dt>
-<dd>Exception traffic consists of packets, which during normal
+was referred to as communication processors.</p>
+</dd>
+<dt id="term-Exception-traffic">Exception traffic<a class="headerlink" href="#term-Exception-traffic" title="Permalink to this term">¶</a></dt><dd><p>Exception traffic consists of packets, which during normal
 network conditions are unusual, that for some reason need more
 complex processing. For flow-based forwarding engines, this
 could be the first packet in a previously unseen flow, and as
 such requires checking against security policies and the
 installation of a new entry in the fast path’s forwarding
 database. It may also be an ARP request, or a fragmented IP
-packet, for a limited-feature fast path IP stack.</dd>
-<dt id="term-false-sharing">False sharing</dt>
-<dd>False sharing occurs when multiple CPU cores accesses two or
+packet, for a limited-feature fast path IP stack.</p>
+</dd>
+<dt id="term-False-sharing">False sharing<a class="headerlink" href="#term-False-sharing" title="Permalink to this term">¶</a></dt><dd><p>False sharing occurs when multiple CPU cores accesses two or
 more pieces of logically disjoint data resides on the same CPU
 cache line. For false sharing to have any detrimental effects,
 at least one core need to write to the cache line. The effect is
 a performance degradation, the size of which depends on the
 frequency of access. False sharing does not affect the
-correctness of the program.</dd>
-<dt id="term-fast-path"><a class="reference internal" href="intro.html#fast-path"><span class="std std-ref">Fast path</span></a></dt>
-<dd>The dataplane fast path is part of the data plane application that
-handles the bulk of the packets.</dd>
-<dt id="term-fib">FIB</dt>
-<dd>A Forward Information Base (FIB) holds information on where to
-forward a packet.</dd>
-<dt id="term-flow-cache">Flow cache</dt>
-<dd>A flow cache is a data structure which is logically an overlay
-on top of the complete <a class="reference internal" href="#term-fib"><span class="xref std std-term">FIB</span></a>. Systems that employ a
+correctness of the program.</p>
+</dd>
+<dt id="term-Fast-path"><a class="reference internal" href="intro.html#fast-path"><span class="std std-ref">Fast path</span></a><a class="headerlink" href="#term-Fast-path" title="Permalink to this term">¶</a></dt><dd><p>The data plane fast path is part of the data plane application that
+handles the bulk of the packets.</p>
+</dd>
+<dt id="term-FIB">FIB<a class="headerlink" href="#term-FIB" title="Permalink to this term">¶</a></dt><dd><p>A Forward Information Base (FIB) holds information on where to
+forward a packet.</p>
+</dd>
+<dt id="term-Flow-cache">Flow cache<a class="headerlink" href="#term-Flow-cache" title="Permalink to this term">¶</a></dt><dd><p>A flow cache is a data structure which is logically an overlay
+on top of the complete <a class="reference internal" href="#term-FIB"><span class="xref std std-term">FIB</span></a>. Systems that employ a
 flow cache avoid having to perform a potentially costly FIB lookup
-(among other processing, such as <a class="reference internal" href="#term-acl"><span class="xref std std-term">ACL</span></a> lookups) for every
-packet in a flow.</dd>
-<dt id="term-forwarding-plane">Forwarding plane</dt>
-<dd>A synonym to data plane, often used for in the context of switches
-and IP router implementations.</dd>
-<dt id="term-high-touch-application">High touch application</dt>
-<dd>A data plane fast path application that on average spends relativily
-many CPU clock cycles and other hardware resources for every packet.</dd>
-<dt id="term-huge-pages">Huge Pages</dt>
-<dd>The virtual address space is divided into pages, usually 4 kB
+(among other processing, such as <a class="reference internal" href="#term-ACL"><span class="xref std std-term">ACL</span></a> lookup operations) for
+every packet in a flow.</p>
+</dd>
+<dt id="term-Forwarding-plane">Forwarding plane<a class="headerlink" href="#term-Forwarding-plane" title="Permalink to this term">¶</a></dt><dd><p>A synonym to data plane, often used for in the context of switches
+and IP router implementations.</p>
+</dd>
+<dt id="term-Hardware-threading">Hardware threading<a class="headerlink" href="#term-Hardware-threading" title="Permalink to this term">¶</a></dt><dd><p>In a CPU core employing hardware threading, such as a
+<a class="reference internal" href="#term-SMT"><span class="xref std std-term">SMT</span></a> system, has two or more hardware threads. From a
+software point of view, each such hardware thread looks just
+like a (virtual) CPU core, with its own set of registers, a
+stack, etc. However, on the level of the physical
+implementation, each hardware thread share, to a varying degree,
+underlying CPU core resources (e.g., core-private caches,
+instruction decoders, or arithmetic logic units) with one or
+more hardware threads on the same core. Such co-located threads
+are usually referred to as siblings threads or just siblings.</p>
+<p>The number of hardware threads is fixed, and unlikely their
+software counter parts, hardware threads do not migrate across
+physical CPU cores. Virtual thread would have been a more
+appropriate term for a hardware thread.</p>
+</dd>
+<dt id="term-High-touch-application">High touch application<a class="headerlink" href="#term-High-touch-application" title="Permalink to this term">¶</a></dt><dd><p>A data plane fast path application that on average spends relatively
+many CPU clock cycles and other hardware resources for every packet.</p>
+</dd>
+<dt id="term-Huge-Pages">Huge Pages<a class="headerlink" href="#term-Huge-Pages" title="Permalink to this term">¶</a></dt><dd><p>The virtual address space is divided into pages, usually 4 kB
 in size. The hardware keeps a cache of translation between
 virtual and physical in a Translation Look-aside Buffer (TLB).
 For applications accessing a large amount of memory (i.e., with
@@ -141,162 +186,186 @@ a large working set size), the TLB cache may be missed, causing
 expensive traps to the kernel. Increasing the page size for
 part of the virtual memory is a way to avoid this issue. Such
 pages are often very much large (e.g., 2 MB or 1 GB), and thus
-are often referred to as “huge pages”.</dd>
-<dt id="term-isa">ISA</dt>
-<dd>An Instruction Set Architecture (ISA) specifies the interface
+are often referred to as “huge pages”.</p>
+</dd>
+<dt id="term-ISA">ISA<a class="headerlink" href="#term-ISA" title="Permalink to this term">¶</a></dt><dd><p>An Instruction Set Architecture (ISA) specifies the interface
 between software and the CPU hardware. The ISA defines things like
 the available machine language instructions (and how they
-are encoded), registers, data types and memory models.</dd>
-<dt id="term-layer-2">Layer 2</dt>
-<dd>The data link layer is the second layer in OSI model, and handles
+are encoded), registers, data types and memory models.</p>
+</dd>
+<dt id="term-Layer-2">Layer 2<a class="headerlink" href="#term-Layer-2" title="Permalink to this term">¶</a></dt><dd><p>The data link layer is the second layer in OSI model, and handles
 data transmission between different nodes on the same physical
 network segment. Ethernet is an example of a layer 2 data link
-layer protocol.</dd>
-<dt id="term-lcore">Lcore</dt>
-<dd>Short for logical core. Lcore is a term extensively used in DPDK,
+layer protocol.</p>
+</dd>
+<dt id="term-Lcore">Lcore<a class="headerlink" href="#term-Lcore" title="Permalink to this term">¶</a></dt><dd><p>Short for logical core. Lcore is a term extensively used in DPDK,
 and means something that looks like a CPU core from a software
 point of view, and is allocated to the DPDK application (via a core
 mask). In a bare metal system, a logical core is either a “full”
 physical core (for non-SMT systems) or a hardware thread (for cases
-where hardware threading is employed).</dd>
-<dt id="term-lcore-worker-thread">Lcore worker thread</dt>
-<dd>An operating system software thread responsible for processing packets
+where hardware threading is employed).</p>
+</dd>
+<dt id="term-Lcore-worker-thread">Lcore worker thread<a class="headerlink" href="#term-Lcore-worker-thread" title="Permalink to this term">¶</a></dt><dd><p>An operating system software thread responsible for processing packets
 for the data plane fast path. This thread is pinned to a particular
-by DPDK, and should be the only thread scheduled on that lcore.</dd>
-<dt id="term-load">Load</dt>
-<dd>A load machine instruction reads a chunk of data (usually 8-512
-bits) from memory and puts it into a CPU register.</dd>
-<dt id="term-low-touch-application">Low touch application</dt>
-<dd>A data plane fast path application that on average spends relativily
-few CPU clock cycles and other hardware resources for every packet.</dd>
-<dt id="term-lto">LTO</dt>
-<dd>Link-time Optimization (LTO) is a compiler mode of operation,
+by DPDK, and should be the only thread scheduled on that lcore.</p>
+</dd>
+<dt id="term-Load">Load<a class="headerlink" href="#term-Load" title="Permalink to this term">¶</a></dt><dd><p>A load machine instruction reads a chunk of data (usually 8-512
+bits) from memory and puts it into a CPU register.</p>
+</dd>
+<dt id="term-Low-touch-application">Low touch application<a class="headerlink" href="#term-Low-touch-application" title="Permalink to this term">¶</a></dt><dd><p>A data plane fast path application that on average spends relatively
+few CPU clock cycles and other hardware resources for every packet.</p>
+</dd>
+<dt id="term-LTO">LTO<a class="headerlink" href="#term-LTO" title="Permalink to this term">¶</a></dt><dd><p>Link-time Optimization (LTO) is a compiler mode of operation,
 where optimizations are deferred to the link stage, allowing
 optimization to be done across program’s or shared library’s
 different compilation units. The inlining of a function residing
 in a different .c file than the caller is possible, for
 example. LTO increases build times to such a large degree that
-it is often impractical to use.</dd>
-<dt id="term-mib">MIB</dt>
-<dd>A Management Information Base (MIB) is a <a class="reference internal" href="#term-snmp"><span class="xref std std-term">SNMP</span></a> data model.
+it is often impractical to use.</p>
+</dd>
+<dt id="term-MIB">MIB<a class="headerlink" href="#term-MIB" title="Permalink to this term">¶</a></dt><dd><p>A Management Information Base (MIB) is a <a class="reference internal" href="#term-SNMP"><span class="xref std std-term">SNMP</span></a> data model.
 The term is sometimes also used to refer to an instance of a
 particular model. IEFT has defined a number of MIBs (e.g., for
-TCP and IP).</dd>
-<dt id="term-management-plane"><a class="reference internal" href="intro.html#management-plane"><span class="std std-ref">Management plane</span></a></dt>
-<dd>The part of the network that handles configuration and
-monitoring.</dd>
-<dt id="term-nat">NAT</dt>
-<dd>Network Address Translation (NAT) is a method of rewriting the
+TCP and IP).</p>
+</dd>
+<dt id="term-Management-plane"><a class="reference internal" href="intro.html#management-plane"><span class="std std-ref">Management plane</span></a><a class="headerlink" href="#term-Management-plane" title="Permalink to this term">¶</a></dt><dd><p>The part of the network that handles configuration and
+monitoring.</p>
+</dd>
+<dt id="term-NAT">NAT<a class="headerlink" href="#term-NAT" title="Permalink to this term">¶</a></dt><dd><p>Network Address Translation (NAT) is a method of rewriting the
 IP packet header to translate to change the source and/or
 destination host and/or port, often for the purpose of having
-multiple IP hosts to between host’s and its single IP address.</dd>
-<dt id="term-netconf">NETCONF</dt>
-<dd>The Network Configuration Protocol (NETCONF) is an XML-based
-network configuration management protocol developed by the IEFT.</dd>
-<dt id="term-network-function">Network function</dt>
-<dd>For the purpose of this book, the immediate surroundings to the
+multiple IP hosts to between host’s and its single IP address.</p>
+</dd>
+<dt id="term-NETCONF">NETCONF<a class="headerlink" href="#term-NETCONF" title="Permalink to this term">¶</a></dt><dd><p>The Network Configuration Protocol (NETCONF) is an XML-based
+network configuration management protocol developed by the IEFT.</p>
+</dd>
+<dt id="term-Network-function">Network function<a class="headerlink" href="#term-Network-function" title="Permalink to this term">¶</a></dt><dd><p>For the purpose of this book, the immediate surroundings to the
 data plane application, which work in concert to provide a data
 plane function to interface with the control plane and other
-instances of data plane functions.</dd>
-<dt id="term-network-protocol-suite">Network protocol suite</dt>
-<dd>A set of related communication protocols, usually arranged in
-layered architecture, used in a computer network.</dd>
-<dt id="term-network-stack">Network stack</dt>
-<dd>A network stack, also known as a protocol stack, is an
-implemention, usually in software, of a family or
-<a class="reference internal" href="#term-network-protocol-suite"><span class="xref std std-term">suite</span></a> of network protocols.</dd>
-<dt id="term-mythical-man-month">Mythical Man-Month</dt>
-<dd>In the book titled <em>The Mythical Man-Month: Essays on Software
+instances of data plane functions.</p>
+</dd>
+<dt id="term-Network-protocol-suite">Network protocol suite<a class="headerlink" href="#term-Network-protocol-suite" title="Permalink to this term">¶</a></dt><dd><p>A set of related communication protocols, usually arranged in
+layered architecture, used in a computer network.</p>
+</dd>
+<dt id="term-Network-stack">Network stack<a class="headerlink" href="#term-Network-stack" title="Permalink to this term">¶</a></dt><dd><p>A network stack, also known as a protocol stack, is an
+implementation, usually in software, of a family or
+<a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">suite</span></a> of network protocols.</p>
+</dd>
+<dt id="term-Mythical-Man-Month">Mythical Man-Month<a class="headerlink" href="#term-Mythical-Man-Month" title="Permalink to this term">¶</a></dt><dd><p>In the book titled <em>The Mythical Man-Month: Essays on Software
 Engineering</em>, Fredrick Brooks of IBM debunks the myth that a
-software project can be estimated in man months. In particular,
-he observes that the communcation overhead grows in non-linear
-fashion as people are added to the project.</dd>
-<dt id="term-preemption-safety">Preemption Safety</dt>
-<dd>A operation is preemption safe in case the preemption of a
+software project can be estimated in man-months. In particular,
+he observes that the communication overhead grows in non-linear
+fashion as people are added to the project.</p>
+</dd>
+<dt id="term-Parallelism">Parallelism<a class="headerlink" href="#term-Parallelism" title="Permalink to this term">¶</a></dt><dd><p>The term parallel, as used in this book, is reserved for
+situations when two or more tasks are literally performed during
+the same, or at least overlapping, time period. To result of
+various time sharing schemes (e.g., multitasking or temporal
+hardware threading), the term <a class="reference internal" href="#term-Concurrency"><span class="xref std std-term">concurrency</span></a> is used
+instead.</p>
+<p>This books mostly concern itself with parallelism on the level
+of software threads, and their execution on CPU cores. In that
+case, parallel execution of two threads only occurs they are
+literally executed on different CPU cores (or <a class="reference internal" href="#term-Hardware-threading"><span class="xref std std-term">hardware
+threads</span></a> on the same core), at the same
+time.</p>
+<p>A superscalar CPU core is also parallel in the sense that two
+or more instructions from the same instruction stream may be
+executed at the same time (e.g., using different core execution
+units, or at different stages at the CPU pipeline).</p>
+</dd>
+<dt id="term-Preemption-Safety">Preemption Safety<a class="headerlink" href="#term-Preemption-Safety" title="Permalink to this term">¶</a></dt><dd><p>A operation is preemption safe in case the preemption of a
 thread’s execution (e.g., a kernel-induced process context
 switch occurs) does not threaten the correctness of the program,
 or have very detrimental effects performance. In this book, the
 preemption unsafe constructs covered only cause performance
-degradation, although at time very serious such.</dd>
-<dt id="term-processing-latency">Processing Latency</dt>
-<dd><p class="first">For the purpose of this book, processing latency is the CPU time
+degradation, although at time very serious such.</p>
+</dd>
+<dt id="term-Processing-Latency">Processing Latency<a class="headerlink" href="#term-Processing-Latency" title="Permalink to this term">¶</a></dt><dd><p>For the purpose of this book, processing latency is the CPU time
 spent on a particular task (i.e., the number of CPU core
 cycles).  In case the processing is performed on multiple cores
 in parallel, the processing latency may be greater than the
-<a class="reference internal" href="#term-wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>. In case a packet is buffered (e.g.,
+<a class="reference internal" href="#term-Wall-clock-Latency"><span class="xref std std-term">wall-clock latency</span></a>. In case a packet is buffered (e.g.,
 on the NIC), and the data plane CPU cores are very busy, the
 processing latency may be only a small fraction of the total
 port-to-port wall-clock latency experience by that packet.</p>
-<p class="last">In the context of IP routers, the term is used to denote all
+<p>In the context of IP routers, the term is used to denote all
 latency that occurs within the router (i.e., both CPU related
 latency and internal queuing latency). This is not how the term
 is used in this book.</p>
 </dd>
-<dt id="term-program-order">Program order</dt>
-<dd>Operations are said to be done in program order if their results
+<dt id="term-Program-order">Program order<a class="headerlink" href="#term-Program-order" title="Permalink to this term">¶</a></dt><dd><p>Operations are said to be done in program order if their results
 are globally visible in the same order as the operations were
-specified in the program’s source code.</dd>
-<dt id="term-ran">RAN</dt>
-<dd>The Radio Access Network (RAN) is the network that sits between
-the <a class="reference internal" href="#term-ue"><span class="xref std std-term">UE</span></a> and the <a class="reference internal" href="#term-cn"><span class="xref std std-term">CN</span></a> in a mobile telecommuncations
-system.</dd>
-<dt id="term-rfs">RFS</dt>
-<dd>See <a class="reference internal" href="#term-rss"><span class="xref std std-term">RSS</span></a>.</dd>
-<dt id="term-rss">RSS</dt>
-<dd>Receive Side Scaling. A NIC function which distributes packets
+specified in the program’s source code.</p>
+</dd>
+<dt id="term-RAN">RAN<a class="headerlink" href="#term-RAN" title="Permalink to this term">¶</a></dt><dd><p>The Radio Access Network (RAN) is the network that sits between
+the <a class="reference internal" href="#term-UE"><span class="xref std std-term">UE</span></a> and the <a class="reference internal" href="#term-CN"><span class="xref std std-term">CN</span></a> in a mobile telecommunications
+system.</p>
+</dd>
+<dt id="term-RFS">RFS<a class="headerlink" href="#term-RFS" title="Permalink to this term">¶</a></dt><dd><p>See <a class="reference internal" href="#term-RSS"><span class="xref std std-term">RSS</span></a>.</p>
+</dd>
+<dt id="term-RSS">RSS<a class="headerlink" href="#term-RSS" title="Permalink to this term">¶</a></dt><dd><p>Receive Side Scaling. A NIC function which distributes packets
 to different NIC RX descriptor queues, usually based on the
 source and destination IP. If transport layer fields are taken
 into a account, the same function is sometimes called
-Receive Flow Scaling (RFS).</dd>
-<dt id="term-slow-path">Slow path</dt>
-<dd>The part of a data plane application that process exception traffic.</dd>
-<dt id="term-sequence-counter">Sequence counter</dt>
-<dd>A sequence counter is a low-overhead reader-writer synchronization
-mechanism.</dd>
-<dt id="term-snmp">SNMP</dt>
-<dd>The Simple Network Management Protocol is a network management
+Receive Flow Scaling (RFS).</p>
+</dd>
+<dt id="term-Sequence-counter">Sequence counter<a class="headerlink" href="#term-Sequence-counter" title="Permalink to this term">¶</a></dt><dd><p>A sequence counter is a low-overhead reader-writer synchronization
+mechanism.</p>
+</dd>
+<dt id="term-Slow-path">Slow path<a class="headerlink" href="#term-Slow-path" title="Permalink to this term">¶</a></dt><dd><p>The part of a data plane application that process exception traffic.</p>
+</dd>
+<dt id="term-SMT">SMT<a class="headerlink" href="#term-SMT" title="Permalink to this term">¶</a></dt><dd><p>Simultaneous multithreading (SMT) is a <a class="reference internal" href="#term-Hardware-threading"><span class="xref std std-term">hardware
+threading</span></a> technique implemented on the level of the CPU
+core. An SMT core work on two or more instruction streams in
+parallel.</p>
+</dd>
+<dt id="term-SNMP">SNMP<a class="headerlink" href="#term-SNMP" title="Permalink to this term">¶</a></dt><dd><p>The Simple Network Management Protocol is a network management
 protocol for IP networks. Originally intended for configuration
-management, current-day use is primarily for network monitoring.</dd>
-<dt id="term-spinlock">Spinlock</dt>
-<dd>A type of lock where a thread failing to acquire a lock
+management, current-day use is primarily for network monitoring.</p>
+</dd>
+<dt id="term-Spinlock">Spinlock<a class="headerlink" href="#term-Spinlock" title="Permalink to this term">¶</a></dt><dd><p>A type of lock where a thread failing to acquire a lock
 immediately retries, and keeps doing so (“spins”), until the
 lock operation is successful. Spinlocks are common in operating
 systems kernels, but unusual in user space applications, since
-they are not <a class="reference internal" href="#term-preemption-safety"><span class="xref std std-term">preemption safe</span></a>.</dd>
-<dt id="term-ssh">SSH</dt>
-<dd>Secure Shell (SSH) is a protocol for remote shell access and
+they are not <a class="reference internal" href="#term-Preemption-Safety"><span class="xref std std-term">preemption safe</span></a>.</p>
+</dd>
+<dt id="term-SSH">SSH<a class="headerlink" href="#term-SSH" title="Permalink to this term">¶</a></dt><dd><p>Secure Shell (SSH) is a protocol for remote shell access and
 command execution. It may also be used as a secure transport
-layer (e.g., for <a class="reference internal" href="#term-netconf"><span class="xref std std-term">NETCONF</span></a>).</dd>
-<dt id="term-store">Store</dt>
-<dd>A store machine instruction takes the contents of a CPU register
-(usually 8-512 bits of data) and writes it into memory.</dd>
-<dt id="term-syslog">Syslog</dt>
-<dd>Long the de facto standard logging standard on UNIX systems,
+layer (e.g., for <a class="reference internal" href="#term-NETCONF"><span class="xref std std-term">NETCONF</span></a>).</p>
+</dd>
+<dt id="term-System-call">System call<a class="headerlink" href="#term-System-call" title="Permalink to this term">¶</a></dt><dd><p>A system call, or syscall for short, is a function call crossing
+the user-kernel space boundary.</p>
+</dd>
+<dt id="term-Store">Store<a class="headerlink" href="#term-Store" title="Permalink to this term">¶</a></dt><dd><p>A store machine instruction takes the contents of a CPU register
+(usually 8-512 bits of data) and writes it into memory.</p>
+</dd>
+<dt id="term-Syslog">Syslog<a class="headerlink" href="#term-Syslog" title="Permalink to this term">¶</a></dt><dd><p>Long the <em>de facto</em> standard logging standard on UNIX systems,
 syslog is now specified (or more accurately, documented) in IEFT
-<a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5424.txt">RFC 5424</a>.</dd>
-<dt id="term-tls">TLS</dt>
-<dd>In C11, and long before in GNU C, a static or extern storage
+<a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5424.txt">RFC 5424</a>.</p>
+</dd>
+<dt id="term-TLS">TLS<a class="headerlink" href="#term-TLS" title="Permalink to this term">¶</a></dt><dd><p>In C11, and long before in GNU C, a static or extern storage
 class variable may be declared as being kept in Thread Local
 Storage (TLS). Such variables exists in one copy per thread in
 the process. C11 uses <code class="docutils literal notranslate"><span class="pre">thread_local</span></code> to mark a variable thread
 local, but in DPDK the practice is to instead use the GCC
-extensions <code class="docutils literal notranslate"><span class="pre">__thread</span></code>.</dd>
-<dt id="term-ue">UE</dt>
-<dd>User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
+extensions <code class="docutils literal notranslate"><span class="pre">__thread</span></code>.</p>
+</dd>
+<dt id="term-UE">UE<a class="headerlink" href="#term-UE" title="Permalink to this term">¶</a></dt><dd><p>User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
 roughly equivalent of a <em>host</em> in a TCP/IP network. To complicate
 things, a UE is also almost always a <em>host</em> as well, since the
-mobile network is used as a data link layer for IP.</dd>
-<dt id="term-user-plane">User plane</dt>
-<dd>A synonym to <a class="reference internal" href="#term-data-plane"><span class="xref std std-term">data plane</span></a>, commonly used in the context of
-telecommunications networks.</dd>
-<dt id="term-vector-packet-processing">Vector packet processing</dt>
-<dd><p class="first">Vector packet processing is a network stack design pattern,
+mobile network is used as a data link layer for IP.</p>
+</dd>
+<dt id="term-User-plane">User plane<a class="headerlink" href="#term-User-plane" title="Permalink to this term">¶</a></dt><dd><p>A synonym to <a class="reference internal" href="#term-Data-plane"><span class="xref std std-term">data plane</span></a>, commonly used in the context of
+telecommunications networks.</p>
+</dd>
+<dt id="term-Vector-packet-processing">Vector packet processing<a class="headerlink" href="#term-Vector-packet-processing" title="Permalink to this term">¶</a></dt><dd><p>Vector packet processing is a network stack design pattern,
 where the packets traverse the different layers in network stack
 in batches (“vectors”), rather than as individual packets. The
-implementation-level layers may coorelate with the layers of the
-<a class="reference internal" href="#term-network-protocol-suite"><span class="xref std std-term">network protocol suite</span></a> being implemented, but may also
+implementation-level layers may correlate with the layers of the
+<a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">network protocol suite</span></a> being implemented, but may also
 be more fine-grained (e.g., IP processing may be split into two
-or three such “sub layers”), or just different altogheter. In a
+or three such “sub layers”), or just different altogether. In a
 traditional network stack, a packet traverse the whole stack up
 until completion (e.g., the packet is dropped, forwarded, or
 handed off to a local application).</p>
@@ -310,41 +379,47 @@ unrolling is used.</p>
 between layers, the sub layer processing code allows the
 compiler to use SIMD instructions to a much higher degree that
 would be possible in a single-packet-per-layer design.</p>
-<p class="last">One prominent use of the Vector packet processing pattern is the
+<p>One prominent use of the Vector packet processing pattern is the
 Open Source network router and switch platform with the same
-name - <a class="reference external" href="http://fd.io/">Vector Packet Processing</a></p>
+name - <a class="reference internal" href="#term-VPP"><span class="xref std std-term">VPP</span></a>.</p>
 </dd>
-<dt id="term-wall-clock-latency">Wall-clock Latency</dt>
-<dd>Wall-clock latency, or wall-time latency, is the latency in
+<dt id="term-VPP">VPP<a class="headerlink" href="#term-VPP" title="Permalink to this term">¶</a></dt><dd><p><a class="reference external" href="http://fd.io/">Vector Packet Processing</a> (VPP) is a Open
+Source data plane platform, with built-in router and switch
+applications. It optionally uses DPDK for packet I/O, but
+otherwise does not make use of DPDK as a platform.</p>
+</dd>
+<dt id="term-Wall-clock-Latency">Wall-clock Latency<a class="headerlink" href="#term-Wall-clock-Latency" title="Permalink to this term">¶</a></dt><dd><p>Wall-clock latency, or wall-time latency, is the latency in
 terms of the passage of physical time (i.e., what a wall clock
 measures). A commonly used synonym (e.g., in the context of
 manufacturing) is <em>lead time</em>. The wall-clock latency may be
-longer or shorter than the <a class="reference internal" href="#term-processing-latency"><span class="xref std std-term">processing latency</span></a>.</dd>
-<dt id="term-work-scheduler">Work scheduler</dt>
-<dd>For the purpose of this book, a work scheduler (also known as a
+longer or shorter than the <a class="reference internal" href="#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a>.</p>
+</dd>
+<dt id="term-Work-scheduler">Work scheduler<a class="headerlink" href="#term-Work-scheduler" title="Permalink to this term">¶</a></dt><dd><p>For the purpose of this book, a work scheduler (also known as a
 job scheduler) is a data plane fast path function that assign
-items of work to the worker lcores. Work scheduling in its
-simpliest forms can be the use of <a class="reference internal" href="#term-rss"><span class="xref std std-term">RSS</span></a> in the NIC. A DPDK
+items of work to the worker lcores. Work scheduling in one of its
+most simple forms is the use of <a class="reference internal" href="#term-RSS"><span class="xref std std-term">RSS</span></a> in the NIC. A DPDK
 Event Device is a form of work scheduler. In a data plane
 application, a job is usually, but not always, processing a
 packet (at a certain stage in the pipeline, or the complete
-processing, for run-to-completion designs).</dd>
-<dt id="term-working-set-size">Working set size</dt>
-<dd>The amount of memory actively being used by a program, as opposed
+processing, for run-to-completion designs).</p>
+</dd>
+<dt id="term-Working-set-size">Working set size<a class="headerlink" href="#term-Working-set-size" title="Permalink to this term">¶</a></dt><dd><p>The amount of memory actively being used by a program, as opposed
 to memory merely allocated, and then left unused. This book will
 used this term to denote <em>actively used</em> to mean memory that is
-being repeatedly and oftenly used, as opposed to memory that
-is only rarely used (e.g., during initialization). The reason for
-this definition is that the primary use for the term is in the
-context of CPU cache pressure. The total amount of memory ever
-used by the application is usually less of a concearn, for these
-types of applications. The working set includes both instructions
-and data.</dd>
+being repeatedly and frequently accessed, as opposed to memory
+that is only rarely used (e.g., during initialization). The
+reason for this definition is that the primary use for the term
+is in the context of CPU cache pressure. The total amount of
+memory ever used by the application is usually less of a
+concern, for these types of applications. The working set
+includes both instructions and data.</p>
+</dd>
 </dl>
-</div>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -359,7 +434,7 @@ and data.</dd>
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
@@ -378,7 +453,7 @@ and data.</dd>
 <li class="toctree-l1"><a class="reference internal" href="modularization.html">Modularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a></li>
-<li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Antipatterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Anti Patterns</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Glossary</a></li>
 </ul>
 
@@ -386,22 +461,28 @@ and data.</dd>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="antipatterns.html" title="previous chapter">Antipatterns</a></li>
+      <li>Previous: <a href="antipatterns.html" title="previous chapter">Anti Patterns</a></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -410,8 +491,8 @@ and data.</dd>
       &copy;2022, Ericsson AB.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/glossary.rst.txt"

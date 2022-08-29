@@ -36,8 +36,8 @@ Critical Section Length and Impact
 C11 Atomics
 ===========
 
-Seqlocks
-========
+Sequence Locks
+==============
 
 Spinlocks and Ticketlocks
 =========================

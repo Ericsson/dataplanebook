@@ -9,7 +9,7 @@ Introduction
 
 .. sectionauthor:: Mattias Rönnblom <mattias.ronnblom@ericsson.com>
 
-This text is an attempt at a guide to the structure and implemention
+This text is an attempt at a guide to the structure and implementation
 of data plane applications. The focus lies on the part of the software
 which handles the bulk of the packets, often with a very tight latency
 budget. This book is about life in the fast path.
@@ -65,7 +65,7 @@ primarily handles control plane type tasks, and the Distributed Unit
 
 In an IP network router, the separation into planes may exist only
 internally (or indeed, not at all). The protocols and means of
-communication between the different planes are properitary [#RFC5810]_
+communication between the different planes are proprietary [#RFC5810]_
 .
 
 A pragmatic rule of a thumb for what type of processing goes into
@@ -110,7 +110,7 @@ builds a network topology and configure the :term:`forwarding
 information base<FIB>` (FIB) in the router's data plane accordingly.
 
 In a 3GPP :term:`RAN`, the control plane handles issues related to
-mobility and bearer manangement for :term:`UEs<UE>`, among other things.
+mobility and bearer management for :term:`UEs<UE>`, among other things.
 
 An :term:`ATM` network's control plane manages the establishment and
 release of virtual circuits (VCs).
@@ -204,7 +204,7 @@ techniques of the data plane.
 Indeed, an application that receives stimuli at high rate over a
 network (or some other I/O device), quickly and reliably performs some
 kind of low latency processing and finally provides a response of some
-sort, may qualifiy as a data plane application, although in the
+sort, may qualify as a data plane application, although in the
 literal sense it is not.
 
 Low Capacity Data Plane
@@ -232,7 +232,7 @@ Open Source software platform for data plane applications. DPDK serves
 in the role of the :term:`data plane platform` for the applications of
 this book.
 
-The initial DPDK design was done by the Intel engineer Venky
+The initial DPDK design was the work of Intel engineer Venky
 Venkatesan.
 
 DPDK comes in the form of a set of link libraries, accessed through C
@@ -273,14 +273,19 @@ Early on, DPDK only targeted commercial off the shelf (COTS) desktops
 and servers, but has since worked itself into the world of
 special-purpose networking ASICs. In such :term:`DPUs <DPU>`, the
 traditional `network processing unit <NPU>` (NPU) have been replaced
-with a general-purpose multi-core CPU complex, augemented with various
+with a general-purpose multi-core CPU complex, augmented with various
 networking-specific accelerators and the occasional CPU instruction
 set architecture (ISA) extension.
+
+.. _ODP:
+
+Open Data Plane
+^^^^^^^^^^^^^^^
 
 DPDK has largely dislodged the `Open Data Plane
 <https://opendataplane.org/>`_ (ODP). ODP is a project with a similar
 goal, but grew inside the non-x86 and :term:`data processing
-unit<DPU>` (DPU) eco system. Part of the rationale for ODP was that
+unit<DPU>` (DPU) ecosystem. Part of the rationale for ODP was that
 DPDK lacked in support for various accelerators found in such
 processors, but DPDK has since gradually caught up with ODP.
 
@@ -307,7 +312,7 @@ essentially do everything in the fast path application.
 The fast path sits on top of a :term:`data plane platform`. This book
 assumes the division of concern between the platform and the
 application to be that of `DPDK`_, as opposed to a more opinionated
-platform like `Vector Packet Processing <http://fd.io/>`_ (VPP).
+platform like :term:`VPP`.
 
 .. _Slow Path:
 
@@ -334,7 +339,7 @@ network stack, or threads within the same process as the fast path.
 In case the slow path is hosted in a separate process, this process
 typically does not directly use DPDK.
 
-Packets that traverse the slow path, as the name suggets, will
+Packets that traverse the slow path, as the name suggests, will
 experience greater :term:`wall-clock latency`. The source of this
 latency is both that more CPU cycles are spent processing the packet,
 and operating system scheduling latency (since the slow path threads
@@ -372,7 +377,7 @@ the control plane.
 
 Data plane control may be implemented as a module within the fast path
 process. In case the data plane control interface implementation is
-complex, it may warrant a sepa
+complex, hosting it in a separate process might be a better option.
 
 Complex data plane control interfaces may warrant having the data
 plane control function implemented as a separate process. Such a split
@@ -388,9 +393,9 @@ using :ref:`control threads <Control Threads>`.
 
 In some applications it may be feasible to run data plane control
 processing on the :term:`lcore` worker threads. A shared memory
-interface, making inter-process communcation relativiely inexpensive,
-to the outside world may facilite such a design. Care must be taken to
-avoid excessive :term:`processing latency` for data plane control
+interface, making inter-process communication relatively inexpensive,
+to the outside world may facilitate such a design. Care must be taken
+to avoid excessive :term:`processing latency` for data plane control
 requests.
 
 In some context, the term slow path is used for a software component
@@ -416,7 +421,7 @@ thread won't be handling packets queued up for processing.
 
 In case the interface to the data plane application is some sort of
 file descriptor (e.g., referencing a socket) the system calls alone
-may introduce a noticable jitter. Add to this the actual request
+may introduce a noticeable jitter. Add to this the actual request
 processing latency, which may introduce delays in the millisecond
 class or more.
 
@@ -547,8 +552,8 @@ where the prevailing terminology is that a logical node is made up of
 multiple network functions.
 
 The network function may carry its own operating system kernel, to be
-deployed in a Virtual Machine (VM), in which it's said to be a
-Virtulized Network Function (VNF).
+deployed in a Virtual Machine (VM), in which case it's referred to as a
+Virtualized Network Function (VNF).
 
 In case the data plane application and the supporting components are
 deployed in a container, the package will contain only the user space
@@ -562,7 +567,7 @@ A third deployment alternative is as a Physical Network Function
 hardware.
 
 A carefully crafted data plane application, in combination with
-carefully selected applicance hardware, may faciliate application
+carefully selected appliance hardware, may facilitate application
 portability across all above-mentioned deployments.
 
 Hardware Platforms
@@ -578,7 +583,7 @@ operating system.
 The processors are symmetric multi-processors (SMPs).
 
 The processor can be general-purpose server processor, or something
-esentially functionally equivalent, but hosted inside a specialized
+essentially functionally equivalent, but hosted inside a specialized
 networking system-on-a-chip (SoC).
 
 DPDK support the most relevant ARM instruction set architectures
@@ -616,7 +621,7 @@ system kernels, it didn't get a proper memory model until in ISO/IEC
 9899:2011 (C11).
 
 Data plane programming is also hard because of the immense complexity
-of modern CPUs. Their behaviour very difficult indeed to understand,
+of modern CPUs. Their behavior very difficult indeed to understand,
 or to predict, both in performance and functional correctness (e.g.,
 memory models).
 
@@ -631,7 +636,7 @@ reasons for the developer to understand and occasionally even write
 assembly code.
 
 Understanding the C11 memory model and lock-less programming, which is
-often useful or even essential, is also notiously difficult. Bugs in
+often useful or even essential, is also notoriously difficult. Bugs in
 such code is very difficult to test for.
 
 Staffing Data Plane Projects
