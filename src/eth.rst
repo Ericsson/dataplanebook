@@ -14,7 +14,7 @@ Receive and Transmit Queues
 Hardware NIC Drivers
 ====================
 
-Virtio Net
+VirtIO Net
 ==========
 
 Memif

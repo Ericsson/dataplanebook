@@ -8,7 +8,7 @@ Modularization
 Module and Interfaces
 =====================
 
-Implementating run time polymorphism.
+Implementing runtime polymorphism.
 
 A module of data plane application will more resemble that of a module
 inside an monolithic kernel design such as Linux, rather than an

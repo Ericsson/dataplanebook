@@ -2,8 +2,8 @@
     Copyright(c) 2022 Ericsson AB
     Author: Mattias Rönnblom <mattias.ronnblom@ericsson.com>
 
-Antipatterns
-============
+Anti Patterns
+=============
 
 * ``inline`` is a magical "go faster" keyword that should be applied to all
   functions
@@ -12,4 +12,4 @@ Antipatterns
 * volatile is actually useful
 * Open-coding spinlocks
 * TSO means sequential consistency means I don't have to worry
-* Too-much-in-a-hurry for modularization
+* Too much in a hurry for modularization
