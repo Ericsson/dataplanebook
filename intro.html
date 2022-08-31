@@ -277,9 +277,9 @@ exception packets consists of the first packet encountered in a
 particular flow. For other data plane applications it may be certain
 flows, rather than certain packets within a flow, that are considered
 exception traffic. It may also be certain types of unusual packets,
-which processing is delegated to the slow path. In an IP context, such
-packets may be those requiring reassembly or that include IP options,
-or certain ICMP packets.</p>
+which processing is delegated to the slow path. In an IP context, ICMP
+and <span class="xref std std-term">ARP</span>/<span class="xref std std-term">ND</span> packets might be handed off to the slow
+path.</p>
 <p>The slow path can also be used to terminate complex protocols, such as
 TCP (e.g., carrying <a class="reference internal" href="glossary.html#term-Management-plane"><span class="xref std std-term">management plane</span></a> or <a class="reference internal" href="glossary.html#term-Control-plane"><span class="xref std std-term">control plane</span></a>
 protocol traffic).</p>
