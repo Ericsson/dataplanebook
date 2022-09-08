@@ -74,7 +74,7 @@ Use Cases
 Data plane statistics can be used for a number of different purposes,
 including:
 
-* Trouble shooting and debugging
+* Troubleshooting and debugging
 * Node and network level performance monitoring and profiling
 * Security (e.g., detecting intrusion attempts)
 * In-direct functional uses (e.g., billing)
@@ -85,12 +85,15 @@ purpose for the network as a whole. The counters may for example be
 used for billing, or as input for automated or manual network
 optimization.
 
-A statistics-related term is network *telemetry*. Telemetry means
-network nodes provides statistics to a central location, usually using
-a push model. This information may then in turn be used to address one
-or more of the above-mentioned use cases. The data plane statistics
-implementation need not and should not know if its statistics is being
-used for telemetry.
+Telemetry
+---------
+
+Data plane statistics can be used as basis for network *telemetry*.
+Telemetry means network nodes provides statistics to a central
+location, usually using a push model. This information may then in
+turn be used to address one or more of the above-mentioned use
+cases. The data plane statistics implementation need not and should
+not know if its statistics is being used for telemetry.
 
 Requirements
 ============
@@ -128,8 +131,8 @@ of this, it makes sense to allocate a chunk of the fast path cycle
 budget to spend on solving the statistics problem. On the other hand,
 the fewer cycles spent on any per-packet task the better. The primary
 business value of the data plane comes from the core data plane
-function, and only small minority of the CPU cycles should be spent on
-statistics - an auxiliary function.
+function, and only a small minority of the CPU cycles should be spent
+on statistics - an auxiliary function.
 
 The number of counters updated per packet will range from somewhere
 around a handful for low latency, low touch applications, up into the
@@ -140,16 +143,17 @@ applications spend roughly the same amount of :term:`domain logic` CPU
 cycles for every counter they need to update. The more elaborate
 logic, the more cycles are spent, and the more there is a need to
 account for what is going on, in order to, for example, profile or
-debug the application, or the network. [#cyclesvslogic]_
+debug the application, or the network. [#cyclesvslogic]_ Thus
+a high touch application tend to update more counters per packet
+than does its low touch cousin.
 
 The next assumption is that no more than 5% of the total per-packet
 CPU cycle budget should be spent on statistics, and that roughly one
 counter update per 300 CPU cycles worth of domain logic
 :term:`processing latency` is expected.
 
-In the unlikely case all of these assumption hold true, the
-:term:`processing latency` budget for a counter update is 15 core
-clock cycles.
+In case these assumptions hold true, the :term:`processing latency`
+budget for a counter update is 15 core clock cycles.
 
 Uncertainties aside, this approximation give you an order-of-magnitude
 level indication of the performance requirements, and underscores the
@@ -211,15 +215,15 @@ size` for the application as a whole.
 Counters should not be evicted from the last level cache, with
 often-used counters held in the L1 or L2 caches.
 
-The other issue is just allocating enough DRAM to the statistics data
-structures. Depending on how the counters are organized in memory,
-only a very small fraction of the memory allocated may actually be
-used.
+An issue strictly tied to space efficiency is the amount of DRAM
+required to hold the statistics data structures. Depending on how the
+counters are organized in memory, only a very small fraction of the
+memory allocated may actually be used.
 
-Another consideration is if memory consumption are required to
-correlate with the number of active flows, or if it is acceptable to
-statically preallocated statistics memory for the maximum number of
-flows supported.
+A related question is if memory consumption are required to correlate
+with the number of active flows, or if it is acceptable to statically
+preallocated statistics memory for the maximum number of flows
+supported.
 
 Prototyping may be required to determined how the counter
 :term:`working set size` affects performance, both of the statistics
@@ -251,13 +255,14 @@ Flow affinity reduces statistics processing overhead regardless of
 implementation, but applications with shared per-flow counters gain
 the most.
 
-Flow affinity make it likely statistics related data is in a CPU cache
-near the core. If, on the other hand, there is no affinity, the cache
-lines holding the statistics data may well be located in a different
-core's private cache (having just been written to), resulting in a
-very expensive cache miss when being accessed. Other flow-related data
-follow the same pattern, resulting in affinity generally having a
-significant positive effect on overall fast path performance.
+Flow affinity makes it likely statistics related data is in a CPU
+cache near the core. If, on the other hand, there is no affinity, the
+cache lines holding the statistics data may well be located in a
+different core's private cache (having just been written to),
+resulting in a very expensive cache miss when being accessed. Other
+flow-related data follow the same pattern, resulting in affinity
+generally having a significant positive effect on overall fast path
+performance.
 
 Parallel Flow Processing
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -330,8 +335,8 @@ plane proper. See :ref:`Shared Counters with Per Core Buffering` for
 more on this.
 
 The statistics can either be organized in a global statistics database
-for the whole fast path, or a per-module or per-layer breakdown with
-several different memory areas being used.
+for the whole fast path, or broken down per module, or per layer
+basis, resulting in many different memory blocks being used.
 
 In case of the global statistics struct type, care must be taken not
 to needlessly couple different protocol modules via the statistics
@@ -384,8 +389,8 @@ configuration) for systems with high max cardinality, and large
 variations in the number of actual objects instantiated, is to use
 dynamic allocation, but use fixed-offset accesses to the fields within
 those dynamically-allocated chunks of memory. For example, the list of
-session could be a pointer to a dynamically allocated array, instead
-of a fixed, compile-time-sized, array.
+flows could be a pointer to a dynamically allocated array, instead of
+a fixed, compile-time-sized, array.
 
 Large counter data structures should be allocated from :term:`huge
 page <Huge pages>` memory, regardless if the statistics struct is
@@ -628,10 +633,10 @@ time.
 
 .. literalinclude:: stats_shared_lock_protected_read.c
 
-The above example includes the acquiring and releasing the lock as a
-part of the access function. Another option is to have explicit reader
-lock and release functions in the ``ep_stats.h`` API. In that case, a
-reader may read large of amounts of counters, without taking the
+The above example includes acquiring and releasing the lock as a part
+of the access function. Another option is to have explicit reader lock
+and release functions in the ``ep_stats.h`` API. In that case, a
+reader may read a large amount of counters, without taking the
 overhead for a large number of lock and unlock calls.
 
 Reset
@@ -836,8 +841,8 @@ and there are a number of forces that pull in different directions:
   primarily by causing the eviction of level 1 cache lines used by
   other parts of the fast path.
 * If the same counter is repeatedly updated as a part of the same,
-  large, write buffer flush transaction, flush performance will be
-  benefit from a high degree of temporal locality.
+  large, write buffer flush transaction, flush performance will
+  benefit from thes high degree of temporal locality.
 * A write buffer which are allowed to grow large will take the lcore
   worker thread a long time to flush, potentially causing an unacceptable
   level of packet latency jitter.
@@ -845,14 +850,14 @@ and there are a number of forces that pull in different directions:
   or global) statistics lock, reintroducing the very issue the write
   buffer is there to solve.
 * A large write buffer, combined with the use of the
-  ``stat_wb_try_flush()`` function, can be use for mitigation in a
+  ``stat_wb_try_flush()`` function, can be used for mitigation in a
   situation where a thread (e.g., another lcore worker thread, or a
   :term:`control thread`) holds the lock for a relatively long time.
 
 Moving the ``stat_wb`` functions, in particular the add function, to
-the API header file may slightly improve the performance [#nogain]_,
-in non-:term:`LTO` builds, since the function can then be inlined by
-the compiler.
+the API header file may slightly improve the performance [#nogain]_ in
+non-:term:`LTO` builds, since then the function may be inlined by the
+compiler.
 
 Propagation Delay
 ^^^^^^^^^^^^^^^^^
@@ -893,7 +898,7 @@ Per Core Counters
 In DPDK, per-core data structures (usually in the form of nested C
 struct) are usually implemented by having as many instances of the
 struct as the maximum number of support DPDK lcores
-(``RTE_LCORE_MAX``), kept in a static array. An DPDK application may
+(``RTE_LCORE_MAX``), kept in a static array. A DPDK application may
 reuse the same pattern, to good effect.
 
 Since DPDK worker threads are pinned to CPU core, and no more than one
@@ -1080,8 +1085,8 @@ application, spending ~1000 clock cycles/packet for domain logic
 processing (thus excluding packet I/O). No actual packets are sent,
 and the clock cycles spent are dummy calculations, not using any
 memory. The numbers measured represent how much the application is
-slowed down, when statistics is added. Latency is specified is an
-average per counter add operation.
+slowed down, when statistics is added. Latency is specified as an
+average over all counter add operations.
 
 The counter implementations in the benchmark are identical to the
 examples.
