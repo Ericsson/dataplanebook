@@ -89,7 +89,7 @@ and what protocols are being used.</p>
 <p>Data plane statistics can be used for a number of different purposes,
 including:</p>
 <ul class="simple">
-<li><p>Trouble shooting and debugging</p></li>
+<li><p>Troubleshooting and debugging</p></li>
 <li><p>Node and network level performance monitoring and profiling</p></li>
 <li><p>Security (e.g., detecting intrusion attempts)</p></li>
 <li><p>In-direct functional uses (e.g., billing)</p></li>
@@ -99,12 +99,15 @@ have no role in the local data plane function, they still serve a
 purpose for the network as a whole. The counters may for example be
 used for billing, or as input for automated or manual network
 optimization.</p>
-<p>A statistics-related term is network <em>telemetry</em>. Telemetry means
-network nodes provides statistics to a central location, usually using
-a push model. This information may then in turn be used to address one
-or more of the above-mentioned use cases. The data plane statistics
-implementation need not and should not know if its statistics is being
-used for telemetry.</p>
+<section id="telemetry">
+<h3>Telemetry<a class="headerlink" href="#telemetry" title="Permalink to this headline">¶</a></h3>
+<p>Data plane statistics can be used as basis for network <em>telemetry</em>.
+Telemetry means network nodes provides statistics to a central
+location, usually using a push model. This information may then in
+turn be used to address one or more of the above-mentioned use
+cases. The data plane statistics implementation need not and should
+not know if its statistics is being used for telemetry.</p>
+</section>
 </section>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
@@ -136,8 +139,8 @@ of this, it makes sense to allocate a chunk of the fast path cycle
 budget to spend on solving the statistics problem. On the other hand,
 the fewer cycles spent on any per-packet task the better. The primary
 business value of the data plane comes from the core data plane
-function, and only small minority of the CPU cycles should be spent on
-statistics - an auxiliary function.</p>
+function, and only a small minority of the CPU cycles should be spent
+on statistics - an auxiliary function.</p>
 <p>The number of counters updated per packet will range from somewhere
 around a handful for low latency, low touch applications, up into the
 hundreds for a complex, multi-layer protocol stack.</p>
@@ -146,14 +149,15 @@ applications spend roughly the same amount of <a class="reference internal" href
 cycles for every counter they need to update. The more elaborate
 logic, the more cycles are spent, and the more there is a need to
 account for what is going on, in order to, for example, profile or
-debug the application, or the network. <a class="footnote-reference brackets" href="#cyclesvslogic" id="id3">1</a></p>
+debug the application, or the network. <a class="footnote-reference brackets" href="#cyclesvslogic" id="id3">1</a> Thus
+a high touch application tend to update more counters per packet
+than does its low touch cousin.</p>
 <p>The next assumption is that no more than 5% of the total per-packet
 CPU cycle budget should be spent on statistics, and that roughly one
 counter update per 300 CPU cycles worth of domain logic
 <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> is expected.</p>
-<p>In the unlikely case all of these assumption hold true, the
-<a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> budget for a counter update is 15 core
-clock cycles.</p>
+<p>In case these assumptions hold true, the <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a>
+budget for a counter update is 15 core clock cycles.</p>
 <p>Uncertainties aside, this approximation give you an order-of-magnitude
 level indication of the performance requirements, and underscores the
 need to pay attention to producer-side statistics performance.</p>
@@ -202,14 +206,14 @@ more different counters are updated, the larger the <a class="reference internal
 size</span></a> for the application as a whole.</p>
 <p>Counters should not be evicted from the last level cache, with
 often-used counters held in the L1 or L2 caches.</p>
-<p>The other issue is just allocating enough DRAM to the statistics data
-structures. Depending on how the counters are organized in memory,
-only a very small fraction of the memory allocated may actually be
-used.</p>
-<p>Another consideration is if memory consumption are required to
-correlate with the number of active flows, or if it is acceptable to
-statically preallocated statistics memory for the maximum number of
-flows supported.</p>
+<p>An issue strictly tied to space efficiency is the amount of DRAM
+required to hold the statistics data structures. Depending on how the
+counters are organized in memory, only a very small fraction of the
+memory allocated may actually be used.</p>
+<p>A related question is if memory consumption are required to correlate
+with the number of active flows, or if it is acceptable to statically
+preallocated statistics memory for the maximum number of flows
+supported.</p>
 <p>Prototyping may be required to determined how the counter
 <a class="reference internal" href="../glossary.html#term-Working-set-size"><span class="xref std std-term">working set size</span></a> affects performance, both of the statistics
 related operations, and other processing. For example, the per-core
@@ -236,13 +240,14 @@ that flow.</p>
 <p>Flow affinity reduces statistics processing overhead regardless of
 implementation, but applications with shared per-flow counters gain
 the most.</p>
-<p>Flow affinity make it likely statistics related data is in a CPU cache
-near the core. If, on the other hand, there is no affinity, the cache
-lines holding the statistics data may well be located in a different
-core’s private cache (having just been written to), resulting in a
-very expensive cache miss when being accessed. Other flow-related data
-follow the same pattern, resulting in affinity generally having a
-significant positive effect on overall fast path performance.</p>
+<p>Flow affinity makes it likely statistics related data is in a CPU
+cache near the core. If, on the other hand, there is no affinity, the
+cache lines holding the statistics data may well be located in a
+different core’s private cache (having just been written to),
+resulting in a very expensive cache miss when being accessed. Other
+flow-related data follow the same pattern, resulting in affinity
+generally having a significant positive effect on overall fast path
+performance.</p>
 </section>
 <section id="parallel-flow-processing">
 <h4>Parallel Flow Processing<a class="headerlink" href="#parallel-flow-processing" title="Permalink to this headline">¶</a></h4>
@@ -306,8 +311,8 @@ in a <a class="reference internal" href="../glossary.html#term-Data-plane-contro
 plane proper. See <a class="reference internal" href="#shared-counters-with-per-core-buffering"><span class="std std-ref">Shared Counters with Per Core Buffering</span></a> for
 more on this.</p>
 <p>The statistics can either be organized in a global statistics database
-for the whole fast path, or a per-module or per-layer breakdown with
-several different memory areas being used.</p>
+for the whole fast path, or broken down per module, or per layer
+basis, resulting in many different memory blocks being used.</p>
 <p>In case of the global statistics struct type, care must be taken not
 to needlessly couple different protocol modules via the statistics
 module. On the statistics consumer side on the other hand, it might
@@ -349,8 +354,8 @@ configuration) for systems with high max cardinality, and large
 variations in the number of actual objects instantiated, is to use
 dynamic allocation, but use fixed-offset accesses to the fields within
 those dynamically-allocated chunks of memory. For example, the list of
-session could be a pointer to a dynamically allocated array, instead
-of a fixed, compile-time-sized, array.</p>
+flows could be a pointer to a dynamically allocated array, instead of
+a fixed, compile-time-sized, array.</p>
 <p>Large counter data structures should be allocated from <a class="reference internal" href="../glossary.html#term-Huge-Pages"><span class="xref std std-term">huge
 page</span></a> memory, regardless if the statistics struct is
 self-contained or spread across many different chunks of memory.</p>
@@ -679,10 +684,10 @@ time.</p>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The above example includes the acquiring and releasing the lock as a
-part of the access function. Another option is to have explicit reader
-lock and release functions in the <code class="docutils literal notranslate"><span class="pre">ep_stats.h</span></code> API. In that case, a
-reader may read large of amounts of counters, without taking the
+<p>The above example includes acquiring and releasing the lock as a part
+of the access function. Another option is to have explicit reader lock
+and release functions in the <code class="docutils literal notranslate"><span class="pre">ep_stats.h</span></code> API. In that case, a
+reader may read a large amount of counters, without taking the
 overhead for a large number of lock and unlock calls.</p>
 </section>
 <section id="id12">
@@ -1050,8 +1055,8 @@ application, potentially having a negative impact on performance,
 primarily by causing the eviction of level 1 cache lines used by
 other parts of the fast path.</p></li>
 <li><p>If the same counter is repeatedly updated as a part of the same,
-large, write buffer flush transaction, flush performance will be
-benefit from a high degree of temporal locality.</p></li>
+large, write buffer flush transaction, flush performance will
+benefit from thes high degree of temporal locality.</p></li>
 <li><p>A write buffer which are allowed to grow large will take the lcore
 worker thread a long time to flush, potentially causing an unacceptable
 level of packet latency jitter.</p></li>
@@ -1059,14 +1064,14 @@ level of packet latency jitter.</p></li>
 or global) statistics lock, reintroducing the very issue the write
 buffer is there to solve.</p></li>
 <li><p>A large write buffer, combined with the use of the
-<code class="docutils literal notranslate"><span class="pre">stat_wb_try_flush()</span></code> function, can be use for mitigation in a
+<code class="docutils literal notranslate"><span class="pre">stat_wb_try_flush()</span></code> function, can be used for mitigation in a
 situation where a thread (e.g., another lcore worker thread, or a
 <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>) holds the lock for a relatively long time.</p></li>
 </ul>
 <p>Moving the <code class="docutils literal notranslate"><span class="pre">stat_wb</span></code> functions, in particular the add function, to
-the API header file may slightly improve the performance <a class="footnote-reference brackets" href="#nogain" id="id22">4</a>,
-in non-<a class="reference internal" href="../glossary.html#term-LTO"><span class="xref std std-term">LTO</span></a> builds, since the function can then be inlined by
-the compiler.</p>
+the API header file may slightly improve the performance <a class="footnote-reference brackets" href="#nogain" id="id22">4</a> in
+non-<a class="reference internal" href="../glossary.html#term-LTO"><span class="xref std std-term">LTO</span></a> builds, since then the function may be inlined by the
+compiler.</p>
 </section>
 <section id="propagation-delay">
 <h4>Propagation Delay<a class="headerlink" href="#propagation-delay" title="Permalink to this headline">¶</a></h4>
@@ -1101,7 +1106,7 @@ will be less than ~13 us.</p>
 <p>In DPDK, per-core data structures (usually in the form of nested C
 struct) are usually implemented by having as many instances of the
 struct as the maximum number of support DPDK lcores
-(<code class="docutils literal notranslate"><span class="pre">RTE_LCORE_MAX</span></code>), kept in a static array. An DPDK application may
+(<code class="docutils literal notranslate"><span class="pre">RTE_LCORE_MAX</span></code>), kept in a static array. A DPDK application may
 reuse the same pattern, to good effect.</p>
 <p>Since DPDK worker threads are pinned to CPU core, and no more than one
 worker thread uses a particular core, the per-thread data structure
@@ -1379,8 +1384,8 @@ application, spending ~1000 clock cycles/packet for domain logic
 processing (thus excluding packet I/O). No actual packets are sent,
 and the clock cycles spent are dummy calculations, not using any
 memory. The numbers measured represent how much the application is
-slowed down, when statistics is added. Latency is specified is an
-average per counter add operation.</p>
+slowed down, when statistics is added. Latency is specified as an
+average over all counter add operations.</p>
 <p>The counter implementations in the benchmark are identical to the
 examples.</p>
 <p>The application modifies two global counters, and two flow-related
