@@ -24,6 +24,11 @@ Glossary
       telecommunications network, that has largely fallen into disuse.
       As opposed to IP, ATM is connection-oriented on the data link layer.
 
+   ARP
+      The Address Resolution Protocol (ARP) is used in conjunction
+      with IPv4 for discovering the link layer (e.g., Ethernet MAC
+      address) for a particular IPv4 address.
+
    BGP
       The Border Gateway Protocol (BGP) is a protocol used by Internet
       routers to exchange routing and reachability information.
@@ -34,6 +39,17 @@ Glossary
       operating system-like services like work scheduling, memory
       management, and timers. :ref:`DPDK` is the reference data
       plane platform of this book.
+
+   Data race
+      A data race occurs when two or more threads access shared
+      memory, without proper synchronization. At least one thread must
+      be a reader, and at least one a writer. A data race may cause
+      nondeterministic program behavior, with different results
+      produced between different runs of the same program, due to
+      random or pseudo random conditions such as the interleaving of
+      the program's threads. A program containing a data race may also
+      produce different results depending on which :term:`ISA`, CPU,
+      compiler, or compiler flags are used.
 
    eBPF
       Extended Berkeley Packet Filter (eBPF) is a low-level
@@ -115,9 +131,19 @@ Glossary
 
    DPU
       A Data Processing Unit (DPU) is processor designed for data
-      plane applications. A DPU is built around a complex of
-      general-purpose CPU cores, augmented by networking-specific
-      accelerators and high performance network I/O interfaces.
+      plane applications. Largely a marketing term, how a DPU is
+      implemented, as opposed to what role it serves, is somewhat
+      vague. Generally, a DPU is built around a complex of
+      general-purpose :term:`SMP` CPU cores, augmented by
+      networking-specific accelerators and high performance network
+      I/O interfaces.
+
+      The general-purpose cores may be designed to be involved in fast
+      path processing, or only be used for slow path and control plane
+      type tasks. In the latter case, a :term:`NPU` type block will be
+      required as well, to facilitate a software-programmable fast
+      path.
+
       Older processor generations with the same basic architecture
       was referred to as communication processors.
 
@@ -249,6 +275,13 @@ Glossary
       destination host and/or port, often for the purpose of having
       multiple IP hosts to between host's and its single IP address.
 
+   ND
+      Neighbor Discovery (ND) is a protocol operating at the link
+      layer. It may be employed in the same role has :term:`ARP` has
+      for IPv4 (i.e., resolving an IP address into a link-layer
+      address). ND is also used for router discovery and router
+      redirection.
+
    NETCONF
       The Network Configuration Protocol (NETCONF) is an XML-based
       network configuration management protocol developed by the IEFT.
@@ -267,6 +300,22 @@ Glossary
       A network stack, also known as a protocol stack, is an
       implementation, usually in software, of a family or
       :term:`suite<network protocol suite>` of network protocols.
+
+   NPU
+      A Network Processing Unit (NPU) (also known as network
+      processor) is an integrated circuit designed for data plane fast
+      path processing. A NPU is software programmable, but it's
+      programming model usually differs in significant ways from a
+      SMP processor. Programs of legacy NPUs were often limited in a manner
+      similar to P4 and :term:`eBPF`, but the languages were proprietary
+      or semi-proprietary (e.g., C-based but not full ANSI C), as were
+      the tool chains.
+
+      The original NPUs product lines, and the NPU term itself, has
+      largely fallen out of use. However, in recent years there has
+      been a resurgence of NU'S type designs in the form of highly
+      programmable and flexible switch pipelines, either in switches
+      circuits, or as a part of a :term:`DPU`.
 
    Mythical Man-Month
       In the book titled *The Mythical Man-Month: Essays on Software
@@ -344,6 +393,18 @@ Glossary
 
    Slow path
       The part of a data plane application that process exception traffic.
+
+   SMP
+      Symmetric multiprocessing (SMP) is a computer architecture
+      style, where the processor has two or more cache-coherent cores
+      with the same (or very similar) :term:`ISA`, sharing the same
+      memory and I/O devices, and serving the same role (i.e., no CPU
+      core is dedicated, on the level of the hardware, to handle some
+      specific task). The original (but not this) definition required
+      memory access times for a particular memory location should be
+      the same across different CPU cores, which exclude the use of
+      caches. General-purpose client and server x86 and ARM multi-core
+      CPUs are all SMP CPU.
 
    SMT
       Simultaneous multithreading (SMT) is a :term:`hardware
