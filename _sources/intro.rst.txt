@@ -14,10 +14,10 @@ of data plane applications. The focus lies on the part of the software
 which handles the bulk of the packets, often with a very tight latency
 budget. This book is about life in the fast path.
 
-The applications of this book usually implements some kind of network
-stack. Although the book anchored them in the :ref:`DPDK` (DPDK)
-platform, most patterns and principles apply more widely, such as the
-network stack of an operating system kernel.
+The applications of this book usually implements some kind of
+:term:`network stack`. Although the book anchored them in the
+:ref:`DPDK` (DPDK) platform, most patterns and principles apply more
+widely, such as the network stack of an operating system kernel.
 
 .. _Audience:
 
@@ -25,8 +25,8 @@ Audience
 ========
 
 This book is written for software developers, software architects and
-system engineers. The assumption is that the reader possesses good
-general software development skills, including good knowledge of the C
+system engineers. The assumption is that the reader possesses general
+software development skills, including good knowledge of the C
 language, and basic understanding of operating system level concepts,
 computer networks, and computer processors.
 
@@ -128,6 +128,11 @@ agents terminating network management protocols such as :term:`SNMP`
 and :term:`NETCONF`, shell access such as :term:`SSH`, and logging
 protocols such as :term:`syslog`.
 
+Requests that originates from a management plane entity, but which
+eventually need be serviced by a data plane control entity, usually,
+but not always, go via the control plane. In other words - network
+planes are not a strictly layered architecture.
+
 In this book, no distinction is made between control and management
 plane, since this make little relevance for the data plane - the focus
 of this book.
@@ -143,7 +148,7 @@ node in the network.
 
 This book concerns itself with applications written in a
 general-purpose programming language, run on a symmetric
-multi-processing (SMP) computer processor.
+multiprocessing (SMP) processor.
 
 At the core of the data plane application is some sort of a
 :term:`network stack`. To manage complexity and achieve good
@@ -219,7 +224,7 @@ Such an application could well sit on top of a general-purpose
 operating system network stack. Its authors have more freedom when it
 comes to the choice of programming languages and program structure.
 
-Low capacity data plane applications are not within the scope of this
+Low capacity data plane applications are outside the scope of this
 book.
 
 .. _DPDK:
@@ -251,7 +256,7 @@ somewhat less challenging DPDK programming model.
 
 For DPDK to bypass the kernel, the Network Interface Controller (NIC)
 hardware (or a virtual function thereof) is mapped in the process'
-address space. Instead, or in addition to, the kernel's NIC driver,
+address space. Instead of, or in addition to, the kernel's NIC driver,
 the application uses a driver provided by DPDK, for that particular
 hardware. In addition to the NIC driver, a packet buffer memory
 manager is needed, but not much else in terms of infrastructure.
@@ -272,10 +277,10 @@ for data plane applications.
 Early on, DPDK only targeted commercial off the shelf (COTS) desktops
 and servers, but has since worked itself into the world of
 special-purpose networking ASICs. In such :term:`DPUs <DPU>`, the
-traditional `network processing unit <NPU>` (NPU) have been replaced
-with a general-purpose multi-core CPU complex, augmented with various
-networking-specific accelerators and the occasional CPU instruction
-set architecture (ISA) extension.
+traditional :term:`network processing unit <NPU>` (NPU) have been
+replaced with a general-purpose multi-core CPU complex, augmented with
+various networking-specific accelerators and the occasional CPU
+instruction set architecture (ISA) extension.
 
 .. _ODP:
 
@@ -295,12 +300,11 @@ Data Plane Fast Path
 --------------------
 
 A common pattern is to split the per-packet data plane processing
-logic into two parts.
+logic into two parts: the *fast path* and the *slow path*.
 
-The fast path is designed to handle the bulk of the packets.  The
+The fast path is designed to handle the bulk of the packets. The
 processing of packets which the fast path is not equipped to handle is
 delegated to the :ref:`slow path <Slow Path>`.
-
 The reason for dividing the data plane application into a slow and
 fast path is to reduce complexity in the performance-sensitive and
 demanding fast path environment, and instead move it to the usually
@@ -313,6 +317,10 @@ The fast path sits on top of a :term:`data plane platform`. This book
 assumes the division of concern between the platform and the
 application to be that of `DPDK`_, as opposed to a more opinionated
 platform like :term:`VPP`.
+
+To achieve high efficiency and to avoid extensive packet latency
+jitter, fast path processing is usually allocated a number of
+dedicated CPU cores.
 
 .. _Slow Path:
 
@@ -375,10 +383,6 @@ type services.
 Data plane control is conceptually a part of the data plane, and not
 the control plane.
 
-Data plane control may be implemented as a module within the fast path
-process. In case the data plane control interface implementation is
-complex, hosting it in a separate process might be a better option.
-
 Complex data plane control interfaces may warrant having the data
 plane control function implemented as a separate process. Such a split
 reduces the complexity hosted by the fast path process, making
@@ -387,11 +391,11 @@ separation between the two functions. In addition, a separate process
 makes it easy to use a different language for data plane control.
 
 In case data plane control is a separate process, there will be an
-internal interface between the data plane control process. This
-internal interface must be terminated in the fast path process, like
-using :ref:`control threads <Control Threads>`.
+internal interface between the data plane control and the fast path
+processes. This interface must be terminated in the fast path process
+(e.g., by a :ref:`control thread <Control Threads>`).
 
-In some applications it may be feasible to run data plane control
+For some applications it may be feasible to run data plane control
 processing on the :term:`lcore` worker threads. A shared memory
 interface, making inter-process communication relatively inexpensive,
 to the outside world may facilitate such a design. Care must be taken
@@ -540,13 +544,13 @@ the lcore worker threads.
 Network Function
 ================
 
-A data plane application is usually package and deployed together with
-a number of supporting platform type functions, providing services
-such as process monitoring and management, and log handling. The data
-plane application may also be co-located with control plane or
-management plane components.
+A data plane application is usually packaged and deployed together
+with a number of supporting platform type functions, providing
+services such as process monitoring and management, and log
+handling. The data plane application may also be co-located with
+control plane or management plane components.
 
-This book will refer to this entity as a *network function*. This
+This book will refer to this entity as a *network function*. This is
 usually equivalent to a network *node*, although there are networks
 where the prevailing terminology is that a logical node is made up of
 multiple network functions.
@@ -582,16 +586,16 @@ operating system.
 
 The processors are symmetric multi-processors (SMPs).
 
-The processor can be general-purpose server processor, or something
+The processor can be a general-purpose server processor, or something
 essentially functionally equivalent, but hosted inside a specialized
 networking system-on-a-chip (SoC).
 
-DPDK support the most relevant ARM instruction set architectures
-(ISAs), AMD64 (or IA-64 in Intel terminology), or the Power ISA of the
-IBM POWER9 family, and RISCV. Usually, the ISA is generic in the sense
-it has no special networking-related instructions added to it compared
-to other implementations, there is nothing in the DPDK model that
-won't prevent such additions.
+DPDK supports the most relevant ARM :term:`instruction set
+architectures <ISA>`, AMD64 (or IA-64 in Intel terminology), the Power
+ISA of the IBM POWER9 family, and RISCV. Although the aforementioned
+ISAs have no special networking-related instructions, there is nothing
+in DPDK that prevents the utilization of such such extensions, would
+they exist.
 
 Accelerators
 ------------
@@ -621,23 +625,28 @@ system kernels, it didn't get a proper memory model until in ISO/IEC
 9899:2011 (C11).
 
 Data plane programming is also hard because of the immense complexity
-of modern CPUs. Their behavior very difficult indeed to understand,
-or to predict, both in performance and functional correctness (e.g.,
+of modern CPUs. Their behavior is very difficult indeed to understand,
+or predict, both in performance and functional correctness (e.g.,
 memory models).
 
 As a result, debugging the data plane fast path is also harder than
 many other applications. In the fast path, the programmer need to care
-about low-level hardware characteristics are not relevant in most
-other application domains.
+about low-level hardware characteristics, not relevant for many other
+application domains.
 
 Data plane development is one of the few domains, together with
-operating system kernels, virtual machines and compilers, where still
-reasons for the developer to understand and occasionally even write
-assembly code.
+operating system kernels, virtual machines and compilers, where there
+still are reasons for the developer to understand and occasionally
+author assembly code.
 
-Understanding the C11 memory model and lock-less programming, which is
-often useful or even essential, is also notoriously difficult. Bugs in
-such code is very difficult to test for.
+A thorough grasp of C11 atomics and memory models and their
+implementation in compilers and processors is required to understand
+of low-level synchronization primitives and lock-less programs. The
+topic is notoriously difficult, and even seasoned veterans (including
+experts involved in the C11 standardization effort) get things
+wrong. A further complication is that bugs caused by :term:`data races
+<data race>` are very hard to test for, and often difficult to
+reproduce and debug.
 
 Staffing Data Plane Projects
 ----------------------------
