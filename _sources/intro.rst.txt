@@ -60,8 +60,8 @@ In certain networks, the separation is externally visible, and the
 protocols used between the entities in the different layers are
 standardized. An example of such a network is the :term:`RAN` of a 5G
 cellular network, where the Centralized Unit Control Plane (CU-CP)
-primarily handles control plane type tasks, and the Distributed Unit
-(DU) handles the data plane.
+primarily handles control plane type tasks, and the Centralized Unit
+User Plane (CU-UP) handles the data plane.
 
 In an IP network router, the separation into planes may exist only
 internally (or indeed, not at all). The protocols and means of
@@ -328,8 +328,8 @@ Data Plane Slow Path
 --------------------
 
 The slow path handles :term:`exception traffic`. For network stacks
-taking a :term:`flow cache` approach, such as Open vSwitch, the
-exception packets consists of the first packet encountered in a
+taking a :term:`flow cache` approach, such as :term:`Open vSwitch`,
+the exception packets consists of the first packet encountered in a
 particular flow. For other data plane applications it may be certain
 flows, rather than certain packets within a flow, that are considered
 exception traffic. It may also be certain types of unusual packets,

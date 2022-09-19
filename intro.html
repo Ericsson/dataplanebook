@@ -76,8 +76,8 @@ cp -- dp
 protocols used between the entities in the different layers are
 standardized. An example of such a network is the <a class="reference internal" href="glossary.html#term-RAN"><span class="xref std std-term">RAN</span></a> of a 5G
 cellular network, where the Centralized Unit Control Plane (CU-CP)
-primarily handles control plane type tasks, and the Distributed Unit
-(DU) handles the data plane.</p>
+primarily handles control plane type tasks, and the Centralized Unit
+User Plane (CU-UP) handles the data plane.</p>
 <p>In an IP network router, the separation into planes may exist only
 internally (or indeed, not at all). The protocols and means of
 communication between the different planes are proprietary <a class="footnote-reference brackets" href="#rfc5810" id="id4">1</a>
@@ -279,8 +279,8 @@ dedicated CPU cores.</p>
 <section id="data-plane-slow-path">
 <span id="slow-path"></span><h3>Data Plane Slow Path<a class="headerlink" href="#data-plane-slow-path" title="Permalink to this headline">¶</a></h3>
 <p>The slow path handles <a class="reference internal" href="glossary.html#term-Exception-traffic"><span class="xref std std-term">exception traffic</span></a>. For network stacks
-taking a <a class="reference internal" href="glossary.html#term-Flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as Open vSwitch, the
-exception packets consists of the first packet encountered in a
+taking a <a class="reference internal" href="glossary.html#term-Flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as <span class="xref std std-term">Open vSwitch</span>,
+the exception packets consists of the first packet encountered in a
 particular flow. For other data plane applications it may be certain
 flows, rather than certain packets within a flow, that are considered
 exception traffic. It may also be certain types of unusual packets,
