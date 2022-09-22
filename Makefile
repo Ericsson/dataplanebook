@@ -2,6 +2,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = src
 BUILDDIR      = build
+LINKCHECKDIR  = $(BUILDDIR)/linkcheck
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -13,6 +14,15 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-check:
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) \
+.PHONY: check
+check: checkspelling checklinks
+
+.PHONY: checkspelling
+checkspelling:
+	@$(SPHINXBUILD) -M $@ $(SPHINXOPTS) "$(SOURCEDIR)" "$(BUILDDIR)" \
 		-b spelling
+
+.PHONY: checklinks
+checklinks:
+	$(SPHINXBUILD) $(SPHINXOPTS) "$(SOURCEDIR)" "$(LINKCHECKDIR)" \
+		-b linkcheck
