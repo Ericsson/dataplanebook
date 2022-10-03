@@ -842,7 +842,7 @@ and there are a number of forces that pull in different directions:
   other parts of the fast path.
 * If the same counter is repeatedly updated as a part of the same,
   large, write buffer flush transaction, flush performance will
-  benefit from thes high degree of temporal locality.
+  benefit from a high degree of temporal locality.
 * A write buffer which are allowed to grow large will take the lcore
   worker thread a long time to flush, potentially causing an unacceptable
   level of packet latency jitter.
