@@ -232,7 +232,7 @@ book.
 Data Plane Development Kit
 --------------------------
 
-The `Data Plane Development Kit <http://www.dpdk.org/>`_ (DPDK) is an
+The `Data Plane Development Kit <https://www.dpdk.org/>`_ (DPDK) is an
 Open Source software platform for data plane applications. DPDK serves
 in the role of the :term:`data plane platform` for the applications of
 this book.
