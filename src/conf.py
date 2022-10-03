@@ -46,7 +46,6 @@ pygments_style = None
 
 html_theme = 'alabaster'
 
-
 # -- LaTeX Options --
 
 latex_elements = {

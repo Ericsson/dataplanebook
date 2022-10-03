@@ -2,6 +2,8 @@
     Copyright(c) 2022 Ericsson AB
     Author: Mattias Rönnblom <mattias.ronnblom@ericsson.com>
 
+.. _Memory Management:
+
 Memory Management
 *****************
 
