@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="memory-management">
-<h1>Memory Management<a class="headerlink" href="#memory-management" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Memory Management<a class="headerlink" href="#memory-management" title="Permalink to this headline">¶</a></h1>
 <section id="dpdk-memory-pools">
 <h2>DPDK Memory Pools<a class="headerlink" href="#dpdk-memory-pools" title="Permalink to this headline">¶</a></h2>
 <section id="ring-versus-stack">
@@ -72,13 +72,17 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="headers.html">Protocol Header Processing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Memory Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dpdk-memory-pools">DPDK Memory Pools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dpdk-memory-pools">DPDK Memory Pools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ring-versus-stack">Ring versus Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#per-core-caches">Per-core Caches</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#dpdk-heap">DPDK Heap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#huge-pages">Huge Pages</a></li>
 </ul>

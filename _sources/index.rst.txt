@@ -7,16 +7,17 @@ Data Plane Software Design
 ##########################
 
 .. note::
-   What you see here is only very early draft of this book. It currently
-   consists of a skeleton structure, plus two chapters
-   :ref:`Introduction` and :ref:`Statistics` in draft versions.
+   What you see here is only very early draft of this book. It
+   currently consists of a skeleton structure, and three chapters in
+   draft form: :ref:`Introduction`, :ref:`Threading` and
+   :ref:`Statistics`.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    intro
-   threading
+   threading/threading
    work
    eth
    mbuf

@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="synchronization">
-<h1>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this headline">¶</a></h1>
 <section id="staying-safe">
 <h2>Staying Safe<a class="headerlink" href="#staying-safe" title="Permalink to this headline">¶</a></h2>
 <section id="thread-safety">
@@ -101,16 +101,24 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="headers.html">Protocol Header Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mem.html">Memory Management</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Synchronization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#staying-safe">Staying Safe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#staying-safe">Staying Safe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#thread-safety">Thread Safety</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#asynchronous-signal-safety">Asynchronous Signal Safety</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preemption-safety">Preemption Safety</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#considerations">Considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#amdahl-s-law">Amdahl’s Law</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#amdahl-s-law">Amdahl’s Law</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#critical-section-length-and-impact">Critical Section Length and Impact</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#c11-atomics">C11 Atomics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sequence-locks">Sequence Locks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spinlocks-and-ticketlocks">Spinlocks and Ticketlocks</a></li>

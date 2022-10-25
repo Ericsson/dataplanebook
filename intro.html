@@ -15,7 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Threading" href="threading.html" />
+    <link rel="next" title="Threading" href="threading/threading.html" />
     <link rel="prev" title="Data Plane Software Design" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -195,7 +195,7 @@ literal sense it is not.</p>
 <section id="low-capacity-data-plane">
 <h3>Low Capacity Data Plane<a class="headerlink" href="#low-capacity-data-plane" title="Permalink to this headline">¶</a></h3>
 <p>The are data plane applications that have comparably lax performance
-requirements, both in terms of throughput, <a class="reference internal" href="glossary.html#term-Wall-clock-Latency"><span class="xref std std-term">wall-clock latency</span></a>
+requirements, both in terms of throughput, <a class="reference internal" href="glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>
 and efficient use of computer hardware. Thus, they can avoid many of
 the sometimes cumbersome and challenging techniques of this book.</p>
 <p>Such an application could well sit on top of a general-purpose
@@ -206,7 +206,7 @@ book.</p>
 </section>
 <section id="data-plane-development-kit">
 <span id="dpdk"></span><h3>Data Plane Development Kit<a class="headerlink" href="#data-plane-development-kit" title="Permalink to this headline">¶</a></h3>
-<p>The <a class="reference external" href="http://www.dpdk.org/">Data Plane Development Kit</a> (DPDK) is an
+<p>The <a class="reference external" href="https://www.dpdk.org/">Data Plane Development Kit</a> (DPDK) is an
 Open Source software platform for data plane applications. DPDK serves
 in the role of the <a class="reference internal" href="glossary.html#term-Data-plane-platform"><span class="xref std std-term">data plane platform</span></a> for the applications of
 this book.</p>
@@ -279,7 +279,7 @@ dedicated CPU cores.</p>
 <section id="data-plane-slow-path">
 <span id="slow-path"></span><h3>Data Plane Slow Path<a class="headerlink" href="#data-plane-slow-path" title="Permalink to this headline">¶</a></h3>
 <p>The slow path handles <a class="reference internal" href="glossary.html#term-Exception-traffic"><span class="xref std std-term">exception traffic</span></a>. For network stacks
-taking a <a class="reference internal" href="glossary.html#term-Flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as <span class="xref std std-term">Open vSwitch</span>,
+taking a <a class="reference internal" href="glossary.html#term-Flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as <a class="reference internal" href="glossary.html#term-Open-vSwitch"><span class="xref std std-term">Open vSwitch</span></a>,
 the exception packets consists of the first packet encountered in a
 particular flow. For other data plane applications it may be certain
 flows, rather than certain packets within a flow, that are considered
@@ -295,7 +295,7 @@ network stack, or threads within the same process as the fast path.</p>
 <p>In case the slow path is hosted in a separate process, this process
 typically does not directly use DPDK.</p>
 <p>Packets that traverse the slow path, as the name suggests, will
-experience greater <a class="reference internal" href="glossary.html#term-Wall-clock-Latency"><span class="xref std std-term">wall-clock latency</span></a>. The source of this
+experience greater <a class="reference internal" href="glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>. The source of this
 latency is both that more CPU cycles are spent processing the packet,
 and operating system scheduling latency (since the slow path threads
 may not be run on a dedicated CPU core).</p>
@@ -336,7 +336,7 @@ processes. This interface must be terminated in the fast path process
 processing on the <a class="reference internal" href="glossary.html#term-Lcore"><span class="xref std std-term">lcore</span></a> worker threads. A shared memory
 interface, making inter-process communication relatively inexpensive,
 to the outside world may facilitate such a design. Care must be taken
-to avoid excessive <a class="reference internal" href="glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> for data plane control
+to avoid excessive <a class="reference internal" href="glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> for data plane control
 requests.</p>
 <p>In some context, the term slow path is used for a software component
 serving in the data plane control role. Such usage of the word is
@@ -604,14 +604,38 @@ between the planes in an IP router. See
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#audience">Audience</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#networking-planes">Networking Planes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-plane-applications">Data Plane Applications</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#network-function">Network Function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hardware-platforms">Hardware Platforms</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#people">People</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#networking-planes">Networking Planes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-plane">Data Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#control-plane">Control Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#management-plane">Management Plane</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-plane-applications">Data Plane Applications</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#low-latency-non-data-plane-applications">Low Latency Non Data Plane Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#low-capacity-data-plane">Low Capacity Data Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-plane-development-kit">Data Plane Development Kit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-plane-fast-path">Data Plane Fast Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-plane-slow-path">Data Plane Slow Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-plane-control">Data Plane Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-architectures">Reference Architectures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#network-function">Network Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-platforms">Hardware Platforms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#processor">Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accelerators">Accelerators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory">Memory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#people">People</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-data-plane-programming-is-easy">Why Data Plane Programming is Easy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-data-plane-programming-is-hard">Why Data Plane Programming is Hard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#staffing-data-plane-projects">Staffing Data Plane Projects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
@@ -636,7 +660,7 @@ between the planes in an IP router. See
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Data Plane Software Design</a></li>
-      <li>Next: <a href="threading.html" title="next chapter">Threading</a></li>
+      <li>Next: <a href="threading/threading.html" title="next chapter">Threading</a></li>
   </ul></li>
 </ul>
 </div>

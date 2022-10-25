@@ -1,0 +1,1081 @@
+
+<!DOCTYPE html>
+
+<html lang="en_US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Threading &#8212; Data Plane Software Design 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Work Scheduling" href="../work.html" />
+    <link rel="prev" title="Introduction" href="../intro.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="threading">
+<span id="id1"></span><h1>Threading<a class="headerlink" href="#threading" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This chapter explains how data plane applications tend to use
+operating system threads to get work done, and that in an as
+resource-efficient, parallel and low-latency manner as possible.</p>
+<p>The DPDK approach to threading is by no means unique to DPDK. Similar
+patterns for how to distribute fast path processing across threads are
+used in other data plane platforms and application, such as
+<a class="reference internal" href="../intro.html#odp"><span class="std std-ref">Open Data Plane</span></a>, <a class="reference internal" href="../glossary.html#term-Open-vSwitch"><span class="xref std std-term">Open vSwitch</span></a> and fd.io <a class="reference internal" href="../glossary.html#term-VPP"><span class="xref std std-term">VPP</span></a>. To the
+author’s knowledge, there are no alternatives that are able achieve
+data plane type characteristics on top of a general-purpose operating
+system kernel. <a class="footnote-reference brackets" href="#alternatives" id="id2">1</a></p>
+<p>The DPDK threading model provides excellent performance
+characteristics, but at the cost of somewhat difficult-to-deploy and
+difficult-to-understand applications, among other things.</p>
+<p>The DPDK threading model is a source of much confusion, and many a
+misunderstanding and surprise. More generally, the DPDK-stipulated
+architecture may seem complex, awkward, and comes with a set of
+drawbacks. It does not make much use of kernel or C library-level
+services, such as functions for load balancing and concurrency,
+accelerator and network I/O hardware abstraction and associated
+drivers, memory management, time and timer management, and thread
+synchronization.</p>
+<p>In this book, the terms <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a> and <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>
+are used with two distinctly different meanings. Please refer to the
+glossary definitions.</p>
+<p>How DPDK-based applications use threads to achieve
+<a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a>, and how threads usually are <em>not</em> the vehicle for
+<a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a> is different from how things are often done in for
+example Java, Go or C++ <a class="footnote-reference brackets" href="#cppthreadoptions" id="id3">2</a> applications.</p>
+<p>Equally different, and in part the result of, or the reason for, the
+DPDK threading model, is the choice of synchronization primitives,
+inter-thread messaging mechanisms, and work scheduling in a DPDK-based
+application, compared to an application designed in the UNIX
+tradition.</p>
+<p>This chapter leaves out <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a> and <a class="reference internal" href="../glossary.html#term-Work-scheduler"><span class="xref std std-term">work scheduling</span></a>. This topic will be covered in a separate chapter.</p>
+</section>
+<section id="unix-networking-application-architecture">
+<h2>UNIX Networking Application Architecture<a class="headerlink" href="#unix-networking-application-architecture" title="Permalink to this headline">¶</a></h2>
+<p>This section will describe the traditional UNIX approach to networking
+applications, employed to craft a data plane fast path, when it is
+written. <a class="footnote-reference brackets" href="#unix" id="id4">3</a></p>
+</section>
+<section id="dpdk-threading-model">
+<h2>DPDK Threading Model<a class="headerlink" href="#dpdk-threading-model" title="Permalink to this headline">¶</a></h2>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>The recipe for building and deploying an application adhering to the
+DPDK threading model, in its most basic form, is roughly as follows:</p>
+<ul class="simple">
+<li><p>Determine which of the system’s <a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">CPU cores</span></a> will be
+dedicated to the DPDK application process.</p></li>
+<li><p><a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">Clear</span></a> the application-owned cores from as
+many user space threads, and kernel space threads, top and bottom
+half interrupt handlers as possible.</p></li>
+<li><p>At the time of DPDK application invocation, inform the application
+which cores to use.</p></li>
+<li><p>In the application’s <code class="docutils literal notranslate"><span class="pre">main()</span></code> function, call DPDK’s
+<a class="reference external" href="https://doc.dpdk.org/api/rte__eal_8h.html">rte_eal_init()</a>,
+which, among other things, spawns as many <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> as there are application-owned <a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">CPU cores</span></a>
+<a class="footnote-reference brackets" href="#mainthread" id="id5">4</a>, and <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">pin</span></a> each thread to
+one of the cores.</p></li>
+<li><p>Have the fast path packet processing EAL threads run continously
+and indefinitely, polling NIC receive queues and other sources of
+work.</p></li>
+</ul>
+<p>This section will dwell into the details of this model, its pros and
+cons, and its variants and extensions.</p>
+<section id="benefits-and-drawbacks">
+<h4>Benefits and Drawbacks<a class="headerlink" href="#benefits-and-drawbacks" title="Permalink to this headline">¶</a></h4>
+<p>In summary, the DPDK threading model has the following benefits:</p>
+<ul class="simple">
+<li><p>Arriving packets (and other <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">items of work</span></a>)
+are dealt with quickly, and without incurring the cost of context
+switches or system calls in the process.</p></li>
+<li><p>Packets may be passed between cores forming a pipeline, using
+low-overhead, shared memory-based message passing, without
+requiring any context switches and system calls.</p></li>
+<li><p>Processing of a packet (or some other item of work) is generally not
+interrupted. In particular, an <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> is never preempted
+and replaced with a peer <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>. This, in turn, means:</p>
+<ul>
+<li><p>Packet processing <a class="reference internal" href="../glossary.html#term-Jitter"><span class="xref std std-term">jitter</span></a> is kept at a minimum, and soft
+real-time deadlines can be met.</p></li>
+<li><p>Efficient and <a class="reference internal" href="../glossary.html#term-Thread-safety"><span class="xref std std-term">thread-safe</span></a>, but
+<a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">non-preemption safe</span></a>, shared data
+structures may be used.</p></li>
+</ul>
+</li>
+</ul>
+<p>The drawbacks for the basic model are, in short:</p>
+<ul class="simple">
+<li><p>The busy-polling EAL threads continuously use all CPU time available
+leading to:</p>
+<ul>
+<li><p>Poor energy efficiency at low or medium load, since used cores are
+constantly kept at maximum operating frequency and out of any
+sleep states.</p></li>
+<li><p>Reduced performance for <a class="reference internal" href="../glossary.html#term-SMT"><span class="xref std std-term">SMT</span></a> systems, since an EAL thread
+will use significant <a class="reference internal" href="../glossary.html#term-Physical-core"><span class="xref std std-term">physical core</span></a> resources, even when
+no useful work is performed (i.e., being a <a class="reference internal" href="../glossary.html#term-Noisy-neighbour"><span class="xref std std-term">noisy SMT
+neighbour</span></a> to another thread running on the same
+physical core).</p></li>
+</ul>
+</li>
+<li><p>The use of <a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">core isolation</span></a> leads to cores allocated to the
+DPDK application cannot be shared (pooled) with other applications
+in the system, which in turn leads to worse overall hardware
+resource utilization.</p></li>
+<li><p>It is not possible to dynamically scale up application to use more
+CPU cores than it has EAL threads.</p></li>
+<li><p>Dynamically scaling down to fewer cores requires discontinuing the
+use of certain EAL threads, which generally is supported by DPDK
+libraries and device drivers, but may pose a challenge for the
+application itself, which potentially rely on per-lcore objects
+(e.g., timers, <a class="reference internal" href="../glossary.html#term-RCU"><span class="xref std std-term">RCU</span></a> memory reclamation, or event device and
+ethernet device ports/queues), which cannot be left unattended.</p></li>
+<li><p>For <a class="reference internal" href="../glossary.html#term-CNF"><span class="xref std std-term">CNFs</span></a>, core isolation somewhat complicates
+container-level scheduling.</p></li>
+</ul>
+<p>DPDK’s basic threading model can be extended to mitigate, or even
+eliminated, these problems. Such improvements will be covered in this
+chapter, and other future chapters, for example a chapter on power
+management.</p>
+</section>
+</section>
+<section id="eal-threads">
+<h3>EAL Threads<a class="headerlink" href="#eal-threads" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> is the workhorse of DPDK-based
+data plane fast path applications.</p>
+<p>An EAL thread is an operating system thread created and managed by the
+DPDK’s core platform library - the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a>. All EAL threads are
+spawned at EAL initialization, and lives throughout the lifetime of
+the DPDK process.</p>
+<section id="logical-cores">
+<h4>Logical Cores<a class="headerlink" href="#logical-cores" title="Permalink to this headline">¶</a></h4>
+<p>In general, the term <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> refers to an entity, usually
+a piece of hardware, behaving like a <a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">CPU core</span></a> from the point
+of view of the software program it is running. The hardware-software
+interface of which the logical core is a key part is called an
+<a class="reference internal" href="../glossary.html#term-ISA"><span class="xref std std-term">instruction set architecture (ISA)</span></a>.</p>
+<p>A logical core may be realized as a <a class="reference internal" href="../glossary.html#term-Hardware-threading"><span class="xref std std-term">hardware thread</span></a>, a <a class="reference internal" href="../glossary.html#term-Full-core"><span class="xref std std-term">full core</span></a>, or in exceptional cases, a
+software-emulated core - all of which are functionally equivalent,
+from a software point of view.  <a class="footnote-reference brackets" href="#logicalcoreperformance" id="id6">5</a> The
+seemingly useful term logical core seems rarely used, as does a
+synonym: <a class="reference internal" href="../glossary.html#term-Virtual-core"><span class="xref std std-term">virtual core</span></a>.</p>
+<p>When the term <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> is used in a DPDK context - usally
+abbreivated to <a class="reference internal" href="../glossary.html#term-Lcore"><span class="xref std std-term">lcore</span></a> - it means something related, but
+distinct from the generic, hardware-level concept.</p>
+<p>The DPDK lcore is a only a different name for an <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL
+thread</span></a>. The reason for the lcore designation is that an EAL thread is
+usually <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">pinned</span></a> to one particular
+<a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>, dedicated to its use.</p>
+<p>When this book uses the abbreviated <em>lcore</em> form, the DPDK meaning of
+the word is implied.</p>
+<p><a class="reference external" href="https://doc.dpdk.org/api/rte__lcore_8h.html">&lt;rte_lcore.h&gt;</a> is the
+primary API for lcore-related operations, such as EAL thread iteration
+and status queries.</p>
+</section>
+<section id="main-and-worker-lcores">
+<h4>Main and Worker Lcores<a class="headerlink" href="#main-and-worker-lcores" title="Permalink to this headline">¶</a></h4>
+<p>As a part of the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> initialization (i.e., the
+<code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> call), the calling thread is repurposed as an
+<a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>, and designated the <a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a>.</p>
+<p>The EAL default is to assign the lowested-numbered lcore the main
+lcore role. The default may be overridden with the <code class="docutils literal notranslate"><span class="pre">--main-lcore</span></code>
+<a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL parameter</span></a>.</p>
+<p>By default, EAL, during its initialization, spawns one operating
+system thread for each <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> in the <code class="docutils literal notranslate"><span class="pre">main()</span></code> thread’s
+original <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity mask</span></a>, beyond
+the first. All such EAL threads are a <a class="reference internal" href="../glossary.html#term-Worker-lcore"><span class="xref std std-term">worker lcores</span></a>.</p>
+<p>For example, if a DPDK application is invoked with 12 cores in the
+<code class="docutils literal notranslate"><span class="pre">main()</span></code> function thread’s <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity mask</span></a>, <code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> will, barring any <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL
+Parameters</span></a> saying otherwise, create 12 EAL threads. One of these EAL
+threads is the main lcore, using the caller’s operating system thread,
+and the 11 others are worker lcores, each associated with a newly
+created operating system thread.</p>
+<p>The number of worker lcores may be, and usually is, reduced compared
+to the default. For more information, see the <a class="reference internal" href="#lcore-affinity"><span class="std std-ref">Lcore Affinity</span></a>
+and <a class="reference internal" href="#core-allocation"><span class="std std-ref">Core Allocation</span></a> sections.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH()</span></code> and <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH_WORKER()</span></code> macros
+may be used to iterate over both the main and the worker lcores, or
+just the worker lcores, respectively.</p>
+<p>Progammatically or by using <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameters</span></a>, certain worker
+lcores may be asked to take the role of a <a class="reference internal" href="../glossary.html#term-Service-lcore"><span class="xref std std-term">service lcore</span></a>. See
+the <a class="reference internal" href="#service-cores"><span class="std std-ref">Service Cores</span></a> section for details.</p>
+<section id="worker-launch">
+<h5>Worker Launch<a class="headerlink" href="#worker-launch" title="Permalink to this headline">¶</a></h5>
+<p>EAL threads serving as <a class="reference internal" href="../glossary.html#term-Worker-lcore"><span class="xref std std-term">worker lcores</span></a> are
+assigned tasks using the <a class="reference external" href="https://doc.dpdk.org/api/rte__launch_8h.html">&lt;rte_launch.h&gt;</a> API.</p>
+<p>A common pattern is launch a more-or-less permanently running
+function, and then deal with more fine-grained work scheduling by
+other means (e.g., a combination of DPDK event devices, DPDK timers
+and DPDK ethernet devices). See the future chapter on <a class="reference internal" href="../work.html#work-scheduling"><span class="std std-ref">Work Scheduling</span></a> for more information on this subject.</p>
+<p>After having finished initializing the DPDK platform and application,
+and launched all workers, the <a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a> itself may take on
+some long-runnning fast path task.</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_eal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_lcore.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_debug.h&gt;</span><span class="cp"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="nf">do_work</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(;;)</span><span class="w"></span>
+<span class="w">		</span><span class="p">;</span><span class="w"> </span><span class="cm">/* perform fast path work here */</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_eal_init</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="n">rte_exit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Invalid EAL arguments</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">RTE_LCORE_FOREACH_WORKER</span><span class="p">(</span><span class="n">lcore_id</span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rte_eal_remote_launch</span><span class="p">(</span><span class="n">do_work</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">			</span><span class="n">rte_panic</span><span class="p">(</span><span class="s">&quot;Failed to launch lcore thread</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">do_work</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In this very rudimentary example all EAL threads are employed for fast
+path work.</p>
+<p>The basic structure of this program shares a resemblance with one that
+calls into POSIX thread API. An important difference that
+<code class="docutils literal notranslate"><span class="pre">rte_eal_remote_launch()</span></code> doesn’t launch a thread, in the sense of
+creating it, but rather only assigning an <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">item of work</span></a>, in the
+form of a function to execute, to an already-existing thread.</p>
+<p>One way to see DPDK worker lcores, is as a fixed-sized thread worker
+pool, which works on one task at a time, and where the assignment of
+tasks is directed at a particular worker, putting the burdon of load
+balancing the caller. However, in DPDK, the task is often of the
+never-ending nature, only terminating when some <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>
+says it’s time for an orderly shut down of the application.</p>
+</section>
+</section>
+<section id="fast-path-lcores">
+<h4>Fast Path Lcores<a class="headerlink" href="#fast-path-lcores" title="Permalink to this headline">¶</a></h4>
+<p>Most or all EAL threads in most DPDK fast path application are
+assigned tasks with demanding throughput requirements, paired with
+requirements to keep latency and <a class="reference internal" href="../glossary.html#term-Jitter"><span class="xref std std-term">jitter</span></a> below some upper
+bound. This book will refer to such cores as <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a>. A DPDK lcore in service in any type or role (i.e.,
+<a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a>, <a class="reference internal" href="../glossary.html#term-Worker-lcore"><span class="xref std std-term">worker lcore</span></a>, or <a class="reference internal" href="../glossary.html#term-Service-lcore"><span class="xref std std-term">service lcore</span></a>)
+may fit this description.</p>
+<p>One might argue <em>real-time lcore</em> would be a more suitable designation
+for such cores, considering the soft real-time characteristics
+requirements prevalent in the data plane domain. However, this term
+may had lead the unwary to believe it somehow implied the use of
+real-time scheduling policies, or the <code class="docutils literal notranslate"><span class="pre">CONFIG_PREEMPT_RT</span></code> real-time
+Linux kernel patches. Fast path lcores generally do not depend on
+neither of those. In addition, the archetypal hard real-time system is
+not designed to operate under the kind of system load the fast path
+application has to endure. That fact is reflected in the design in
+Linux’ RT scheduling policies, discussed in the ref:<cite>Real Time
+Scheduling Policies</cite> section.</p>
+<p>The DPDK documentation doesn’t have a word for fast path lcores,
+although in at least one instance <em>DPDK processing threads</em> and
+<em>forwarding threads</em> is used. <a class="footnote-reference brackets" href="#noterm" id="id7">6</a></p>
+</section>
+<section id="lcore-affinity">
+<span id="id8"></span><h4>Lcore Affinity<a class="headerlink" href="#lcore-affinity" title="Permalink to this headline">¶</a></h4>
+<p>By default, the <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> of the <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> is set is such a manner, that each EAL thread may only
+be scheduled on one <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>, and that each logical core
+has exactly one EAL thread pinned to it. In other words, there’s a
+one-to-one relationship between a DPDK lcore and the underlying
+hardware logical core.</p>
+<p>The set of CPU cores allocated to an application may be, and usually
+is, reduced by using <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL command-line parameters</span></a> (i.e., <code class="docutils literal notranslate"><span class="pre">-c</span></code> or <code class="docutils literal notranslate"><span class="pre">-l</span></code>). The default is to use all cores
+available in the <code class="docutils literal notranslate"><span class="pre">main()</span></code> function thread’s original affinity
+mask. See the <a class="reference internal" href="#core-allocation"><span class="std std-ref">Core Allocation</span></a> section for more on this
+subject.</p>
+<p>Most DPDK-based fast path applications are designed with the
+assumption of a one-to-one relationship between EAL thread and
+<a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>. <a class="footnote-reference brackets" href="#ton" id="id9">9</a></p>
+<section id="peer-preemptable-eal-threads">
+<h5>Peer Preemptable EAL Threads<a class="headerlink" href="#peer-preemptable-eal-threads" title="Permalink to this headline">¶</a></h5>
+<p>By using the <code class="docutils literal notranslate"><span class="pre">--lcores</span></code> <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameter</span></a>, the
+default 1:1 mapping between EAL threads and logical cores may be
+changed into a M:N relationship. This flag may be used to create
+a number of different process scheduling scenarios.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--lcores</span></code> may be used to include a particular CPU core in the
+affinity mask of more than one EAL thread. For example, a 2:1 mapping
+may be used, where two lcores are mapped against one logical core.</p>
+<p>In case such EAL threads are configured with a normal time-sharing,
+preemptible multitasking, scheduling policy (e.g., <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code> on
+Linux), which is the default, they do not qualify as
+<a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">non-preemptable</span></a>.</p>
+<p>Preemptable EAL threads suffer severe limitations in terms of what
+kind of latency characteristics they deliver, and generally can’t be
+used for fast path packet processing. In addition, they cannot safely
+use many DPDK APIs. See the section on <a class="reference internal" href="#non-preemption-safe-apis"><span class="std std-ref">Non-preemption Safe APIs</span></a>.</p>
+</section>
+<section id="cooperative-multitasking">
+<span id="id10"></span><h5>Cooperative Multitasking<a class="headerlink" href="#cooperative-multitasking" title="Permalink to this headline">¶</a></h5>
+<p><a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">Peer preemptable EAL threads</span></a>
+coexisting (i.e., are being scheduled) on by the same CPU core may be
+turned non-preemptable provided they all have the <code class="docutils literal notranslate"><span class="pre">SCHED_FIFO</span></code>
+scheduling policy, the same priority, and use <code class="docutils literal notranslate"><span class="pre">sched_yield()</span></code> to
+yield the CPU in situations when it is safe to do.</p>
+<p>Cooperative multitasking allows for the use of EAL threads for the
+purpose of concurrency (e.g., to run different modules), at the cost
+of context switches and the significant complexity introduced by the
+use of a combination of high CPU utilization and real-time scheduling
+policies. See the section on <a class="reference internal" href="#real-time-scheduling-policies"><span class="std std-ref">Real Time Scheduling Policies</span></a> for
+more information on the latter.</p>
+</section>
+<section id="floating-eal-threads">
+<span id="id11"></span><h5>Floating EAL Threads<a class="headerlink" href="#floating-eal-threads" title="Permalink to this headline">¶</a></h5>
+<p>The <code class="docutils literal notranslate"><span class="pre">--lcores</span></code> <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameter</span></a> may be used to
+instruct the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> to include more than one CPU core in one or
+more EAL threads’ <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity masks</span></a>.</p>
+<p>Having an EAL thread <a class="reference internal" href="../glossary.html#term-Floating-thread"><span class="xref std std-term">floating</span></a> on two or more
+<em>dedicated</em> cores makes very little sense, since a single thread
+cannot can’t use more than one core at a time. This scenario will be
+left aside.</p>
+<p>The other use case for floating EAL threads is to have them overlap,
+either with other EAL threads, or with non-EAL threads, from the DPDK
+application process, or some other process. In such a scenario, the
+kernel’s process scheduler attempts to load balance all threads across
+the cores available to each thread.</p>
+<p>Floating threads with a <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code>-type scheduling policy will
+suffer from the kernel’s inability (or rather, unwillingness) to
+migrate such threads quickly from one core, to another.</p>
+<p>This behavior, which can be tweaked by means of kernel runtime
+configuration (e.g., setting a low migration cost), leads to
+situations where there are runnable floating EAL threads are left
+waiting, even though there is an idle CPU core in its affinity
+mask. See the <span class="xref std std-ref">Process Scheduler</span> section for more information.</p>
+<p>If the kernel is configured to quickly migrate <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code>
+threads, or if a real-time scheduling policies, which perform
+immediate rebalancing, is used, the fast path application might suffer
+from the very thing the migration cost concept of the <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code>
+policy is trying to address: there’s a cost associated to migration,
+primarily in the form of cache misses in core-private CPU caches.</p>
+<p>The floating threads approach will have less of a disastrous outcome
+if the EAL threads avoid busy-polling, either by using interrupts
+relayed over a file descriptor from the kernel, or by calling
+<code class="docutils literal notranslate"><span class="pre">usleep()</span></code> (or similar) at times they have nothing to do. In this
+scenario, they are less likely to be considered batch-type thread, and
+less likely to be interrupted by threads that are considered
+interactive.</p>
+<p>Floating and preemptible EAL threads only make sense under very
+specific circumstances (e.g., in the context of functional tests).
+The author has trouble imaging a real-world production scenario in
+which floating EAL threads provides a net benefit.</p>
+</section>
+</section>
+<section id="lcore-identifier">
+<h4>Lcore Identifier<a class="headerlink" href="#lcore-identifier" title="Permalink to this headline">¶</a></h4>
+<p>Each DPDK <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> and each <a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL
+thread</span></a> is assigned process-unique non-negative integer identifier.
+Lcore id allocation is a task of the DPDK <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a>.</p>
+<p>This <em>lcore id</em> is in the range from zero to <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE-1</span></code>
+(inclusive).</p>
+<p>The DPDK lcore id and the kernel-level CPU id (e.g., <a class="reference internal" href="../glossary.html#term-CPU"><span class="xref std std-term">CPU</span></a>
+number in Linux) usually, but not always, have the same value, for the
+same <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>.</p>
+<p>The lcore id to kernel CPU id mapping may be controlled by means of
+DPDK <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">command-line arguments</span></a>.</p>
+</section>
+<section id="thread-local-data">
+<h4>Thread Local Data<a class="headerlink" href="#thread-local-data" title="Permalink to this headline">¶</a></h4>
+<p>The <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> keeps lcore id and other tightly coupled and
+frequently accessed EAL thread-related data in <a class="reference internal" href="../glossary.html#term-TLS"><span class="xref std std-term">thread-local
+storage</span></a>. Such data includes the EAL thread’s <a class="reference internal" href="../glossary.html#term-NUMA-node"><span class="xref std std-term">NUMA node</span></a>
+and thread’s <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> at the time it was
+created. This caching scheme implies that EAL considers the affinity
+and <a class="reference internal" href="../glossary.html#term-NUMA"><span class="xref std std-term">NUMA</span></a> placement as an constant invariants across
+the DPDK process life cycle.</p>
+<p>In addition, many DPDK libraries and <a class="reference internal" href="../glossary.html#term-PMD"><span class="xref std std-term">PMDs</span></a> keep per-EAL
+thread data, usually in the form of a static array indexed by the
+<a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>.</p>
+<p>The DPDK EAL, library and driver per-EAL thread data is also kept for
+<a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL threads</span></a>.</p>
+</section>
+<section id="thread-count">
+<h4>Thread Count<a class="headerlink" href="#thread-count" title="Permalink to this headline">¶</a></h4>
+<p>DPDK has a compile-time upper bound for the number of concurrent EAL
+threads, controlled by the <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code>. This limit may be
+increased, but DPDK reliance on per-thread data effectively prevents
+very large numbers of EAL threads. Usually, <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> is set
+higher than, but still the same order of magnitude as, the highest
+core count system the build is targeting. On POWER and x86_64 builds,
+for example, the compile-time default for <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> is 128.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> limit must be set to also accomodate any
+<a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL threads</span></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">rte_lcore_count()</span></code> function may be used to retrieve the actual
+number of lcores. Note however that this count also include
+<a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL threads</span></a>, if any
+such have been created.</p>
+</section>
+<section id="invitation-only-apis">
+<h4>Invitation Only APIs<a class="headerlink" href="#invitation-only-apis" title="Permalink to this headline">¶</a></h4>
+<p>Certain DPDK APIs and certain kind of DPDK synchronization primitives
+only be safely used by threads with certain properties.</p>
+<section id="lcore-id-only-apis">
+<span id="id12"></span><h5>Lcore Id Only APIs<a class="headerlink" href="#lcore-id-only-apis" title="Permalink to this headline">¶</a></h5>
+<p>Threads equipped with a <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a> posses special powers, in the
+sense there are DPDK APIs in where such threads get a preferential
+treatment, or indeed may be that only one that can safely use them.</p>
+<p>For example, the rte_rand() function of the <a class="reference external" href="https://doc.dpdk.org/api/rte__random_8h.html">&lt;rte_random.h&gt;</a> API is only <a class="reference internal" href="../glossary.html#term-MT-safe"><span class="xref std std-term">MT
+safe</span></a> if called from a <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>-equipped thread.</p>
+<p>Only <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> and <a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL
+threads</span></a> have lcore ids.</p>
+<p>For efficiency reasons, DPDK drivers or a libraries often employ
+per-lcore data structures, usually in the form of an array indexed by
+the lcore id. Threads without lcore ids may either be not be allowed
+to call the API, may call it, but suffer worse performance or a lack
+of MT safety guarantees, forcing external synchronization, or the
+library may fall back to thread-local storage.</p>
+<p>Another reason for an API to require an lcore id is a mere matter of
+API design. For example, in the original <a class="reference external" href="https://doc.dpdk.org/api/rte__timer_8h.html">&lt;rte_timer.h&gt;</a> API, a timer wheel was
+addressed by means of the lcore id of the managing thread.</p>
+</section>
+<section id="non-preemption-safe-apis">
+<span id="id13"></span><h5>Non-preemption Safe APIs<a class="headerlink" href="#non-preemption-safe-apis" title="Permalink to this headline">¶</a></h5>
+<p>DPDK includes many synchronization primitives (e.g., the
+<a class="reference internal" href="../glossary.html#term-Spinlock"><span class="xref std std-term">spinlock</span></a> and the <a class="reference internal" href="../glossary.html#term-Sequence-counter"><span class="xref std std-term">sequence counter</span></a>) and
+<a class="reference internal" href="../glossary.html#term-Thread-safety"><span class="xref std std-term">thread-safe</span></a> low-level data structures (e.g.,
+the default ring) which are not safe to use for threads which may be
+preempted. In addition, many higher-level API library and driver
+implementations (e.g., the <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/timer_lib.html">timer library</a>, <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/eventdev.html">eventdev</a>, and <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/service_cores.html">service
+cores framework</a>) use
+such constructs in their implementation, and thus also aren’t
+<a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safe</span></a>.</p>
+<p>The result of a thread calling a non-preemption safe API, and then
+being interrupted by the kernel during the call, is that it may
+interfere with the forward progress of (i.e, block) other
+threads. Such a situation is generally not a threat to functional
+correctness of the application, but may have disasterous affects on
+throughput and latency - in particular latency jitter. Simply put,
+<a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safety</span></a> is to performance what <a class="reference internal" href="../glossary.html#term-Thread-safety"><span class="xref std std-term">thread safety</span></a>
+is for correctness.</p>
+<p>Especially harmful is a case where a running thread suffers an
+involuntary context switch, and is replaced with a thread which in
+turn is <em>busy-waiting</em> for previous thread to produce some result.
+This waiting normally continues until the next involuntary preemption,
+or the first thread being migrated to a new CPU core, either of which
+may take 10s to 100s of milliseconds. <a class="footnote-reference brackets" href="#ladawait" id="id14">8</a> This scenario is
+sometimes referred to as <em>lock holder preemption</em>. This book uses the
+term <a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">peer preemption</span></a>.</p>
+<p>Using spinlocks and other non-<a class="reference internal" href="../glossary.html#term-Wait-free-algorithm"><span class="xref std std-term">wait-free</span></a>
+constructs in a user space program may seems like a poor design, but
+under the right conditions, this is the most performant solution. With
+the DPDK default lcore deployment and isolated cores, under the
+assumption that the <a class="reference internal" href="../glossary.html#term-Critical-section"><span class="xref std std-term">critical section</span></a> of a lock (or the
+equivalent) is very short, busy-waiting is less costly than issuing a
+system call (e.g., <code class="docutils literal notranslate"><span class="pre">select()</span></code>) and putting the thread into sleep
+waiting for some file descriptor to become active, like a non-DPDK
+application would have done. This is especially true for
+<a class="reference internal" href="../glossary.html#term-Lock-contention"><span class="xref std std-term">high-contention</span></a> cases. This subject will be
+explored further in the future <a class="reference internal" href="../sync.html#synchronization"><span class="std std-ref">Synchronization</span></a> chapter.</p>
+<p><a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> are normally spared from preemption,
+and in particular completly safe from <a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">peer preemption</span></a>.</p>
+<p>There is at least one other way to avoid preemption, than the method
+normally employed by the DPDK threading model. It may be perfectly
+safe for a thread configured with a real-time scheduling policy to use
+share non-preemption safe data structures with a set of fast path
+lcores. See also the section on <a class="reference internal" href="#cooperative-multitasking"><span class="std std-ref">Cooperative Multitasking</span></a> for
+more information.</p>
+<p>Historically, DPDK API documentation has been lacking in the area of
+specifying multi-thread safety, preemption safety, and related
+concerns, such as signal handler safety.</p>
+</section>
+</section>
+</section>
+<section id="non-eal-threads">
+<h3>Non EAL Threads<a class="headerlink" href="#non-eal-threads" title="Permalink to this headline">¶</a></h3>
+<p>In a DPDK-based fast path process, not all threads are <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL
+threads</span></a>. Unsurprisingly, the DPDK documentation refers
+to such threads as <a class="reference internal" href="../glossary.html#term-Non-EAL-thread"><span class="xref std std-term">non-EAL threads</span></a>, and this
+book will stick to that term.</p>
+<p>More unexpected is that the EAL may be the source of such non-EAL
+threads (e.g., the <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a> for interrupt handling).</p>
+<section id="unregistered-non-eal-thread">
+<h4>Unregistered Non EAL Thread<a class="headerlink" href="#unregistered-non-eal-thread" title="Permalink to this headline">¶</a></h4>
+<p>Threads that are created using non-DPDK API calls (e.g., direct or
+indirect calls via non-DPDK libraries to <code class="docutils literal notranslate"><span class="pre">pthread_create()</span></code>) are
+referred to as <a class="reference internal" href="../glossary.html#term-Unregistered-non-EAL-thread"><span class="xref std std-term">unregistered non-EAL threads</span></a>.</p>
+<p>Threads created prior to the <code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> call inherit get the
+<code class="docutils literal notranslate"><span class="pre">main()</span></code> function’s thread <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity</span></a>,
+and after that will get the main lcore’s affinity, which usually means
+they are pinned to a main lcore’s CPU core. The affinity settings for
+both those cases are less than ideal, since they result in a thread
+floating (migrating) into the main and worker lcores’ CPU cores,
+threatening their <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safety</span></a>.</p>
+<p>Unregistered non-EAL threads are best off having an affinity which
+either coincide with that of DPDK <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control threads</span></a>. An alternative approach is to not employ the main lcore as a
+<a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcore</span></a>, but instead use it for running various
+control threads, in conjunction with the <a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a>’s thread.</p>
+<section id="threaded-libraries">
+<h5>Threaded Libraries<a class="headerlink" href="#threaded-libraries" title="Permalink to this headline">¶</a></h5>
+<p>Special care need to be taken for threads created by a non-DPDK
+library, linked to the DPDK application. A particularly troublesome
+sub category is libraries that spawn threads “under the hood”, without
+the application’s knowledge and consent, and where the POSIX thread id
+is unavailable to the application.</p>
+<p>Preferably, the use of such libraries should be avoided. Even outside
+the context of the data plane, background threads in generic libraries
+is generally a sign of poor library design.</p>
+<p>If such libraries cannot be avoided, care must be take to assure that
+threads created by it on the behalf of the application receives the
+appropriate affinity settings and scheduling policy, or otherwise is
+made to not interfere with the <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a>.</p>
+</section>
+</section>
+<section id="registered-non-eal-thread">
+<h4>Registered Non EAL Thread<a class="headerlink" href="#registered-non-eal-thread" title="Permalink to this headline">¶</a></h4>
+<p>An <a class="reference internal" href="../glossary.html#term-Unregistered-non-EAL-thread"><span class="xref std std-term">unregistered non-EAL thread</span></a>
+may <a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">register</span></a> in the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a>,
+by calling <code class="docutils literal notranslate"><span class="pre">rte_register_thread()</span></code>.</p>
+<p>One of the powers granted to a registered non-EAL thread is that of
+any holder of an <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>: access to DPDK APIs that require
+the calling thread to have such an identifier. See the <a class="reference internal" href="#lcore-id-only-apis"><span class="std std-ref">Lcore Id Only APIs</span></a> section for more information.</p>
+<p>A registered non-EAL thread may use <code class="docutils literal notranslate"><span class="pre">rte_lcore_id()</span></code> to retrieve
+their lcore id, in the same manner as an EAL thread would.</p>
+<p>A registered non-EAL thread is generally <em>not</em> considered an lcore
+(i.e., an EAL thread), and the <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH()</span></code> loop macro will
+exclude registered non-EAL threads.</p>
+<p>However, the EAL-internal represention of a registered non-EAL thread
+is an instance of the EAL thread data structure, but with a role
+attribute set to <code class="docutils literal notranslate"><span class="pre">ROLE_NON_EAL</span></code>.</p>
+<p>A registered non-EAL thread is a disabled EAL thread, in the sense
+<code class="docutils literal notranslate"><span class="pre">rte_lcore_is_enabled()</span></code> returns false. It serves in the
+<code class="docutils literal notranslate"><span class="pre">ROLE_NON_EAL</span></code> role, if asked by <code class="docutils literal notranslate"><span class="pre">rte_eal_lcore_role()</span></code>.</p>
+<p>The lcore count produced by <code class="docutils literal notranslate"><span class="pre">rte_lcore_count()</span></code> <em>does include</em>
+registered non-EAL threads.</p>
+<p>There is no way for a registered non-EAL thread to receive launched
+tasks (i.e., it cannot be the subject of a <code class="docutils literal notranslate"><span class="pre">rte_launch_task()</span></code>
+call).</p>
+<p>For a discussion on why DPDK’s thread-related terminology is not
+internally consistent, see <a class="reference internal" href="#a-terminology-side-note"><span class="std std-ref">A Terminology Side Note</span></a>.</p>
+</section>
+</section>
+<section id="control-threads">
+<h3>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this headline">¶</a></h3>
+<p>Using <code class="docutils literal notranslate"><span class="pre">rte_ctrl_thread_create()</span></code>, an application may spawn what DPDK
+calls a <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>.</p>
+<p>A DPDK control thread starts its life as an <a class="reference internal" href="../glossary.html#term-Unregistered-non-EAL-thread"><span class="xref std std-term">unregistered
+non-EAL thread</span></a>. The EAL sets control thread’s <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity mask</span></a> to that of the process original <code class="docutils literal notranslate"><span class="pre">main()</span></code>
+sthread’s affinity mask, at the time it initialized the EAL, but with
+all cores used for running EAL threads removed.</p>
+<p>An alternative to using this DPDK convenience function for thread
+creation, is to rely on standard <code class="docutils literal notranslate"><span class="pre">libc</span></code> facilities (e.g.,
+<code class="docutils literal notranslate"><span class="pre">pthread_create()</span></code>).</p>
+<p>If the control thread needs access to DPDK APIs requiring the caller
+to possess a <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>, the control thread needs to
+<a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">register</span></a>.</p>
+<p>Refer to the section on <a class="reference internal" href="../intro.html#data-plane-control"><span class="std std-ref">Data Plane Control</span></a> for more information
+on what role a DPDK control thread may serve, from a functional or
+architectural perspective. Note that DPDK itself, and the application,
+may employ DPDK control threads for other purposes as well.</p>
+<section id="control-and-fast-path-thread-interaction">
+<h4>Control and Fast Path Thread Interaction<a class="headerlink" href="#control-and-fast-path-thread-interaction" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">Control threads</span></a> may need to interact with
+<a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a> for a number of reasons,
+such as affecting changes in configuration or retrieving various
+state information (e.g., counters).</p>
+<p>Each of the <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> normally runs on an
+<a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">isolated core</span></a>, dedicated for its use. Such
+luxuries cannot always be afforded mere control threads, which then
+often instead are deployed <a class="reference internal" href="../glossary.html#term-Floating-thread"><span class="xref std std-term">floating</span></a> on a set
+of cores, shared by other threads, leaving them <a class="reference internal" href="../glossary.html#term-Preemptable-thread"><span class="xref std std-term">preemptable</span></a>.</p>
+<p>This section covers two ways to deal with this problem, in an resource
+efficient and safe manner: either make them non-preemptable, or use
+preemption safe ways to interact with the fast path lcores.</p>
+<p>See also the <a class="reference internal" href="#non-preemption-safe-apis"><span class="std std-ref">Non-preemption Safe APIs</span></a> section.</p>
+<section id="non-preemptable-control-threads">
+<h5>Non Preemptable Control Threads<a class="headerlink" href="#non-preemptable-control-threads" title="Permalink to this headline">¶</a></h5>
+<p>A straight-forward way to deal with the inability of a preemptable
+control thread to safely interact with <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a> is make them <a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">non-preemptable</span></a>.</p>
+<p>The obvious, and maybe also obviously too costly, way is to use a
+per-control thread <a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">isolated core</span></a>.</p>
+<p>Another option is to configure the control threads with real-time
+scheduling policy. In case multiple control threads shares the same
+CPU core, they should be configured with <code class="docutils literal notranslate"><span class="pre">SCHED_FIFO</span></code> and the same
+static priority, and cooperate in the same manner as described for EAL
+threads, described in the <a class="reference internal" href="#cooperative-multitasking"><span class="std std-ref">Cooperative Multitasking</span></a> section.</p>
+<p>Barring any higher-priority, real-time-priority, long-running threads
+scheduled on the same core, the <code class="docutils literal notranslate"><span class="pre">SCHED_FIFO</span></code>-equipped control
+threads will qualify as non-preemptable. See <a class="reference internal" href="#non-preemption-safe-apis"><span class="std std-ref">Non-preemption Safe APIs</span></a> for more information on this subject.</p>
+<p>Like always when absolute-priority, real-time scheduling policies are
+used, care must be taken not to starve other threads, in particular
+kernel threads bound to particular cores. See the section on
+<a class="reference internal" href="#real-time-scheduling-policies"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more discussion on the use of
+real-time scheduling policies in data plane applications.</p>
+</section>
+<section id="preemptable-control-thread">
+<h5>Preemptable Control Thread<a class="headerlink" href="#preemptable-control-thread" title="Permalink to this headline">¶</a></h5>
+<p>Preemptable control threads may be safely used, with careful design of
+the interaction with the <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a>, with the
+use of preemption-safe means of communication.</p>
+<p>For simple data types, accessed in a non-transactional manner, C11
+atomics, primarily in the form of atomic loads and stores, may be
+used. Typically, the control thread would atomically store
+configuration updates, and atomically load state, statistics, trace
+events, and other information from the fast path data structures.</p>
+<p>For updates larger than 64 bits, relying machine-level atomic
+instructions may not be possible. In that case, a sequence lock may
+look like a temption option, for data which is often-read from the
+fast path, and only occasionally written by the control
+thread. However, a sequence lock is not preemption-safe on the writer
+side, although the criticial section is usually small, so depending on
+application it may be an acceptable level of risk. The risk being one
+or more <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a> being unable to
+make progress. Sequence lock does provide a means to abandoned a
+failed read transaction, which may be used to allow the thread to make
+progress, provided it keeps copy of the old data, and using the old
+data doesn’t threaten application correctness.</p>
+<p><a class="reference internal" href="../glossary.html#term-RCU"><span class="xref std std-term">Read-copy-update (RCU)</span></a> may be used to update more
+elaborate configuration or other data structures, with a set of
+dependent values.</p>
+<p>By default, DPDK rings are not preemption-safe, but when operated in
+<code class="docutils literal notranslate"><span class="pre">MP_RTS/MC_RTS</span></code> or <code class="docutils literal notranslate"><span class="pre">MP_HTS/MC_HTS</span></code> mode, they are. Such rings a
+good option for messaging. A clean, and conservative design is to
+interact between the control threads and the fast path lcores only by
+means of messaging. It may results in more code, and lower
+performance, for control plane signaling-intesive applications. Such a
+ring may also be used as a relay, or a very basic deferred-work
+mechanism, just passing a function pointer to a <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path
+lcore</span></a>, asking it to perform some action (e.g., an configuration
+update) in a preemption-safe context.</p>
+<p>Preemptable control threads acquiring locks, whether spinlocks,
+mutexes or some other kind of blocking mutual exclusion mechanism,
+shared with fast path lcores causes issues similar that of
+<a class="reference internal" href="../glossary.html#term-Priority-inversion"><span class="xref std std-term">priority inversion</span></a> in a real-time system.</p>
+<p>Interaction between preemptable control threads and EAL threads may
+occur in a obvious way. For example, the control thread takes a
+spinlock to update some table, read some packet counter value
+incremented by the fast path lcores, or attempts to dequeue elements
+from a ring which an EAL thread may have written to.</p>
+<p>There are also more subtle cases, where the interaction is much less
+obvious. For example, it may happen as a side affect of calls to
+shared libraries. A call to <code class="docutils literal notranslate"><span class="pre">malloc()</span></code>, for example, may result in a
+POSIX mutex lock being taken by the caller. If the holder is
+preempted, and a fast path lcore attempts to allocate memory, it will
+be put to sleep and not be awaken by the kernel until the mutex is
+released.</p>
+<p>More in-depth discussion on this subject will appear in the future
+<a class="reference internal" href="../sync.html#synchronization"><span class="std std-ref">Synchronization</span></a> chapter.</p>
+</section>
+</section>
+<section id="eal-control-threads">
+<h4>EAL Control Threads<a class="headerlink" href="#eal-control-threads" title="Permalink to this headline">¶</a></h4>
+<p>The EAL creates a number of DPDK control threads for internal
+use. They are control threads in the DPDK sense only, not in the sense
+described in <a class="reference internal" href="../intro.html#data-plane-control"><span class="std std-ref">Data Plane Control</span></a>. They are usually employed in
+an auxaliary role, and not in the form of a control plane agent.</p>
+<section id="interrupt-thread">
+<h5>Interrupt Thread<a class="headerlink" href="#interrupt-thread" title="Permalink to this headline">¶</a></h5>
+<p>Interrupts cannot be directly received by a user space
+process. However, there are ways for the kernel to relay this
+information to a process.</p>
+<p>At time of initialization, <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> spawns a <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>
+for the purpose of relaying this information to other threads in the
+application.</p>
+</section>
+<section id="other-control-threads">
+<h5>Other Control Threads<a class="headerlink" href="#other-control-threads" title="Permalink to this headline">¶</a></h5>
+<p>There may be other DPDK control threads of a DPDK-internal origin
+(i.e., which are not the direct result of an application calling
+<code class="docutils literal notranslate"><span class="pre">rte_ctrl_thread_create()</span></code>.</p>
+<p>Some examples of modules employing control threads:</p>
+<ul class="simple">
+<li><p>vhost library</p></li>
+<li><p>eventdev RX adapter</p></li>
+<li><p>vdpa driver</p></li>
+<li><p>dlb2 driver</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="core-allocation">
+<span id="id15"></span><h3>Core Allocation<a class="headerlink" href="#core-allocation" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a> hosting a DPDK-based fast path application
+must include an entity which decides which of the available CPU cores
+(and the <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical cores</span></a> they present to the
+software) are to be dedicated, or otherwise used, by the fast path
+process (as well as other processes). This CPU resource manger may be
+a part of a more generic resource manager function, which also manages
+I/O devices, accelerators and memory. Those subjects are left to the
+future chapters (e.g., <a class="reference internal" href="../eth.html#ethernet-devices"><span class="std std-ref">Ethernet Devices</span></a> and <a class="reference internal" href="../mem.html#memory-management"><span class="std std-ref">Memory Management</span></a>).</p>
+<p>The CPU resource manager described here takes on a task similar to,
+but much simpler than, that of a Kubernetes scheduler in a Kubernetes
+cluster, but only internally, in the <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a>.</p>
+<p>The CPU resource manager are best off left outside the fast path
+application itself, since it deals with system (i.e., <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network
+function</span></a>-wide) concerns. The data plane fast path is likely not the
+only user of CPU resources. Knowledge about other application
+processes, their resource requirements, and the mutual priority
+generally do not belong in fast path application, or even the data
+plane.</p>
+<p>Core allocation also includes steps to assure that the appropriate CPU
+cores a kept <a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">isolated</span></a>.</p>
+<p>The core allocation scheme may be static (e.g., a <a class="reference internal" href="../glossary.html#term-PNF"><span class="xref std std-term">PNF</span></a> with
+purpose-built hardware and a fixed number of CPU cores), or dynamic in
+regards to the hardware platform properties (core count, CPU cache and
+NUMA hierarchy, etc).</p>
+<p>The CPU resource manager must be equipped with a basic understanding
+of the fast path application black box constraints, e.g.:</p>
+<ul>
+<li><p>The minimum number of dedicated CPU cores required for <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast
+path lcores</span></a>.</p></li>
+<li><p>The maximum number of dedicated CPU cores the fast path application
+is able to make use of.</p></li>
+<li><p>In case of a <a class="reference internal" href="../glossary.html#term-SMT"><span class="xref std std-term">SMT</span></a> system, how should the <a class="reference internal" href="../glossary.html#term-Hardware-threading"><span class="xref std std-term">hardware
+threads</span></a> be employed, e.g. one (or a
+combination) of the follow options:</p>
+<blockquote>
+<div><ol class="upperalpha simple">
+<li><p>Allocate one hardware thread per <a class="reference internal" href="../glossary.html#term-Physical-core"><span class="xref std std-term">physical core</span></a> to the
+fast path application, and leave the sibling hardware threads
+idle.</p></li>
+<li><p>Allocate one hardware thread per <a class="reference internal" href="../glossary.html#term-Physical-core"><span class="xref std std-term">physical core</span></a> to the
+fast path application, and use the siblings for other non-fast
+path threads, or enable them in the control thread core mask.</p></li>
+<li><p>Allocate all siblings of a particular physical core to the fast
+path, and let it sort out how they are best used (e.g., by
+digging into the CPU topology via /proc, or just ignore SMT
+topology).</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>The minimum and maximum number of shared CPU cores, for data plane
+control and other control threads.</p></li>
+<li><p>For a heterogenous system, if small or large CPU cores, or a
+combination thereof, are preferred.</p></li>
+</ul>
+<p>Usually, one or more cores are reserved for <a class="reference internal" href="../glossary.html#term-Data-plane-control"><span class="xref std std-term">data plane
+control</span></a>, <a class="reference internal" href="../glossary.html#term-Control-plane"><span class="xref std std-term">control plane</span></a>, or <a class="reference internal" href="../glossary.html#term-Management-plane"><span class="xref std std-term">management plane</span></a> use, or
+for the use by DPDK-internal threads, such as the interrupt thread.</p>
+<p>Allocation would normally occur during DPDK application startup. See
+the section on <a class="reference internal" href="#lcore-affinity"><span class="std std-ref">Lcore Affinity</span></a> for more information. The number
+of EAL threads created puts an upper limit on how many CPU cores may
+be utilized by <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a>. The limit is fixed
+across a DPDK process’ lifetime.</p>
+<p>Which <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical cores</span></a> should be used may be
+specified by means of the <code class="docutils literal notranslate"><span class="pre">-l</span></code> or <code class="docutils literal notranslate"><span class="pre">-c</span></code> <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL parameters</span></a>, at
+program startup.</p>
+<p>Which CPU cores are to be used for the DPDK <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control threads</span></a> can also be controlled, by setting the appropriate
+initial DPDK process <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity mask</span></a>. Consider an application <code class="docutils literal notranslate"><span class="pre">eavesdropper</span></code> run on a system
+with 24 cores, numbered 0-23 (inclusive):</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="n">taskset</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="mi">1-23</span><span class="w"> </span><span class="n">eavesdropper</span><span class="w"> </span><span class="o">-</span><span class="n">l</span><span class="w"> </span><span class="mi">3-23</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">taskset</span></code> utility runs the specified program, with the affinity
+setting provided. In this invocation, taskset will set initial
+eavesdropper <code class="docutils literal notranslate"><span class="pre">main()</span></code> thread affinity to include cores numbered 1
+to 23. <code class="docutils literal notranslate"><span class="pre">-l</span> <span class="pre">3-23</span></code> will instruct <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a>, via <code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code>,
+to use the logical cores numbered 3 to 23; one EAL threads per CPU
+core. Any DPDK control threads created will receive an affinity mask
+consisting of logical cores 2 and 3.</p>
+<section id="internal-allocation">
+<h4>Internal Allocation<a class="headerlink" href="#internal-allocation" title="Permalink to this headline">¶</a></h4>
+<p>A task related to, but dinstinct from, core allocation is to decide
+in what role each of the available lcores will serve <em>within</em> the fast
+path application. This in turn is much related to the application
+architecture, for example how <a class="reference internal" href="../glossary.html#term-Work-scheduler"><span class="xref std std-term">work scheduling</span></a>
+is implemented.  The organization of the packet processing pipeline,
+and the division of concearns between lcores, and the implementation
+of <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a> is an decidely application-internal questions,
+and a topic left to future chapters.</p>
+</section>
+<section id="service-lcore-allocation">
+<h4>Service Lcore Allocation<a class="headerlink" href="#service-lcore-allocation" title="Permalink to this headline">¶</a></h4>
+<p>For applications that use the DPDK <a class="reference internal" href="../glossary.html#term-Service-cores-framework"><span class="xref std std-term">service cores framework</span></a>,
+there is a need to configure a number of the DPDK-managed lcores
+to be used for running services.</p>
+<p>Which lcores are to be used as service cores may specified using
+<a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL parameters</span></a>. Configuring service cores by command-line
+options make sense for driver-level service core usage, in particular
+if said PMD is also instantiated using EAL parameters.</p>
+<p>When service cores are used for application-level (i.e.,
+non-DPDK-platform level) services, the conversion of <a class="reference internal" href="../glossary.html#term-Worker-lcore"><span class="xref std std-term">worker
+lcores</span></a> to <a class="reference internal" href="../glossary.html#term-Service-lcore"><span class="xref std std-term">service lcores</span></a> is
+likely best managed by the application itself, being an
+process-internal implementation detail.</p>
+</section>
+</section>
+<section id="thread-type-summary">
+<h3>Thread Type Summary<a class="headerlink" href="#thread-type-summary" title="Permalink to this headline">¶</a></h3>
+<table class="colwidths-given docutils align-default" id="id20">
+<caption><span class="caption-text">Data Plane Thread Types</span><a class="headerlink" href="#id20" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 32%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head"><p>Creation</p></th>
+<th class="head"><p>Has Lcore Id?</p></th>
+<th class="head"><p>Processor Affinity</p></th>
+<th class="head"><p>Usually Risks Preemption</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="line-block">
+<div class="line"><a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a></div>
+<div class="line"><a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">Main lcore</span></a></div>
+<div class="line"><a class="reference internal" href="../glossary.html#term-Worker-lcore"><span class="xref std std-term">Worker lcore</span></a></div>
+<div class="line"><a class="reference internal" href="../glossary.html#term-Service-lcore"><span class="xref std std-term">Service lcore</span></a></div>
+<div class="line"><a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">Fast path lcore</span></a></div>
+</div>
+</td>
+<td><p>EAL</p></td>
+<td><p>Yes</p></td>
+<td><p>Almost always <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">pinned</span></a> to a dedicated core.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">Registered non-EAL thread</span></a></p></td>
+<td><p>Application e.g. via <code class="docutils literal notranslate"><span class="pre">pthread_create()</span></code> + <code class="docutils literal notranslate"><span class="pre">rte_thread_register()</span></code>.</p></td>
+<td><p>Yes</p></td>
+<td><p>Unspecified</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../glossary.html#term-Unregistered-non-EAL-thread"><span class="xref std std-term">Unregistered non-EAL thread</span></a></p></td>
+<td><p>Application e.g. via <code class="docutils literal notranslate"><span class="pre">pthread_create()</span></code>.</p></td>
+<td><p>No</p></td>
+<td><p>Unspecified</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line"><a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">Control Thread</span></a></div>
+<div class="line"><a class="reference internal" href="../glossary.html#term-Interrupt-thread"><span class="xref std std-term">Interrupt Thread</span></a></div>
+</div>
+</td>
+<td><p>EAL or application via <code class="docutils literal notranslate"><span class="pre">rte_ctrl_thread_create()</span></code>.</p></td>
+<td><p>No</p></td>
+<td><p>Original pre-<code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> main thread affinity, with the
+lcore CPU cores removed.</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="service-cores">
+<span id="id16"></span><h3>Service Cores<a class="headerlink" href="#service-cores" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="a-terminology-side-note">
+<span id="id17"></span><h3>A Terminology Side Note<a class="headerlink" href="#a-terminology-side-note" title="Permalink to this headline">¶</a></h3>
+<p>The misleading use of <em>lcore</em> and its derivate terms in DPDK has a
+historical basis. The terminology dates back to pre-2.0.0 version of
+the software. In early DPDK incarnations the lcore was a hardware
+<a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> drafted into service as a DPDK lcore, and was
+represented by and in various data in the core DPDK framework (the
+<a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a>), libraries, and <a class="reference internal" href="../glossary.html#term-PMD"><span class="xref std std-term">PMDs</span></a>.</p>
+<p>When the affinity requirement was relaxed in DPDK 2.0.0, the lcore and
+related names were kept, even though the DPDK lcore was no longer
+necessarily tied to a logical core. The <em>lcore</em> was now just another
+word for an <em>EAL thread</em>, according to the documentation.</p>
+<p>The situations deteriorated further when the rte_thread_register()
+function was introduced into the DPDK 20.11 public API. This function
+allowed its user to create what the documentation refers to as
+<em>registered non-EAL threads</em>, that had a <em>lcore id</em>, and was counted
+by <code class="docutils literal notranslate"><span class="pre">rte_lcore_count()</span></code>, both suggesting it was indeed an
+lcore. However, these threads are excluded from <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH</span></code>,
+suggesting they were not lcores.</p>
+<p>Although the current state of affairs resulted a fair amount headache
+and verbiage for dataplane book authors, it doesn’t cause much trouble
+in data plane software developers’ everyday DPDK
+discussions. <a class="footnote-reference brackets" href="#headache" id="id18">7</a> There are two reasons for this:</p>
+<ol class="arabic simple">
+<li><p>The defacto one-to-one relationship between lcore and CPU core is
+even in contemporary applications <em>almost</em> always true. This
+subject is gets an in-depth treatment in the <a class="reference internal" href="#lcore-affinity"><span class="std std-ref">Lcore Affinity</span></a>
+section.</p></li>
+<li><p><a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">Registered non-EAL thread</span></a> are
+releatively scarce and does not serve a central roll, especially
+for the DPDK platform itself. Thus, their complicated, incoherent
+nature, where they are sometimes an EAL thread (lcore) and
+sometimes not, is rarely exposed.</p></li>
+</ol>
+</section>
+<section id="real-time-scheduling-policies">
+<span id="id19"></span><h3>Real Time Scheduling Policies<a class="headerlink" href="#real-time-scheduling-policies" title="Permalink to this headline">¶</a></h3>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="alternatives"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>An application running on <em>bare metal</em> (in the original sense of
+the word, i.e. a system bare of anything resembling an operating
+system), with supervisor capabilities, and carrying its own
+special-purpose kernel, would have other options.</p>
+</dd>
+<dt class="label" id="cppthreadoptions"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>Nowadays, coroutines and fibers are options to using POSIX threads
+for concurrency in C++. This has long been true for C, where many
+of the original threading libraries had threads that was actually
+fibers (i.e, the thread switches were performed in user space). The
+term <em>green threads</em> were used as the time. In C, the practice
+seems to have fallen out of favor.</p>
+</dd>
+<dt class="label" id="unix"><span class="brackets"><a class="fn-backref" href="#id4">3</a></span></dt>
+<dd><p>UNIX here is not only meant to refer to the set of
+now-largely-extinct operating system that are trademarked UNIX, but
+also those that are API compatible with the POSIX APIs, such as
+FreeBSD and Linux.</p>
+</dd>
+<dt class="label" id="mainthread"><span class="brackets"><a class="fn-backref" href="#id5">4</a></span></dt>
+<dd><p>The original thread that called the program’s main() function is
+employed as a EAL thread for the main lcore, and thus no thread
+need to be spawned for this lcore.</p>
+</dd>
+<dt class="label" id="logicalcoreperformance"><span class="brackets"><a class="fn-backref" href="#id6">5</a></span></dt>
+<dd><p>The performance characterstics may vary wildly.</p>
+</dd>
+<dt class="label" id="noterm"><span class="brackets"><a class="fn-backref" href="#id7">6</a></span></dt>
+<dd><p>Presumably the reason is that the authors assumed that EAL threads
+are always employed as fast path lcores, and thus there’s no need
+for a separate term.</p>
+</dd>
+<dt class="label" id="headache"><span class="brackets"><a class="fn-backref" href="#id18">7</a></span></dt>
+<dd><p>The author suspects the plentphora of terms required to talk about
+DPDK threads in a reasonbly precise manner might result in some
+headache also for the readers of this text.</p>
+</dd>
+<dt class="label" id="ladawait"><span class="brackets"><a class="fn-backref" href="#id14">8</a></span></dt>
+<dd><p>The quality of experience of such a data plane would be on par with
+the automotive industry of the Soviet Union, where the customer was
+asked to wait 10 years for the delivery of their new car.</p>
+</dd>
+<dt class="label" id="ton"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
+<dd><p>Technically, such applications would likely allow a 1:N
+relationship between EAL thread and CPU core, as long as the N
+cores used are dedicated to that EAL thread. The author has trouble
+seeing such a deployment as anything but a waste of (N-1) perfectly
+serviceable CPU cores.</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Data Plane Software Design</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Threading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unix-networking-application-architecture">UNIX Networking Application Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dpdk-threading-model">DPDK Threading Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eal-threads">EAL Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-eal-threads">Non EAL Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#control-threads">Control Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-allocation">Core Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-type-summary">Thread Type Summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-cores">Service Cores</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-terminology-side-note">A Terminology Side Note</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#real-time-scheduling-policies">Real Time Scheduling Policies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../work.html">Work Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../eth.html">Ethernet Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mbuf.html">The Packet Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../headers.html">Protocol Header Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mem.html">Memory Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sync.html">Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cache.html">Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stats/stats.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../time.html">Timekeeping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../timers.html">Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crypto.html">Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modularization.html">Modularization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../control.html">Control Plane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slowpath.html">Slow Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../antipatterns.html">Anti Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../intro.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="../work.html" title="next chapter">Work Scheduling</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Ericsson AB.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/threading/threading.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

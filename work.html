@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Ethernet Devices" href="eth.html" />
-    <link rel="prev" title="Threading" href="threading.html" />
+    <link rel="prev" title="Threading" href="threading/threading.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="work-scheduling">
-<h1>Work Scheduling<a class="headerlink" href="#work-scheduling" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Work Scheduling<a class="headerlink" href="#work-scheduling" title="Permalink to this headline">¶</a></h1>
 <p>(Work scheduling is a too-narrow title. This chapter should cover the
 overall organization of the processing.)</p>
 <section id="hardware-ingress-load-balancing">
@@ -92,11 +92,19 @@ overall organization of the processing.)</p>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Work Scheduling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#receive-side-and-receive-flow-scaling">Receive Side and Receive Flow Scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dpdk-generic-flow">DPDK Generic Flow</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#run-to-completion">Run to Completion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-points">Optimization Points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduled-pipeline">Scheduled Pipeline</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#dpdk-service-cores">DPDK Service Cores</a></li>
 </ul>
 </li>
@@ -122,7 +130,7 @@ overall organization of the processing.)</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="threading.html" title="previous chapter">Threading</a></li>
+      <li>Previous: <a href="threading/threading.html" title="previous chapter">Threading</a></li>
       <li>Next: <a href="eth.html" title="next chapter">Ethernet Devices</a></li>
   </ul></li>
 </ul>

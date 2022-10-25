@@ -36,37 +36,84 @@
 <h1>Data Plane Software Design<a class="headerlink" href="#data-plane-software-design" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>What you see here is only very early draft of this book. It currently
-consists of a skeleton structure, plus two chapters
-<a class="reference internal" href="intro.html#introduction"><span class="std std-ref">Introduction</span></a> and <a class="reference internal" href="stats/stats.html#statistics"><span class="std std-ref">Statistics</span></a> in draft versions.</p>
+<p>What you see here is only very early draft of this book. It
+currently consists of a skeleton structure, and three chapters in
+draft form: <a class="reference internal" href="intro.html#introduction"><span class="std std-ref">Introduction</span></a>, <a class="reference internal" href="threading/threading.html#threading"><span class="std std-ref">Threading</span></a> and
+<a class="reference internal" href="stats/stats.html#statistics"><span class="std std-ref">Statistics</span></a>.</p>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#audience">Audience</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#networking-planes">Networking Planes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#data-plane-applications">Data Plane Applications</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#network-function">Network Function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#hardware-platforms">Hardware Platforms</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#people">People</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#networking-planes">Networking Planes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#data-plane">Data Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#control-plane">Control Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#management-plane">Management Plane</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="threading.html#dpdk-deployment-model-overview">DPDK Deployment Model Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="threading.html#worker-cores">Worker Cores</a></li>
-<li class="toctree-l2"><a class="reference internal" href="threading.html#control-threads">Control Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#data-plane-applications">Data Plane Applications</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#low-latency-non-data-plane-applications">Low Latency Non Data Plane Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#low-capacity-data-plane">Low Capacity Data Plane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#data-plane-development-kit">Data Plane Development Kit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#data-plane-fast-path">Data Plane Fast Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#data-plane-slow-path">Data Plane Slow Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#data-plane-control">Data Plane Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#reference-architectures">Reference Architectures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#network-function">Network Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#hardware-platforms">Hardware Platforms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#processor">Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#accelerators">Accelerators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#memory">Memory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#people">People</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#why-data-plane-programming-is-easy">Why Data Plane Programming is Easy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#why-data-plane-programming-is-hard">Why Data Plane Programming is Hard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#staffing-data-plane-projects">Staffing Data Plane Projects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="threading/threading.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threading/threading.html#unix-networking-application-architecture">UNIX Networking Application Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threading/threading.html#dpdk-threading-model">DPDK Threading Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#eal-threads">EAL Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#non-eal-threads">Non EAL Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#control-threads">Control Threads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#core-allocation">Core Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#thread-type-summary">Thread Type Summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#service-cores">Service Cores</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#a-terminology-side-note">A Terminology Side Note</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading/threading.html#real-time-scheduling-policies">Real Time Scheduling Policies</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="work.html#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="work.html#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="work.html#receive-side-and-receive-flow-scaling">Receive Side and Receive Flow Scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="work.html#dpdk-generic-flow">DPDK Generic Flow</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="work.html#run-to-completion">Run to Completion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="work.html#pipeline">Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="work.html#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="work.html#optimization-points">Optimization Points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="work.html#scheduled-pipeline">Scheduled Pipeline</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="work.html#dpdk-service-cores">DPDK Service Cores</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eth.html#ethernet-api">Ethernet API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eth.html#ethernet-api">Ethernet API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eth.html#receive-and-transmit-queues">Receive and Transmit Queues</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="eth.html#hardware-nic-drivers">Hardware NIC Drivers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eth.html#virtio-net">VirtIO Net</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eth.html#memif">Memif</a></li>
@@ -82,15 +129,27 @@ consists of a skeleton structure, plus two chapters
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mem.html">Memory Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mem.html#dpdk-memory-pools">DPDK Memory Pools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mem.html#dpdk-memory-pools">DPDK Memory Pools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mem.html#ring-versus-stack">Ring versus Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mem.html#per-core-caches">Per-core Caches</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="mem.html#dpdk-heap">DPDK Heap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mem.html#huge-pages">Huge Pages</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#staying-safe">Staying Safe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.html#staying-safe">Staying Safe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sync.html#thread-safety">Thread Safety</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sync.html#asynchronous-signal-safety">Asynchronous Signal Safety</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sync.html#preemption-safety">Preemption Safety</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sync.html#considerations">Considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#amdahl-s-law">Amdahl’s Law</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.html#amdahl-s-law">Amdahl’s Law</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sync.html#critical-section-length-and-impact">Critical Section Length and Impact</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sync.html#c11-atomics">C11 Atomics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sync.html#sequence-locks">Sequence Locks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sync.html#spinlocks-and-ticketlocks">Spinlocks and Ticketlocks</a></li>
@@ -99,8 +158,15 @@ consists of a skeleton structure, plus two chapters
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cache.html">Caches</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#working-set-considerations">Working Set Considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#software-prefetching">Software Prefetching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#working-set-considerations">Working Set Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cache.html#staying-on-chip">Staying On Chip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cache.html#dram-bandwidth">DRAM Bandwidth</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#software-prefetching">Software Prefetching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cache.html#cache-line-demotion-and-flushing">Cache Line Demotion and Flushing</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="cache.html#non-temporal-loads-and-stores">Non Temporal Loads and Stores</a></li>
 </ul>
 </li>
@@ -112,10 +178,28 @@ consists of a skeleton structure, plus two chapters
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stats/stats.html">Statistics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="stats/stats.html#counters">Counters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#use-cases">Use Cases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#organization">Organization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#synchronization">Synchronization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#telemetry">Telemetry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#requirements">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#performance">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#update-propagation-delay">Update Propagation Delay</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#organization">Organization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#separate-versus-integrated-counters">Separate versus Integrated Counters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stats/stats.html#synchronization">Synchronization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#shared-non-synchronized-counters">Shared Non Synchronized Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#shared-atomic-counters">Shared Atomic Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#shared-lock-protected-counters">Shared Lock Protected Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#shared-counters-with-per-core-buffering">Shared Counters with Per Core Buffering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#per-core-counters">Per Core Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats/stats.html#performance-comparison">Performance Comparison</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="stats/stats.html#device-statistics">Device Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stats/stats.html#metrics-library">Metrics Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stats/stats.html#telemetry-library">Telemetry Library</a></li>
@@ -123,12 +207,21 @@ consists of a skeleton structure, plus two chapters
 </li>
 <li class="toctree-l1"><a class="reference internal" href="time.html">Timekeeping</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="time.html#system-time-access">System Time Access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="time.html#dpdk-cycles-api">DPDK Cycles API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="time.html#dpdk-cycles-api">DPDK Cycles API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="time.html#measuring-processing-latency">Measuring Processing Latency</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="timers.html">Timers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#timer-wheels">Timer Wheels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#dispatching-timeouts">Dispatching Timeouts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#timer-wheels">Timer Wheels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="timers.html#dpdk-timer">DPDK Timer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#dispatching-timeouts">Dispatching Timeouts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="timers.html#dpdk-eventdev-timers">DPDK Eventdev Timers</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a><ul>
@@ -143,13 +236,22 @@ consists of a skeleton structure, plus two chapters
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="control.html">Control Plane</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="control.html#control-and-data-plane-division-of-concern">Control and Data Plane Division of Concern</a></li>
-<li class="toctree-l2"><a class="reference internal" href="control.html#control-plane-interface">Control Plane Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="control.html#control-and-data-plane-division-of-concern">Control and Data Plane Division of Concern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="control.html#layers-of-control-planes">Layers of Control Planes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="control.html#control-plane-interface">Control Plane Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="control.html#control-plane-synchronization-strategies">Control Plane Synchronization Strategies</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="control.html#management-plane">Management Plane</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="slowpath.html">Slow Path</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="slowpath.html#slow-and-fast-path-division-of-concern">Slow and Fast Path Division of Concern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="slowpath.html#slow-and-fast-path-division-of-concern">Slow and Fast Path Division of Concern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="slowpath.html#flow-cache-architecture">Flow Cache Architecture</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="antipatterns.html">Anti Patterns</a></li>
@@ -185,7 +287,7 @@ consists of a skeleton structure, plus two chapters
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>

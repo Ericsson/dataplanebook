@@ -76,7 +76,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
@@ -84,8 +84,15 @@
 <li class="toctree-l1"><a class="reference internal" href="mem.html">Memory Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronization</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Caches</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#working-set-considerations">Working Set Considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#software-prefetching">Software Prefetching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-set-considerations">Working Set Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#staying-on-chip">Staying On Chip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dram-bandwidth">DRAM Bandwidth</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#software-prefetching">Software Prefetching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cache-line-demotion-and-flushing">Cache Line Demotion and Flushing</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#non-temporal-loads-and-stores">Non Temporal Loads and Stores</a></li>
 </ul>
 </li>

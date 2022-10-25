@@ -129,7 +129,7 @@ cost</p></li>
 <section id="time-efficiency">
 <span id="id2"></span><h4>Time Efficiency<a class="headerlink" href="#time-efficiency" title="Permalink to this headline">¶</a></h4>
 <p>The typical data plane application has a range from a couple of
-hundred clock cycles worth of <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> per packet
+hundred clock cycles worth of <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> per packet
 for <a class="reference internal" href="../glossary.html#term-Low-touch-application"><span class="xref std std-term">low touch</span></a> applications, up to an
 average of a couple of tens of thousands per packet for <a class="reference internal" href="../glossary.html#term-High-touch-application"><span class="xref std std-term">high
 touch</span></a> applications.</p>
@@ -155,8 +155,8 @@ than does its low touch cousin.</p>
 <p>The next assumption is that no more than 5% of the total per-packet
 CPU cycle budget should be spent on statistics, and that roughly one
 counter update per 300 CPU cycles worth of domain logic
-<a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> is expected.</p>
-<p>In case these assumptions hold true, the <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a>
+<a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> is expected.</p>
+<p>In case these assumptions hold true, the <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a>
 budget for a counter update is 15 core clock cycles.</p>
 <p>Uncertainties aside, this approximation give you an order-of-magnitude
 level indication of the performance requirements, and underscores the
@@ -196,7 +196,7 @@ quickly the same cache line is reused) of the memory used, which
 affects <a class="reference internal" href="#time-efficiency"><span class="std std-ref">Time Efficiency</span></a>.</p>
 <p>The former may impact requirements for the amount of DDR installed on
 the system (or allocated to the container), and the amount of
-<a class="reference internal" href="../glossary.html#term-Huge-Pages"><span class="xref std std-term">huge page</span></a> memory made available to the fast path
+<a class="reference internal" href="../glossary.html#term-Huge-pages"><span class="xref std std-term">huge page</span></a> memory made available to the fast path
 process.</p>
 <p>The latter translate to CPU core stalls (waiting for memory to be read
 or written), and thus more CPU cycles required per counter update, and
@@ -266,7 +266,7 @@ need to be solved regardless.</p>
 <section id="update-propagation-delay">
 <h3>Update Propagation Delay<a class="headerlink" href="#update-propagation-delay" title="Permalink to this headline">¶</a></h3>
 <p><em>Update propagation delay</em> in this chapter refers to the
-<a class="reference internal" href="../glossary.html#term-Wall-clock-Latency"><span class="xref std std-term">wall-clock latency</span></a> between the point in time when the counted
+<a class="reference internal" href="../glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a> between the point in time when the counted
 event occurred, until the counter is updated and available to a
 potential reader. The result of <a class="reference internal" href="../glossary.html#term-Domain-logic"><span class="xref std std-term">domain logic</span></a> processing that
 caused the counter update (e.g, a packet being modified), and the
@@ -284,7 +284,7 @@ think about how quickly a user, or any kind of data plane
 application-external agent, could retrieve counters which should
 reflect a particular packet having been received, processed, or sent.</p>
 <p>For example, if serving a control plane request has a practical
-(although not guaranteed) lower <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> of 1 ms,
+(although not guaranteed) lower <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> of 1 ms,
 that could be used to set an upper boundary for the counter update
 propagation delay.</p>
 </section>
@@ -302,7 +302,7 @@ dimensioned for the worst case, for every type of object. Spatial
 locality may also be worse than other, more compact, alternatives.</p>
 <p>An alternative to structs is to use some kind of map, for example a
 hash table or some sort of tree. However, even efficient map
-implementations typically has a <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a> in the
+implementations typically has a <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> in the
 range 10-100s of clock cycles to access the value of a key.</p>
 <p>One radically different approach to managing counters is to maintain
 only changes, and not the complete statistics state, in the data plane
@@ -356,7 +356,7 @@ dynamic allocation, but use fixed-offset accesses to the fields within
 those dynamically-allocated chunks of memory. For example, the list of
 flows could be a pointer to a dynamically allocated array, instead of
 a fixed, compile-time-sized, array.</p>
-<p>Large counter data structures should be allocated from <a class="reference internal" href="../glossary.html#term-Huge-Pages"><span class="xref std std-term">huge
+<p>Large counter data structures should be allocated from <a class="reference internal" href="../glossary.html#term-Huge-pages"><span class="xref std std-term">huge
 page</span></a> memory, regardless if the statistics struct is
 self-contained or spread across many different chunks of memory.</p>
 </section>
@@ -515,7 +515,7 @@ operations:</p>
 </section>
 <section id="reading">
 <h4>Reading<a class="headerlink" href="#reading" title="Permalink to this headline">¶</a></h4>
-<p>Reading counter values is very straight-forward and <a class="reference internal" href="../glossary.html#term-Preemption-Safety"><span class="xref std std-term">preemption
+<p>Reading counter values is very straight-forward and <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption
 safe</span></a>:</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
 <span class="nf">ep_stats_session_read</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"></span>
@@ -624,7 +624,7 @@ spinlock.</p>
 operations may turn gains into losses.</p>
 <p>Generally, in user space applications, the primary cause of the
 performance degradation caused by a lock is related to the length (in
-terms of <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing latency</span></a>) of the <a class="reference internal" href="../glossary.html#term-Critical-section"><span class="xref std std-term">critical section</span></a>
+terms of <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a>) of the <a class="reference internal" href="../glossary.html#term-Critical-section"><span class="xref std std-term">critical section</span></a>
 (i.e., how long the lock is held). For the category of
 short-transaction systems that data plane applications fall into, the
 main issue is usually not critical section length - since it’s usually
@@ -660,7 +660,7 @@ lock is released.</p>
 <section id="id11">
 <h4>Reading<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
 <p>Reading counter values is very straight-forward, but <em>not</em>
-<a class="reference internal" href="../glossary.html#term-Preemption-Safety"><span class="xref std std-term">preemption safe</span></a>. In case the reader thread
+<a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safe</span></a>. In case the reader thread
 is preempted when it has acquired the lock, but not yet released it,
 all the lcore worker threads will eventually be waiting to acquire the
 lock, and will continue to make progress only when the reader thread
@@ -1056,7 +1056,7 @@ primarily by causing the eviction of level 1 cache lines used by
 other parts of the fast path.</p></li>
 <li><p>If the same counter is repeatedly updated as a part of the same,
 large, write buffer flush transaction, flush performance will
-benefit from thes high degree of temporal locality.</p></li>
+benefit from a high degree of temporal locality.</p></li>
 <li><p>A write buffer which are allowed to grow large will take the lcore
 worker thread a long time to flush, potentially causing an unacceptable
 level of packet latency jitter.</p></li>
@@ -1092,7 +1092,7 @@ lcore worker will start to experience larger batches, and counter
 flushes will contain more operations, reducing per-counter update
 overhead.</p>
 <p>As an example, assume a fast path application where the processing is
-organized as a pipeline, with a per-pipeline stage <a class="reference internal" href="../glossary.html#term-Processing-Latency"><span class="xref std std-term">processing
+organized as a pipeline, with a per-pipeline stage <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing
 latency</span></a> of 1000 core clock cycles, running on a CPU operating at 2,5
 GHz. When a batch of packets have been processed, the lcore calls
 <code class="docutils literal notranslate"><span class="pre">stat_wb_flush()</span></code>. If only a single packet is being processed, the
@@ -1117,7 +1117,7 @@ retrieved relatively cheaply with <code class="docutils literal notranslate"><sp
 <p>If the per-core data structures are large, it’s better to have an
 array of pointers, and only allocated as many as the actual lcore
 count, or dynamically on-demand. This will reduce the amount of memory
-used, and allow allocation from <a class="reference internal" href="../glossary.html#term-Huge-Pages"><span class="xref std std-term">huge page</span></a> memory.</p>
+used, and allow allocation from <a class="reference internal" href="../glossary.html#term-Huge-pages"><span class="xref std std-term">huge page</span></a> memory.</p>
 <p>This scheme disallows modifying counters from non-lcore worker
 threads, but does allow read operations from any thread (even such
 that my be preempted).</p>
@@ -1597,7 +1597,7 @@ statistics in real applications.</p>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../threading.html">Threading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../threading/threading.html">Threading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mbuf.html">The Packet Buffer</a></li>
@@ -1608,10 +1608,28 @@ statistics in real applications.</p>
 <li class="toctree-l1"><a class="reference internal" href="../datastructures.html">Data Structures</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Statistics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#counters">Counters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#use-cases">Use Cases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#organization">Organization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#synchronization">Synchronization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-cases">Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#telemetry">Telemetry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#performance">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-propagation-delay">Update Propagation Delay</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#organization">Organization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#separate-versus-integrated-counters">Separate versus Integrated Counters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#synchronization">Synchronization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared-non-synchronized-counters">Shared Non Synchronized Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared-atomic-counters">Shared Atomic Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared-lock-protected-counters">Shared Lock Protected Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared-counters-with-per-core-buffering">Shared Counters with Per Core Buffering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#per-core-counters">Per Core Counters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-comparison">Performance Comparison</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#device-statistics">Device Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metrics-library">Metrics Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#telemetry-library">Telemetry Library</a></li>
