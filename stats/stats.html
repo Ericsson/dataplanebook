@@ -1187,6 +1187,17 @@ lcore-to-lcore writer synchronization is required.</p>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
+<p>To guarantee that the counter is written atomically (e.g., to avoid a
+scenario where a 64-bit counter is moved from register to memory using
+four 16-bit store operations), an atomic store is used. Since there is
+only a single writer (i.e., an <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> or a
+<a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL thread</span></a>), the associated load need not be
+atomic. More importantly, the whole load + add + store sequence need
+not be atomic, and thus a comparatively expensive atomic add (e.g., a
+<code class="docutils literal notranslate"><span class="pre">__atomic_fetch_add()</span></code>) is avoided.</p>
+<p>A relaxed-memory model atomic store comes without any performance
+penalty on all DPDK-supported compilers and CPU architectures. See the
+section of reading below for more information on this topic.</p>
 </section>
 <section id="id26">
 <h4>Reading<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
@@ -1197,7 +1208,8 @@ from 0 up to <code class="docutils literal notranslate"><span class="pre">RTE_LC
 using the <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH</span></code> macro from <code class="docutils literal notranslate"><span class="pre">rte_lcore.h</span></code>). The
 read-side operation is usually not very performance sensitive, so it
 makes sense to do whatever results in the cleanest code.</p>
-<p>Here’s an example, which provides per-counter API.</p>
+<p>Here’s an example, using the per-counter accessor function design
+style:</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"></span>
 <span class="nf">stats_get_lcore_total_bytes</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">)</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>

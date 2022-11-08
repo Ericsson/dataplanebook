@@ -943,6 +943,19 @@ lcore-to-lcore writer synchronization is required.
 
 .. literalinclude:: stats_per_core_add.c
 
+To guarantee that the counter is written atomically (e.g., to avoid a
+scenario where a 64-bit counter is moved from register to memory using
+four 16-bit store operations), an atomic store is used. Since there is
+only a single writer (i.e., an :term:`EAL thread` or a
+:term:`registered non-EAL thread`), the associated load need not be
+atomic. More importantly, the whole load + add + store sequence need
+not be atomic, and thus a comparatively expensive atomic add (e.g., a
+``__atomic_fetch_add()``) is avoided.
+
+A relaxed-memory model atomic store comes without any performance
+penalty on all DPDK-supported compilers and CPU architectures. See the
+section of reading below for more information on this topic.
+
 Reading
 ^^^^^^^
 
@@ -955,7 +968,8 @@ using the ``RTE_LCORE_FOREACH`` macro from ``rte_lcore.h``). The
 read-side operation is usually not very performance sensitive, so it
 makes sense to do whatever results in the cleanest code.
 
-Here's an example, which provides per-counter API.
+Here's an example, using the per-counter accessor function design
+style:
 
 .. literalinclude:: stats_per_core_single_read.c
 
