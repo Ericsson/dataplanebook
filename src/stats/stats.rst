@@ -933,7 +933,7 @@ similar struct definition as :ref:`Shared Non Synchronized Counters`.
    line (i.e., :term:`false sharing`). If frequently-updated counters for
    two different cores are hosted by the same cache line, this shared
    cache line will partly defeat the purpose of using per-core data
-   structures. *False sharing* does not impact correctness.
+   structures. False sharing does not affect correctness.
 
 Arithmetic Operations
 ^^^^^^^^^^^^^^^^^^^^^

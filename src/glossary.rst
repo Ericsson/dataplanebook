@@ -19,10 +19,16 @@ Glossary
       (in terms of reduced :term:`processing latency`) when multiple
       processors are used to complete a partly parallel task.
 
+   ASIC
+      An application-specific integrated circuit (ASIC) is a chip
+      built to implementation a particular function, or set of related
+      functions.
+
    ATM
       Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
       telecommunications network, that has largely fallen into disuse.
-      As opposed to IP, ATM is connection-oriented on the data link layer.
+      As opposed to IP, ATM is connection-oriented on the :term:`data
+      link layer`.
 
    ARP
       The Address Resolution Protocol (ARP) is used in conjunction
@@ -32,6 +38,9 @@ Glossary
    BGP
       The Border Gateway Protocol (BGP) is a protocol used by Internet
       routers to exchange routing and reachability information.
+
+   Bottom half
+      See :term:`top half`.
 
    Data plane platform
       The part of the data plane applications that provides hardware
@@ -50,6 +59,20 @@ Glossary
       the program's threads. A program containing a data race may also
       produce different results depending on which :term:`ISA`, CPU,
       compiler, or compiler flags are used.
+
+   DVFS
+      Dynamic voltage and frequency scaling (DVFS), sometimes
+      shortened to just *frequency scaling*, is a CPU feature in where
+      the operating frequency and the voltage for a particular
+      :term:`physical CPU core <physical core>`, or cluster of cores,
+      may be reduced, to improve energy efficiency (e.g., the amount
+      energy required to finish some task). DVFS may be available in
+      the core itself, for a cluster of core, or for non-core hardware
+      blocks such as the interconnect, or accelerators.
+
+      CPU core frequencies is either controlled by the automoously by
+      the hardware the by kernel, or by a user application, using
+      kernel runtime configuration to do so.
 
    eBPF
       Extended Berkeley Packet Filter (eBPF) is a low-level
@@ -77,6 +100,13 @@ Glossary
    :ref:`CNF <Network Function>`
       A container network function (CNF) is a :term:`network function`
       hosted in a container.
+
+   Event fd
+      An event :term:`file descriptor` is a reference to a
+      kernel-level event fd object, designed to be used by user
+      application for thread synchronization. An event fd object has
+      sempahor-like semantics, but unlike POSIX semaphores, event fds
+      are proper fds and thus may be used in e.g. ``select()``.
 
    Cache line
       A cache line is the smallest unit managed by the cache hierarchy
@@ -120,6 +150,20 @@ Glossary
      multitasking, with the assistance of the kernel's process
      scheduler, may be employed to maintain concurrency (without full
      parallelism).
+
+   Context switch
+     A process context switch, or context switch for short, is the act
+     of replacing a thread (belong to a particular process or the
+     kernel) executing on a particular CPU core with another thread
+     (of the same process or another process), on that core.
+
+     In Linux terms is replacing the executing *task* with another
+     task.
+
+     The term context switch is occasionally used for the processing
+     required when making a system call, which is done for a different
+     purpose, but where the steps required are much the same (e.g.,
+     switching stack).
 
    Core isolation
       An isolated core is a CPU core managed by the operating system
@@ -211,6 +255,11 @@ Glossary
       Critical section (also known as *critical region*) is a section
       of the program which cannot be executed by more than one thread
       in parallel. This may be achieved by means of a lock.
+
+   Data link layer
+      The data link layer is another name for :term:`layer 2` in the
+      :term:`OSI model`. A related term is the :term:`link layer` of
+      the Internet :term:`protocol suite <Network protocol suite>`
 
    Domain logic
       Domain logic, also known as business logic, is the part of a
@@ -337,10 +386,19 @@ Glossary
       A synonym to data plane, often used for in the context of switches
       and IP router implementations.
 
+   Frame
+      A frame is a :term:`data link layer` :term:`PDU` (e.g., an
+      Ethernet frame).
+
    Full core
       A full core is colloquial term for either a :term:`SMT`
       :term:`CPU core` where all but one of the hardware threads are
       left unused (or disabled), or a non-SMT core.
+
+   User thread
+      A user thread is a thread which is managed not by the kernel,
+      but by some userspace entity, such a library, language virtual
+      machine runtime or the application itself.
 
    Hardware threading
       Hardware threading is a design technique where a CPU core is
@@ -417,6 +475,46 @@ Glossary
       A DPDK control thread used to process hardware interrupt
       notifications from the kernel.
 
+   IPC
+      Instruction per cycle (IPC) is a measure on how many
+      instructions a particular CPU core retires, on the average, per
+      clock cycle.
+
+      IPC is often used to compare the performance of different
+      implementations of a particular :term:`ISA`. Various changes to
+      a CPU core or the CPU cache hierarchy or memory interfaces may
+      lead to a higher IPC, which in turns leads to higher performance
+      at the same clock frequency.
+
+      IPC may also be used an indication of program
+      efficiency. According to this rule of a thumb, a program
+      resulting in high IPC is considered highly optimized, and a
+      program with comparatively low IPC the opposite. However, this
+      rule does not take time complex of the program's algorithms into
+      play. It may well be that the high-IPC program implements a very
+      naive algorithm, which results in the CPU having to execute a
+      very large number instructions, but may do so at a high IPC, as
+      opposed to a variant where the same task is achieved with a
+      lower time complexity algorithm, which requires fewer
+      instructions to be run, but potentially at a lower IPC. An
+      example such a situation is one program using linear search to
+      find an item in an array, with good IPC and an easy-to-handle
+      situation for the CPU hardware prefetcher, and one using a
+      binary tree, which results in both more cache misses and branch
+      mispredictions, causing the IPC to be lower. Still, the latter
+      may on average be much quicker to find the needle in the
+      haystack.
+
+      Another situation that may occur, are two programs implementing
+      the same basic algorithm, but one using simple non-vector
+      instructions and the other using more complex and costly (on a
+      per-instrution basis) :term:`SIMD` instructions. The latter will
+      have likely have better performance, but may well have lower
+      IPC than its non-SIMD counterpart.
+
+      IPC is also commonly used abbrevition of inter-process
+      communcation.
+
    ISA
       An Instruction Set Architecture (ISA) specifies the interface
       between software and the CPU hardware. The ISA defines things like
@@ -439,11 +537,30 @@ Glossary
    Jitter
       Jitter is a measure of latency (i.e., delay) variation.
 
+   Kernel thread
+      A kernel thread is an :term:`operating system thread` which runs
+      exclusively in kernel space.
+
+      Kernel threads perform background tasks in the Linux kernel. A
+      kernel thread shares most characteristics with its :term:`user
+      space cousin <User space thread>`, including the fact that it
+      may be preempted and replace by another thread, of the kernel or
+      user space variety.
+
+   Layer 1
+      The physical layer is the first layer in the OSI model.
+
    Layer 2
       The data link layer is the second layer in OSI model, and handles
       data transmission between different nodes on the same physical
       network segment. Ethernet is an example of a layer 2 data link
       layer protocol.
+
+   Layer 3
+      The network layer is the third layer in the OSI model, and
+      handles communication between different hosts on the same or
+      different :term:`layer 2` network segments. IPv4 and IPv6 and
+      examples of network protocols.
 
    Lcore
       A seemingly DPDK-specific abbreviation of :term:`logical core`.
@@ -468,6 +585,14 @@ Glossary
 
       Registered non-EAL threads are given higher-numbered, previously
       unused, lcore ids.
+
+   Link layer
+      The link layer is the lowest layer in the Internet
+      :term:`protocol suite <Network protocol suite>`. It consists of
+      functionality similar to that of the :term:`OSI model <OSI
+      model>` allocates to its :term:`layer 1` and :term:`layer 2`.
+
+      Ethernet is an example of a link layer.
 
    Logical core
       A logical core is an entity, usually a piece of hardware, that
@@ -517,10 +642,10 @@ Glossary
       DPDK application lcore.
 
    MIB
-     A Management Information Base (MIB) is a :term:`SNMP` data model.
-     The term is sometimes also used to refer to an instance of a
-     particular model. IEFT has defined a number of MIBs (e.g., for
-     TCP and IP).
+      A Management Information Base (MIB) is a :term:`SNMP` data model.
+      The term is sometimes also used to refer to an instance of a
+      particular model. IEFT has defined a number of MIBs (e.g., for
+      TCP and IP).
 
    :ref:`Management plane <Management Plane>`
       The part of the network that handles configuration and
@@ -531,13 +656,31 @@ Glossary
       functions, may safely be called by multiple threads
       simultaneously.
 
+   Multiprocessing
+      In the context of operating systems, multiprocessing refers to
+      the ability to run multiple processes on multiple CPU cores, in
+      term:`parallell`.
+
+      In the context of CPU architecture, multiprocessing is what
+      a multiprocessor (e.g., a :term:`SMP` system) does.
+
    Multitasking
-     Multitasking is the ability of an operating system to
-     :term:`concurrently <Concurrency>` executing multiple task. The
-     kernel's process scheduler will frequently (by human standards)
-     switch from one task to the other, creating the impression of
-     :term:`parallel <Parallelism>`, even in situations where there are
-     more runnable tasks than there are CPU cores in the system.
+      Multitasking is the ability of an operating system to
+      :term:`concurrently <Concurrency>` executing multiple task. The
+      kernel's process scheduler will frequently (by human standards)
+      switch from one task to the other, creating the impression of
+      :term:`parallel <Parallelism>`, even in situations where there are
+      more runnable tasks than there are CPU cores in the system.
+
+   Multithreading
+      Multithreading is the use of multiple :term:`threads <Operating
+      system thread>` in the same operating system process.
+
+      As oppposed to threads in different processes, all threads in
+      the same process shared the same memory. Even data that is
+      generally considered thread-private, such as the stack and data
+      in :term:`thread-local storage <TLS>`, is accessible to other
+      threads as well.
 
    Mythical Man-Month
       In the book titled *The Mythical Man-Month: Essays on Software
@@ -563,6 +706,12 @@ Glossary
       The Network Configuration Protocol (NETCONF) is an XML-based
       network configuration management protocol developed by the IEFT.
 
+   Network application
+      A network application receives input from, and produces output
+      to, a computer network. Examples are a web browser, a DHCP
+      server, or a micro service serving as a part of a distributed
+      web application.
+
    :ref:`Network function <Network Function>`
       For the purpose of this book, the data plane application and its
       immediate surroundings, which work in concert to provide a data
@@ -573,10 +722,26 @@ Glossary
       A set of related communication protocols, usually arranged in
       layered architecture, used in a computer network.
 
+   Network layer
+      The network layer is another name for :term:`layer 3` in the
+      :term:`OSI model`.
+
    Network stack
       A network stack, also known as a protocol stack, is an
       implementation, usually in software, of a family or
       :term:`suite<network protocol suite>` of network protocols.
+
+   NIC
+      A network interface controller (NIC) is a piece of hardware that
+      connects a computer to a computer network. On one side of the
+      NIC is a bus of some sort (e.g., PCIe), and on the other is a
+      network interface, either the physical layer of an local
+      network, or an on-chip link to some other hardware module (e.g.,
+      a switch).
+
+      A NIC is also known as a network interface card (even in cases
+      where it's not implemented as a discrete card) or a network
+      adapter.
 
    Noisy neighbour
       An application is considered a noisy neighbour in case it causes
@@ -626,21 +791,6 @@ Glossary
 
       What qualify as a "short period of time" depends on application-
       level throughput, latency and latency jitter requirements.
-
-   Unregistered non-EAL thread
-      An unregistered non-EAL thread is an operating system thread
-      which not registered with the :term:`EAL`, and thus, for
-      example, does not have a :term:`lcore id`. In other words;
-      a perfectly normal operating system thread, where no
-      special actions or precautions have been taken.
-
-      An unregistered non-EAL thread is created by the fast path
-      application, or some non-DPDK library it calls into.
-
-      Unregistered thread may not call DPDK APIs which require the
-      caller to have a lcore id. Unregistered thread are often also
-      :term:`preemptable <Preemptable thread>`, which further restricts
-      what DPDK APIs may be used.
 
    NPU
       A Network Processing Unit (NPU) (also known as network
@@ -700,6 +850,23 @@ Glossary
       datapath and a DPDK-based datapath. There are also a number of
       hardware switches than can act as a OVS datapath.
 
+   :ref:`Operating system thread <Threads>`
+      A :term:`thread` which is scheduled and otherwise managed by the
+      operating system kernel. There are two types of operating system
+      threads; the :term:`user space thread` and the :term:`kernel
+      thread`.
+
+   OSI model
+      Open Systems Interconnection (OSI) model is a conceptual model,
+      describing an layered architecture, and the division of
+      concearns among the layers.
+
+   Packet
+      A packet is a :term:`network layer` :term:`PDU` (e.g., an IPv4
+      packet). Often, while technically incorrect, term is also for
+      PDUs of other network protocol layers, such as the :term:`data
+      link layer`.
+
    Parallelism
       The term parallel, as used in this book, is reserved for
       situations when two or more tasks are literally performed during
@@ -720,6 +887,17 @@ Glossary
       executed at the same time (e.g., using different core execution
       units, or at different stages at the CPU pipeline).
 
+   PDU
+      A protocol data unit (PDU) is a unit of information, transmitted
+      between entities of some particular protocol layer.
+
+      A PDU typically consists of a protocol layer-specific header and
+      payload data, which itself may be part of a PDU for the next
+      higher layer in the :term:`network protocol suite`.
+
+      For example, the :term:`data link layer` PDU is the
+      :term:`frame`.
+
    Peer preemptable EAL thread
       A peer preemptable EAL thread is an EAL thread which may be
       preempted by the kernel's process scheduler and be replaced with
@@ -733,6 +911,9 @@ Glossary
       circuitry that either implements a single :term:`logical core`,
       or, in the :term:`SMT` case, multiple such, in the form of
       hardware threads.
+
+   Physical function
+      See :term:`SR-IOV`.
 
    PMD
       In the early days of DPDK's history, the poll mode driver (PMD)
@@ -763,7 +944,7 @@ Glossary
       switch occurs) does not threaten the correctness of the program,
       or have very detrimental effects performance. In this book, the
       preemption unsafe constructs covered only cause performance
-      degradation, although at time very serious such.
+      degradations, although at time very serious such.
 
    Preemptable thread
       A preemptable thread is a thread which may suffer an involuntary
@@ -776,8 +957,8 @@ Glossary
       cycles).  In case the processing is performed on multiple cores
       in parallel, the processing latency may be greater than the
       :term:`wall-clock latency`. In case a packet is buffered (e.g.,
-      on the NIC), and the data plane CPU cores are very busy, the
-      processing latency may be only a small fraction of the total
+      on the :term:`NIC`), and the data plane CPU cores are very busy,
+      the processing latency may be only a small fraction of the total
       port-to-port wall-clock latency experience by that packet.
 
       In the context of IP routers, the term is used to denote all
@@ -806,14 +987,15 @@ Glossary
      command-line program, or via the ``/proc`` file system.
 
      The act of configuring processor affinity is also known as CPU
-     pinning, where the latter term is often used when a thread is
-     limited to a single CPU core only (i.e., the thread is "pinned to
-     a core").
+     pinning. The use of the term pinning is often restricted to
+     situations where a thread limited to a single CPU core only
+     (i.e., the thread is "pinned to a core").
 
    Program order
-      Operations are said to be done in program order if their results
-      are globally visible in the same order as the operations were
-      specified in the program's source code.
+      Operations are said to be done in program order if the result of
+      their execution is globally visible (e.g., to other CPU cores in
+      the system) in the same order as the operations were specified
+      in the program's source code.
 
    RAN
       The Radio Access Network (RAN) is the network that sits between
@@ -845,11 +1027,16 @@ Glossary
       See :term:`RSS`.
 
    RSS
-      Receive Side Scaling. A NIC function which distributes packets
-      to different NIC RX descriptor queues, usually based on the
-      source and destination IP. If transport layer fields are taken
-      into a account, the same function is sometimes called
+      Receive Side Scaling. A :term:`NIC` function which distributes
+      packets to different NIC RX descriptor queues, usually based on
+      the source and destination IP. If transport layer fields are
+      taken into a account, the same function is sometimes called
       Receive Flow Scaling (RFS).
+
+   Scheduling latency
+      Sheduling latency is the :term:`time <Wall-clock latency>` from
+      a thread could, in principle, be execute (i.e., it's *runnable*),
+      to the time when it's actually running on a CPU core.
 
    Sequence counter
       A sequence counter is a low-overhead reader-writer synchronization
@@ -892,6 +1079,20 @@ Glossary
      The service cores framework does *not* dynamically load balance
      services over available service lcores.
 
+   SIMD
+     A SIMD (single instruction, multiple data) instruction takes
+     multiple data as input, performs an operation, usually the same,
+     across all input, and (usually) produces multiple data as output.
+
+     The SIMD instruction input and output registers are often called
+     vectors, and SIMD instructions also goes under the name of vector
+     instructions. This has spilled over on naming of compiler
+     features, where generating SIMD instructions often is referred to
+     as vectorization.
+
+     An example of SIMD instruction sets are AVX extensions to the x86
+     family :term:`ISAs <ISA>`, and AltiVec/VMX in PowerPC.
+
    Slow path
       The part of a data plane application that process exception traffic.
 
@@ -929,6 +1130,29 @@ Glossary
       systems kernels, but unusual in user space applications, since
       they are not :term:`preemption safe <preemption safety>`.
 
+   SR-IOV
+      Single Root I/O virtualization (SR-IOV) is PCI Express (PCIe)
+      virtualization standard.
+
+      With SR-IOV, the PCIe device is split into a physical function
+      (PF) and a number of virtual functions (VFs).
+
+      The PF is primarily used for adminstrative tasks. A VF is used
+      to access the actual PCIe device function (e.g., sending and
+      receiving packets, in case of a PCIe :term:`NIC`).
+
+      The PF is usually kept by the host, while the VFs are handed out
+      to virtual machines or containers.
+
+      The concept of a PFs and VFs are often used in situations, for
+      non-PCIe devices, where "full" PCIe is not used (e.g, only
+      PCI-like device enumeration), or not at all.
+
+      The PF/VF division also reflects on the driver structure, where
+      one driver is responsible for the PF, and another for the VFs.
+      Often, the PF driver resides in the kernel, while the VF driver
+      may be either in userspace (e.g., in DPDK), or in the kernel.
+
    SSH
       Secure Shell (SSH) is a protocol for remote shell access and
       command execution. It may also be used as a secure transport
@@ -947,6 +1171,27 @@ Glossary
       syslog is now specified (or more accurately, documented) in IEFT
       `RFC 5424 <https://www.rfc-editor.org/rfc/rfc5424.txt>`_.
 
+   Thread
+      Thread is short for *thread of control* and represents an
+      on-going execution of a program. It consists of a stack, a set
+      of registers, meta data such as its :term:`processor affinity`,
+      scheduling policy, priority, and potentially a reference to a process
+      context as well.
+
+      There are a number of different types of threads, including:
+
+      * :term:`Kernel threads <Kernel thread>`.
+      * :term:`User space threads <User space thread>`.
+      * :term:`User mode threads <User mode thread>`.
+
+      Data plane threads may serve in a variety of different roles, for
+      example:
+
+      * As an :term:`EAL thread`, usually as a :term:`fast path lcore`.
+      * As a :term:`registered <Registered non-EAL thread>` or
+	:term:`unregistered <Unregistered non-EAL thread>`
+	:term:`control thread`.
+
    Thread safety
       A function is considered multi-thread (MT) safe, often
       abbreviated to thread-safe, if it may safely be called from
@@ -962,15 +1207,68 @@ Glossary
       local, but in DPDK the practice is to instead use the GCC
       extensions ``__thread``.
 
+   Top half
+      A traditional interrupt service routine (ISR) performs all
+      processing caused for a particular hardware interrupt in that
+      function. This may include running the RX path of an Ethernet
+      driver and higher layers of the network stack, and marking a
+      user space process to be run.
+
+      Keeping interrupts disabled for a long time may cause issues if
+      other interrupts occur. Keeping the core occuppied some
+      particular task which is not strictly required to handle the
+      interrupt, but rather is just caused by it, may prevent the core
+      from working on some more urgent task.
+
+      To solve those problems, serving an interrupt is divided into
+      two parts. One, the *top half*, is the actual ISR, does as
+      little as possible, which usually translate to clearing the
+      interrupt and deferring the rest of the processing to the
+      *bottom half*.
+
+      In Linux, there is a set of different mechanisms that qualifies
+      as bottom halves (e.g., soft IRQs and tasklets).
+
+   Transparent huge pages
+      Transparent huge pages (THP) is a Linux kernel feature which
+      make a non-huge pages aware application use huge pages. The
+      process of moving data from regular-sized pages (4kB) to huge
+      pages may be so high that it defeat the gains made due a
+      reduction in TLB misses.
+
    UE
       User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
       roughly equivalent of a *host* in a TCP/IP network. To complicate
       things, a UE is also almost always a *host* as well, since the
       mobile network is used as a data link layer for IP.
 
+   Unregistered non-EAL thread
+      An unregistered non-EAL thread is an operating system thread
+      which not registered with the :term:`EAL`, and thus, for
+      example, does not have a :term:`lcore id`. In other words;
+      a perfectly normal operating system thread, where no
+      special actions or precautions have been taken.
+
+      An unregistered non-EAL thread is created by the fast path
+      application, or some non-DPDK library it calls into.
+
+      Unregistered thread may not call DPDK APIs which require the
+      caller to have a lcore id. Unregistered thread are often also
+      :term:`preemptable <Preemptable thread>`, which further restricts
+      what DPDK APIs may be used.
+
    User plane
       A synonym to :term:`data plane`, commonly used in the context of
       telecommunications networks.
+
+   User mode thread
+      A thread which is scheduled and otherwise managed by an user space
+      application. The actual execution of a user mode thread always
+      happens in the context of a operating system thread.
+
+   User space thread
+      A user space thread is an :term:`operating system thread`
+      which forms a part of the user space process.
 
    Vector packet processing
       Vector packet processing is a network stack design pattern,
@@ -1006,6 +1304,9 @@ Glossary
 
    Virtual core
       A synonym for :term:`logical core`.
+
+   Virtual function
+      See :term:`SR-IOV`.
 
    VPP
       `Vector Packet Processing <https://fd.io/>`_ (VPP) is a Open

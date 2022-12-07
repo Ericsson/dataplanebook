@@ -68,12 +68,11 @@ internally (or indeed, not at all). The protocols and means of
 communication between the different planes are proprietary [#RFC5810]_
 .
 
-A pragmatic rule of a thumb for what type of processing goes into
-which plane is the rate of change, or rate of operations, the process
-entails.
+A rule of a thumb for what type of processing goes into which plane is
+the rate of change, or rate of operations, the process entails.
 
 The data plane usually handle one or two orders of magnitude more
-operations per second that does the control plane. The ratio between
+operations per second than does the control plane. The ratio between
 the management plane and the control plane is roughly the same.
 
 A :ref:`network function<Network Function>` may be able to handle
@@ -137,7 +136,7 @@ In this book, no distinction is made between control and management
 plane, since this make little relevance for the data plane - the focus
 of this book.
 
-.. _Data Plane Application:
+.. _Data Plane Applications:
 
 Data Plane Applications
 =======================
@@ -254,12 +253,13 @@ With DPDK, the developer need not face the challenging programming
 environment of the kernel, and instead only have to deal with the
 somewhat less challenging DPDK programming model.
 
-For DPDK to bypass the kernel, the Network Interface Controller (NIC)
-hardware (or a virtual function thereof) is mapped in the process'
-address space. Instead of, or in addition to, the kernel's NIC driver,
-the application uses a driver provided by DPDK, for that particular
-hardware. In addition to the NIC driver, a packet buffer memory
-manager is needed, but not much else in terms of infrastructure.
+For DPDK to bypass the kernel, the :term:`Network Interface Controller
+(NIC) <NIC>` hardware (or a :term:`virtual function` thereof) is
+mapped in the process' address space. Instead of, or in addition to,
+the kernel's NIC driver, the application uses a driver provided by
+DPDK, for that particular hardware. In addition to the NIC driver, a
+packet buffer memory manager is needed, but not much else in terms of
+infrastructure.
 
 This "I/O only" way of using DPDK is still commonplace today.
 
@@ -318,8 +318,8 @@ assumes the division of concern between the platform and the
 application to be that of `DPDK`_, as opposed to a more opinionated
 platform like :term:`VPP`.
 
-To achieve high efficiency and to avoid extensive packet latency
-jitter, fast path processing is usually allocated a number of
+To achieve high efficiency and to avoid large amounts of
+:term:`jitter`, fast path processing is usually allocated a number of
 dedicated CPU cores.
 
 .. _Slow Path:
