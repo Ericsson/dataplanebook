@@ -41,7 +41,7 @@ Data Plane Software Design
    vpp depth first or bredth first (pipeline-internal organization)
    dma devices
    target hardware
-   resource sharing and power management
+   resource sharing and power management, energy efficiency
    platform abstraction layers
    tracing
    portability
@@ -66,7 +66,10 @@ Data Plane Software Design
    virtualization
    cloud considerations
    scaling
-   Non-DPDK frameworks (e.g., fd.io VPP)
+   non-DPDK frameworks (e.g., fd.io VPP)
+   overload handling and backpressure
+   cryptography
+   security
 
 Indices and tables
 ==================

@@ -7,12 +7,15 @@
 Threading
 *********
 
+.. sectionauthor:: Mattias Rönnblom <mattias.ronnblom@ericsson.com>
+
 Introduction
 ============
 
 This chapter explains how data plane applications tend to use
-operating system threads to get work done, and that in an as
-resource-efficient, parallel and low-latency manner as possible.
+:term:`operating system threads <Operating system thread>` to get work
+done, and that in an as resource-efficient, parallel and low-latency
+manner as possible.
 
 The DPDK approach to threading is by no means unique to DPDK. Similar
 patterns for how to distribute fast path processing across threads are
@@ -20,7 +23,10 @@ used in other data plane platforms and application, such as
 :ref:`ODP`, :term:`Open vSwitch` and fd.io :term:`VPP`. To the
 author's knowledge, there are no alternatives that are able achieve
 data plane type characteristics on top of a general-purpose operating
-system kernel. [#alternatives]_
+system kernel. [#alternatives]_ Therefor, since the DPDK approach is
+the prototypical data plane threading model, its chapter is named
+:ref:`Data Plane Threading`, although it contents is very much
+DPDK-centric.
 
 The DPDK threading model provides excellent performance
 characteristics, but at the cost of somewhat difficult-to-deploy and
@@ -53,18 +59,888 @@ tradition.
 This chapter leaves out :term:`concurrency` and :term:`work scheduling
 <Work scheduler>`. This topic will be covered in a separate chapter.
 
-UNIX Networking Application Architecture
-========================================
+Basic Concepts
+==============
 
-This section will describe the traditional UNIX approach to networking
-applications, employed to craft a data plane fast path, when it is
-written. [#unix]_
+This section provides an overview of the most relevant building
+blocks, primarily in the form of kernel-level services, involved in
+assembling an application's threading model.
 
-DPDK Threading Model
+.. _Threads:
+
+Threads
+-------
+
+Thread is short for *thread of control*. From a data perspective, it
+primarily consists of a stack and a set of registers, including a
+stack pointer and a program counter. A thread represents an execution
+of a sequence of programmed instructions.
+
+A thread can be either be scheduled and otherwise managed by the
+operating system kernel, an :term:`operating system thread`, and or by
+an user space entity, in case it's a :term:`user mode thread`.
+
+There are two types of kernel threads; the :term:`user space thread`
+and the :term:`kernel thread`.
+
+Kernel threads would be more appropriately named kernel-only threads,
+since all threads may run kernel code, in supervisor mode, as a part
+of a system call. Kernel threads are created by the kernel and only
+runs in the context of the kernel.
+
+Each user space process has one or more user space threads.
+
+:term:`Multithreading` and :term:`multiprocessing` are the only ways
+for an application to utilize multiple CPU cores in :term:`parallel
+<Parallelism>`.
+
+Multithreading may also be used as a way to achieve
+:term:`concurrency`. Such a use of operating system threads comes with
+some limitations in scalability (i.e., the number of concurrent tasks)
+and reduced efficiency (e.g., increased context switch overhead). For
+moderately-concurrent applications with long runtimes per input
+stimuli, this model is often more than suffient, performance-wise.
+
+.. _User Mode Threads:
+
+User Mode Threads
+^^^^^^^^^^^^^^^^^
+
+A :term:`user mode thread`, sometimes shortened to user thread, is a
+thread which is managed not by the kernel, but by some userspace
+library, programming language virtual machine or runtime, or the
+application itself.
+
+Such thread management includes thread switching; both replacing
+relevant CPU registers and the stack stack from the old user mode
+thread to the new, and process of selecting the next thread to
+run.
+
+The cardinality between the user mode thread and the underlying
+operating system threads varies. An operating system thread may house
+a number fixed set user mode threads, or N number of user mode threads
+"floats" (are migrated between) over M number of operating system
+thread.
+
+The N:M model is an attempt to have the cake, and eat it. It tries to
+maintain a decent level of efficiency (i.e., thread-related overhead)
+and scalability (allowing for many concurrent threads), while
+maintaing the sequential, convenient programming model of
+multithreading.
+
+User mode thread context switching is generally less costly than an
+operating system context switch, and while maintaing a stack can still
+be a significant cost, if it's made dynamic in size one can
+potentially have much more user mode threads than you can have
+operating system threads, allowing user mode threads to be used to
+implementation :term:`concurrency`. Dynamically-sized stacks may
+not be possible to implement without compiler support.
+
+Switching between tasks in the form of two user mode threads is still
+going to be much more expensive than switching between two tasks
+without requiring the stack to be maintained (e.g., as in an
+event-driven architecture). A stack provides a mean to write a simple
+linear program, instead of the event loop type design's requirement to
+before each instance there is a need to wait for some future event (a
+timeout, or a response from some remote process), relevant state for
+future processing much be explicitly save, and then restored again
+when the event occurs. This is required since the thread may be
+repurpose to work on some other task meanwhile.
+
+A well-behaved user mode thread implementation has many concern it
+most take into consideration. For example, it must avoid a situation
+where a single user mode thread starve other user mode threads
+scheduled on the same operating system thread, and in general to
+maintain some level of fairness (or absolute prioritization) between
+user threads.
+
+To avoid the whole application to grinding to a halt in the face of a
+series of blocking system calls, such calls are either forbidden or
+only allowed via a proxy. Such a proxy may, for example, spawn (or
+allocate from a thread pool) a new operating thread to allow the
+original thread to be reused. Such a procedure will much increase the
+overhead related to system calls, but there are less naive approaches
+that partly mitigates these costs.
+
+From the point of view of user thread-to-user thread context
+switching, user mode threads implements cooperative multitasking,
+although no exlicit yield calls may be required on the application
+source level. Thus, a user thread is never preempted and replaced with
+another user thread, but the underlying operating system thread may
+well be.
+
+Implementations
+"""""""""""""""
+
+User mode threads were used in many early POSIX thread libraries.
+
+The commonly-used synonym *green threads* originates from early
+versions of Sun's Java virtual machine (JVM), which used this
+technique to implementation Java-level threads. It's no longer used in
+Java. While user mode thread are still popular, the term green thread
+itself has largely fallen out of use, in part likely due to the bad
+reputation earned from the early Java days.
+
+One of the more recent implementations of user mode threads is in the
+form of Golang and its Goroutines. *Fibers* in the Boost C++ library
+are another contemporary example. Coroutines, in particular so-called
+*stackful* such, are close cousins to user mode threads.
+
+DPDK includes with an *example* implementation of user mode threads.
+It is not a part of the DPDK APIs.
+
+.. _Process Scheduler:
+
+Process Scheduler
+-----------------
+
+All modern operating system implement :term:`multitasking`.
+Traditionally, the "task" was a process, but since the advent of
+:term:`multithreading` [#memoryprotection]_, operating system process
+schedulers operate on the level of threads instead, where the
+traditional single-threaded process is just a special case. Even
+though the contemporary scheduler manages threads, the term process
+persist, in the name of the function.
+
+The Linux kernel uses a concept of a *task*, much in line with the
+term multitasking. A task may be either an :term:`operating system
+thread <Operating system thread>` or a process (or something in
+between). To the Linux kernel, two threads in the same process are
+just two tasks sharing virtual address space (among other things). Two
+processes are two tasks that do not share anything, except potentially
+various namespaces (e.g., a network namespace).
+
+The kernel function responsible to manage multitasking is the process
+scheduler. Its job is to take the system's runnable threads, and
+distributed their execution over the system's CPU cores.
+
+The task of process scheduling comes with a number of (often
+conflicting) goals:
+
+* Make good use of hardware resources (e.g., CPU cores and caches), in
+  an attempt to improve overall system throughput, by load balancing
+  available threads over the available cores.
+* Meet :term:`scheduling latency` requirements for all
+  applications. This in turn allows the application be
+  responsive-enough for a human user, or a machine, in case of
+  machine-machine interaction.
+* Lay out the system's computational tasks in time and on cores in
+  manner to remain as energy efficient as possible. Operate the CPU
+  cores and interconnect at a as low frequency as possible, and
+  temporarily discontinue the use certain cores entirely, allowing
+  them to go sleep.
+
+The process scheduler determines which thread runs where, and for how
+long. To maintain the :term:`concurrency` illusion and give each
+thread a fair share of the CPU, in situations where not all threads
+can be run in :term:`parallel <Parallelism>`, the kernel may preempt
+the execution of a particular thread, and switch in another thread in
+its place. This is called an involuntary context switch. The voluntary
+counterpart is a context switch induced by the thread's own action, in
+the form of a blocking system call. The most common case is the
+process waiting for some event (e.g., using ``select()``), in UNIX
+usually arriving on one of a set of :term:`file descriptors <File
+descriptor>`, or a certain time (e.g., with ``usleep()``).
+
+The ``sched_yield()`` system call may be used to *hint* the kernel the
+thread considers the time of the call a good time for a context
+switch. [#rtyield]_
+
+Designing a process scheduler that remains efficient and provides the
+proper characteristics across a large set of scenarios it needs to
+handle is a challenging task indeed. In Linux, the Completely Fair
+Scheduler (CFS), which handles threads configured with the
+``SCHED_NORMAL`` (also known as ``SCHED_OTHER``) scheduling policy,
+shoulders most of this responsibility. Often, a small subset of the
+system's threads are configured with a real-time scheduling
+policy. See the section on :ref:`Real Time Scheduling Policies` for
+more information.
+
+A good general-purpose process scheduler needs to maintain certain
+soft real-time characteristics. More specifically, it will attempt to
+categorized applications into interactive or batch (or background)
+processing types. The scheduler will attempt to assure interactive
+applications remain responsive.
+
+On the surface, this may sound like it would make it a good fit for
+packet processing application as well.
+
+However, it is not. The CFS type scheduler is tuned for the human time
+scale. The machinery, for example the length of time slices (i.e., the
+chunks of time a thread is allowed to run), is designed for "normal"
+desktop and server applications, where the size of one task is
+measured in the order of tens of milliseconds, as opposed to the data
+plane, where tasks are on the order of microseconds. Similiar, the
+latency budget and :term:`jitter` requirements also differ in the
+order of magnitudes.
+
+A commmon scenario in case fast path processing is mixed with other
+types of threads is where CFS shows a tendency to prioritize the
+execution of a non-vital, periodically running, :term:`management
+plane` over a busy, "batch-looking", packet processing thread.
+
+In a data plane application, certain groups (or classes) of threads
+should have absolute, or at least near-absolute (to avoid starvation),
+priority over some other group of threads. This is not possible to
+express in CFS, which relies the traditional UNIX process nice value
+for prioritization. The nice value is a weight of how much CPU time a
+thread should be allocated, compared to some other thread, competing
+for the same CPU resources.
+
+
+Thread Migration
+^^^^^^^^^^^^^^^^
+
+To maintain good CPU cache utilization, and to reduce process
+scheduler-related synchronization overhead, a general-purpose process
+scheduler (e.g, the Linux CFS scheduler or FreeBSD ULE) primarily
+operate on the level of the CPU core. A thread is assigned to a
+certain core, and need to be explicitly migrated from that core to
+some other core in order to rebalance load. The scheduler considers
+such migration on a periodical basis, or whenever a core becomes idle.
+
+Thus, a potential scenario is that even though there are idle CPU
+cores in a system, a runnable CFS task may be kept waiting for "its"
+core to become available.
+
+For applications that are of an interactive type, but what they
+interact with is a human, such delays are typically not long enough to
+be noticeable. However, for threads that run the data plane fast path,
+the delays, which may in the order of 10s or 100s of milliseconds, are
+likely prohibitively high.
+
+The CFS scheduler can be tuned to *partly* mitigate this issue, but
+such tuning the affect the whole system.
+
+Thread Affinity
+^^^^^^^^^^^^^^^
+
+Real Time Scheduling Policies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Context Switches
+----------------
+
+Wake Up Latency
+^^^^^^^^^^^^^^^
+
+Many modern CPUs, especially large x86_64 cores, come equipped with
+the possible to enter sleep states, when not being used. There are a
+usally a number of different CPU core och package-level sleep
+states. The trade off is being the cost, in terms of energy and time,
+to enter and exit ("wake up" from) a sleep state, and the benefit of
+residing in that state, in terms of energy savings, compared to some
+other states (deeper, more shallow, or indeed no sleep at all).
+
+It is the kernel that decides what sleep state to enter, by executing
+the appropriate instructions (e.g., ``HLT`` or ``MWAIT`` on the AMD64
+ISA).  During light load, the wake up latency adds to
+:term:`wall-clock latency` experienced by a packet traversing the
+:term:`network function`.
+
+`These benchmarks
+<https://www.theseus.fi/bitstream/handle/10024/169205/Vladislav%20Govtvas%20Thesis.pdf>`_
+gives some indication of what wake up latencies to expect on a server
+processor. For example, on a Skylake-generation Intel Xeon core in the
+C6 state, the deepest core-level sleep state, the wakeup latency is
+~80 us. In the more shallow C1E state, the latency is less than ~16
+us, but the power savings are also much less noticable.
+
+A failure to use CPU power management can lead to very poor energy
+efficiency, especially for CPUs operating at high frequencies.
+
+This topic will receive a more in-depth treatment in a future chapter
+on energy efficiency.
+
+Standard Threading
+==================
+
+Overview
+--------
+
+This section attempts to describe the de-facto standard architecture
+for :term:`network applications <Network application>`. This book will
+refer to this as the *standard threading model*, or just the *standard
+model* [#physics]_. This section's focus is the use of :term:`threads
+<Thread>`, for :term:`parallelism` and :term:`concurrency`, but to
+give a more complete picture, the use of other operating system
+services is covered as well.
+
+A network application built per the standard model consists of a user
+space process working concert with the operating system kernel and its
+network stack to implement some kind of network service.
+
+Considering that the standard model is very different from how the
+same functionality would be implemented in data plane fast path
+application based on DPDK (and most other :term:`data plane platforms
+<Data plane platform>`), one might wonder what this section is doing
+in this book.
+
+A description and discussion of the properties of this architectural
+pattern explains why while it's a good fit for many network
+applications, it's typically not suitable for the high-performance,
+low-latency data plane applications of this book. This sets the stage
+for the :ref:`section on data plane threading <Data Plane Threading>`.
+
+The backdrop of this section is a UNIX-like operating system, but
+could just as well be any contemporary general-purpose operating
+system family (e.g., Microsoft Windows). The resulting architecture
+looks much the same, as do the obstacles to achieving the appropriate
+performance characteristics.
+
+There are variation within the standard threading model. For example,
+some programming language virtual machines take a somewhat DPDK-like
+approach (e.g., Golang and its use of usually per-core worker
+operating system threads). The use of fibers, coroutines, or green
+threads - all variations of the same theme - also address some of the
+same concearns as the data plane threading model discussed in the
+:ref:`next section <Data Plane Threading>`.
+
+In the author's opinion, none of these variations significantly
+improves the suitability for the standard model to serve in a data
+plane :term:`fast path` role.
+
+Benefits and Drawbacks
+^^^^^^^^^^^^^^^^^^^^^^
+
+The standard model is a balance between performance, security and
+simplicity.
+
+The upsides of the standard model include:
+
+* Well-known and thus generally not a source of surprise for new developers.
+* Allows the use of operating system threads for both
+  :term:`parallelism` and :term:`concurrency`, potentially augmented by,
+  for improved efficiency, :term:`user mode threading <User mode
+  thread>`.
+* The operating system network stack may tasked to solve a large chunk
+  of the application's problem (e.g., TCP/IP).
+
+A major benefit of the standard model is that few or even none of the
+mandantory steps of the data plane threading model are required. Such
+benefits are:
+
+* The application process need not run as the superuser (root), or be
+  equipped with any special priviligies.
+* The kernel provides a stable, secure, hardware abstraction layer, in
+  particular for networking hardware.
+* :term:`NICs <NIC>` or other hardware devices need not be mapped
+  into the process' address space.
+* Explicit use of :term:`huge memory pages <Huge pages>` may be
+  replaced with :term:`transparent huge pages`, or not used at all.
+* :term:`Core isolation` may not be needed.
+* Power management is the concearn of the operating system kernel.
+
+  * Frequency scaling is done automatically.
+  * CPU cores are put to sleep when not used.
+
+* No busy-waiting is required, but rather an application waiting to
+  receive an item of work (or a timeout) using the regular I/O
+  multiplexing mechanisms (e.g., ``epoll_wait()``, either directly, or
+  more commonly, via some library or framework.
+* CPU cores may easily be shared by different applications, improving
+  overall utilization.
+* For multi-threaded applications, load balancing across multiple CPU
+  cores is handled the kernel's process scheduler.
+* Standard heap memory allocation mechanism may be used (e.g., libc
+  malloc()).
+
+There are a number perceived and actual pain points of the standard
+model, when applied to data plane fast path applications:
+
+* Kernel network stack overhead.
+* Process context switch overhead.
+* System call overhead.
+* NIC (and other) interrupt handling overhead.
+* Lack of efficient access to hardware accelerators (e.g., for
+  cryptographic operations or DMA).
+* Process preemption causing excessive :term:`jitter` and reduced
+  throughput.
+* CPU sleep state-related wake up-latencies, especially in low-load
+  scenarios.
+* Lack of control of CPU :term:`frequency scaling <DVFS>`, resulting
+  in poor energy efficiency and/or throughput or latency
+  characteristics in cases where system load varies often and quickly.
+
+All benefits and drawbacks are related to performance. No developer
+ever said, "Let's build this application the DPDK way. It's so much
+easier!"
+
+Software developers should pick the standard model over the :ref:`data
+plane threading model <Data plane threading>` as often as they can,
+for reasons similar to why they drive a Volvo and not a McLaren
+Formula 1 race car to work. The Volvo-based approach is safer, more
+inexpensive, more energy efficient, easier to develop, maintain and
+deploy, requires a much less qualified operator, and allows for
+relatively friction-free coexistence with other road
+users. [#arrested]_
+
+However, developers of data plane :term:`fast path` applications are,
+sooner or later, likely to find out they are in fact on the race
+track, and their competition revs up to 15000 PMs.
+
+Language and Language Runtime Impact
+------------------------------------
+
+The old-school UNIX socket application is written in C, but the
+limitations of the standard model that are relevant for data plane
+applications have little to do with the choice of programming
+language, and indeed anything that happens inside the user space
+process itself. The process could just as well host a C++ program, a
+Java program (and its VM) or a Go program (and the Go runtime), and it
+would still suffer the same (or worse) fate in terms of poor fast path
+performance characteristics.
+
+.. _Life of a Packet:
+
+Life of a Packet
+----------------
+
+This section attempts to describe the standard model using a set of
+activity diagrams, each describing the *life of a packet*.
+
+Life of a packet is a way to explain the workings of a data plane
+implementation of some sort, for example a router :term:`ASIC`, by
+giving an example of how a packet traverse the different parts of the
+system.
+
+Although the term suggests a biography of a :term:`network layer`
+:term:`PDU`, *packet* in life of a packet is often used as a shorthand
+for any kind of input and output of the involved entities.
+
+In the standard model for network applications, the initial stimuli
+may be a :term:`frame`. Except for the most low-level applications
+(e.g., an Ethernet software bridge), for each successive layer,
+headers are generally stripped off, and the payload may be split into
+several high-layer :term:`PDUs <PDU>`, or merged into a single PDU, or
+somewhere in between. Such multiplexing and demultiplexing will be
+ignored here. For simplicity, in the diagrams that follow, one
+external stimuli is assumed to ripple through the stack, and back out
+again, in some form, or another. In a real application, this
+assumption usually does not hold true. For example, an IP fragment may
+be delayed in the network stack, waiting for the other fragments
+making up the original packet, until processing may continue to the
+next layer.
+
+Single Threaded Standard Application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. uml::
+   :caption: Life of Packet for a Single Threaded Application
+
+   @startuml
+
+   start
+
+   partition "Kernel" {
+      partition "Top half" {
+         :Ethernet driver ISR;
+      }
+      partition "Bottom half" {
+         :Ethernet driver RX;
+         :Network stack RX processing;
+      }
+   }
+   partition "Userspace Network Application" {
+      :Read socket;
+      :Parse request;
+      :Domain logic;
+      :Produce response;
+      :Write socket;
+   }
+   partition "Kernel" {
+      :Network stack TX processing;
+      :Ethernet driver TX;
+   }
+   end
+   @enduml
+
+This diagram shows roughly what steps are performed when processing
+input and producing output in a typical single-threaded standard
+model-type network application.
+
+Kernel RX Processing
+""""""""""""""""""""
+
+First, an Ethernet frames arrives from the network, and is allocated
+an entry in one of the :term:`NIC`'s RX descriptor queues. The kernel
+receives an interrupt [#napi]_, the interrupt service routine (ISR)
+(or :term:`top half`) of the Ethernet driver is run, which in turn
+marks the :term:`bottom half` interrupt handler to be run. The bottom
+half runs the Ethernet driver and the rest of the RX path in the
+network stack. The bottom half generally executes on the same CPU core
+as the top half interrupt handler, to avoid expensive cache misses.
+
+How much network stack processing is required by the kernel depends on
+the type of application. For example, if the the application is a DHCP
+server, it may have created a low-level ``AF_PACKET`` type socket.  In
+such a case, it will, without further ado, get the link-layer frame
+handed to it.
+
+If the application instead is a HTTPS proxy, and has bound a number of
+TCP server sockets, the kernel-level processing will be more
+extensive. If a packet carrying an Ethernet frame, which carries an IP
+datagram, with a TCP segment destined for a connection established to
+that server socket arrives, the kernel will terminate TCP, and queue
+the data in the relevant socket buffer.
+
+Even though the amount of processing varies significantly, the total
+overhead between socket types is relatively small. This is because all
+:term:`file descriptor`-based communication carries a high overhead in
+the form of system calls and context switches.
+
+Userspace Processing
+""""""""""""""""""""
+
+As data arrives on the socket buffer, the socket's (one or more)
+:term:`file descriptors <File descriptor>` will be marked active,
+which in turn will wake up the relevant application threads, blocking
+in ``epoll_wait()`` (or some equivalent I/O multiplexing system call),
+if they aren't already running.
+
+In case Linux receive packet steering (RFS) is used, the kernel- and
+userspace-level processing generally happens on the same CPU core,
+improving cache locality and thus performance.
+
+Multithreaded Standard Application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For applications that work with many sockets (e.g., the typical
+TCP-based server), multiple :term:`operating system threads <Operating
+system thread>` may be used to increase :term:`parallelism`, and to
+avoid having a set of long-running requests block all other processing
+(i.e., for :term:`concurrency`), in a very straigh-forward manner.
+
+* Maintain a one-to-one relationsship between threads and connections
+  (and file descriptors).
+* As new connections arrive, create a new thread or allocate a thread
+  from a set existing, idle threads (i.e., a thread pool).
+
+This architecture quickly break down as the number of connections
+grow. The Linux kernel struggles as the number of threads grow into
+the thousands. The large number of threads will also cause a large
+number of involuntary preemptions, and context switches, which in turn
+reduces the efficiency.
+
+A mitigation strategy for this issue is to use some form of
+:term:`user mode threads <User mode thread>`. See the section on
+:ref:`User Mode Threads` for more information on such threads. It's
+generally possible to have more user mode threads than operating
+system threads, allowing for more concurrent connections. The next
+issue that occurs if scalability needs be extended further, is the
+large amount of memory required by the many user mode thread
+stacks. Depending on the stack sized requried and whether or not those
+stacks are dynamically or statically sized, this issue may occur
+sooner, or later.
+
+The next step in the evolution of such a design, or an upfront
+alternative, is to use a pattern similar to traditional
+single-threaded UNIX event-driven programming, but with one event loop
+instance for each every thread. In such a scenario, threads are used
+only for parallelism, and the event loop is there to solve the
+concurrency problem.
+
+For applications where all input arrive on a single input socket file
+descriptor, but involves (by :ref:`the standards of this book <Data
+Plane Applications>`) very heavy :term:`domain logic` processing,
+performance gains may be achieved by dispatching an incoming packet to
+to one among a number of available worker threads. The efficiency in
+terms of clock cycles/packet will be somewhat reduced, but the
+application-level capacity will be increased, since requests may be
+processed in parallel. Often, the workers need to ship off the
+resulting packet (e.g., a response) back to some singleton thread,
+which will write on the fd. By the very least, the worker threads
+needs to synchronize to produce output.
+
+An issue with the "fan out" pattern is that the work threads, when not
+doing anything useful, will need to blockingly wait, on a mutex lock,
+a condition variable, a sempahore, or a file descriptor. The cost of
+for a thread dispatching incoming items to sleeping workers is steep
+indeed. The workers could busy-wait, as could the input dispatcher
+thread, but that would be big step toward :ref:`data plane threading
+model <Data plane threading>`, including many of the drawbacks and
+lacking some of the benefits.
+
+Multithreaded Receive
+"""""""""""""""""""""
+
+In UNIX, ``read()`` or ``recv()`` operations on file descriptors are
+thread safe, but rarely make sense to access in parallel from multiple
+threads for byte stream-type input, since one part of a message may
+end up on one thread, while the other part is read by some other
+thread. For UDP sockets, or other ``SOCK_DGRAM`` or ``SOCK_SEQPACKET``
+type sockets, where PDUs are delivered atomically (i.e., in one system
+call), a design with multiple threads blocking on the same fd may be
+feasable.
+
+.. uml::
+   :caption: Life of Packet for a Multithreaded Standard Application
+
+   @startuml
+
+   start
+
+   partition "Kernel" {
+      partition "Top half" {
+         :Ethernet driver ISR;
+      }
+      partition "Bottom half" {
+         :Ethernet driver RX;
+         :Network stack RX processing;
+      }
+   }
+   partition "Userspace Network Application" {
+      :Read socket;
+      :Dispatch to worker;
+      fork
+         :Parse request;
+         :Domain logic;
+         :Produce response;
+      fork again
+         :Parse request;
+         :Domain logic;
+         :Produce response;
+      fork again
+         :Parse request;
+         :Domain logic;
+         :Produce response;
+      end merge
+      :Write socket;
+   }
+   partition "Kernel" {
+      :Network stack TX processing;
+      :Ethernet driver TX;
+   }
+
+   end
+
+   @enduml
+
+As mentioned, there are also other patterns, where instead each worker
+handles a connection or a set of connections file descriptors, and
+there is no need for a hand-off. In that case, the activities look
+more like the single-threaded example.
+
+In most cases, link and network layer processing is left to the kernel
+and its TCP/IP stack. The kernel's network stack is relatively rich in
+features, but, because it's generic and feature rich, much slower than
+a stack optimized for a certain use case, or class of use cases.
+
+System Calls
+------------
+
+In case the kernel's network stack, or any :term:`eBPF` extensions,
+are unable to do all the processing required for an application, the
+packet needs to be handed to a user space process for further
+processing, as per the :ref:`life of a packet diagrams <Life of a
+Packet>`.
+
+This hand-off between the kernel and a user space process usually
+happens by means of one or more :term:`system calls <System call>`.
+
+System calls are rarely invoked directly from application code or the
+:term:`data plane platform`, but rather via libc (or some other
+language-specific runtime environment, like the Go runtime).
+
+A system call incur a number of costs, including:
+
+ * A mode switch between CPU user and supervisor mode (a change
+   in *privilege level*, to use x86 terminology), and back again.
+ * A switch between the user stack, and a kernel stack, and back again.
+ * Pollution of CPU caches, where user application cache lines are
+   evicted and replace with kernel-related data.
+ * In some cases, flushing of certain caches to mitigate CPU
+   security-related flaws.
+
+The direct cost of a system call (i.e., the amount of clock cycles
+spent in the call) starts in the range of hundreds of clock cycles,
+and many system calls are much more expensive than that. The indirect
+cost, primarily in the form of cache pollution, may also be
+significant, causing application code run at lower-than-otherwise
+:term:`instructions per cycle <IPC>` (IPC) (i.e., run slower).
+
+Exceptions are calls implemented implemented using virtual dynamic
+shared objects (vDSOs), such as ``gettimeofday()`` on most
+:term:`architectures <ISA>`. vDSO calls accesses memory shared between
+the kernel and user space, and thus are much less expensive and
+does not require a mode switch.
+
+.. _AF_XDP:
+
+AF_XDP
+^^^^^^
+
+Process Context Switches
+------------------------
+
+Latencies
+---------
+
+This section makes an attempt to quantifiying the cost of various
+operations commonly occuring when the standard model is employed.
+
+These latencies were measured on an Intel Xeon 6230N CPU (Cascade
+Lake), operating at 2.30 GHz. The system was running Linux 5.15.
+
+The purpose of the benchmark data is only to give an
+order-of-magnitude indication of what :term:`processing latencies
+<Processing latency>` to expect. The cost of these operations varies
+significantly between different CPUs, :term:`NICs <NIC>`, kernel
+versions and configurations, and the details of the application's
+behavior.
+
+The costs covered here are the direct cost, and thus does not include
+indirect cost such kernel-induced cache pollution. The indirect costs
+are much harder to quantify.
+
+.. list-table:: Network Application Operation Processing Latency
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Operation
+     - Direct Cost [clock cycles]
+   * - UDP socket ``send()+recv()``
+     - 6000
+   * - TCP socket ``write()+read()``
+     - 8000
+   * - Intra-core intra-process context switch w/ ``sched_yield()``
+     - 2000
+   * - Intra-core inter-process context switch w/ ``sched_yield()``
+     - 2500
+   * - Intra-core intra-process context switch w/ ``pthread_cond_wait()``
+     - 5500
+
+The measurements are the result of micro benchmarks, which means they
+generally represent something like a lower bound for the cost for the
+same operations, performed in the context of a real application.
+
+Context Switch Benchmark
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The context switches in the context switch benchmarks are made on an
+active core, where a thread is replaced by another thread. This
+procedure is repeated.
+
+In the *intra-process context switch*, the threads belong to the same
+process, and in the *inter-process context switch* case, they do not.
+
+The ``sched_yield`` benchmark variants use a combination of
+``sched_yield()`` and a real-time scheduling policy to assure that the
+context switch actually occurs.
+
+The benchmark marked ``pthread_cond_wait()`` uses a POSIX condition
+variable to notify the other thread, and force a context switch.
+``pthread_cond_wait()`` may be a suitable base for an internal work
+distribution mechanism within a multithreaded standard model
+application.
+
+For process-external I/O, a standard model application would likely
+use ``select()`` (or the equivalent) to wait for new
+events. ``select()``, ``poll()``, and a little more so
+``epoll_wait()``, further adds to the cost, compared to a
+``pthread_cond_wait()``-based solution.
+
+Inter-core Context Switches
+"""""""""""""""""""""""""""
+
+Context switches which involve putting a thread scheduled on one core
+to sleep, and waking up a thread scheduled on some other
+currently-asleep core are significantly more expensive. Such involves
+an inter-process interrupt (IPI), and potentially also a significant
+amount of time spent waiting for the core to wake up from a sleep
+state.
+
+Generic inter-core context switches benchmarks are not very
+meaningful, since the so much depend on application behavior and the
+CPU sleep state-related configuration and :term:`DVFS`.
+
+For example, in the Intel Idle Linux kernel driver, the Skylake C1E is
+specified as having a wakeup latency of 10 us. Assuming a CPU core
+operating at 2,2 GHz, this shallow sleep state adds the equivalent of
+22000 clock cycles to the context switch latency. A core in C6, the
+deepest core sleep state, adds ~10x more.
+
+The future chapter on energy efficiency will discuss how CPU sleep
+states may be employed, without having a too severe effect on other
+performance characteristics.
+
+Socket Benchmarks
+^^^^^^^^^^^^^^^^^
+
+The cost quoted for accessing UDP and TCP sockets is the sum of the
+cost of receiving 100 bytes worth of data, plus the cost of sending
+the equal amount. Generally, sending a little cheaper than receiving
+data. In the TCP case, the ``write()`` results in an actual TCP
+segment being sent.
+
+Larger packets (or chunks of data) are somewhat more costly, but it
+primariy shows as indirect cost (e.g.., the ``send()`` call doesn't
+take that much longer time, but the user-kernel copy with pollute the
+cache, leading to an indirect cost).
+
+``SOCK_RAW`` type sockets have a performance similar to UDP
+sockets. However, for link-layer sockets, recent versions of the Linux
+kernels provides an alternative, much more efficient, mechanism to
+retrieve the Ethernet frames: ``AF_XDP`` sockets. For more
+information, see the section on :ref:`AF_XDP`.
+
+An option for process-internal thread messaging is a combination of a
+ring buffer (or similar queue) in shared memory, and an :term:`event
+fd` to allowing waking up a sleeping receiver thread. This approach
+allows process-internal message transmission and reception overhead to
+be significant lower compared to a solution based on sockets, UNIX
+pipes, or anything else that requires a system call for sending and
+receiving a message. However, the system calls related to event fd
+management, the I/O multiplexing system call (e.g., ``select()``), and
+the context switches are very expensive. Still, this approach may be
+used to distribute ("fan out") a flow of packets to multiple worker
+threads.
+
+Contrary to popular belief, ``sendmmsg()`` and ``recvmmsg()`` are only
+moderately more efficient (if at all).
+
+Performance Comparison
+----------------------
+
+An standard model-type application utilizing the BSD Sockets API for
+I/O, and processing on average 8 packets per context switch, for
+example, will have a base overhead of ~7000 clock cycles/packet. This
+may be compared to the cost of retrieving and sending a packet using
+an DPDK Ethdev, which is in the order of magnitude of a hundred clock
+cycles.
+
+This may seems like an unfair comparison, since the application may
+well make use of part of the Linux kernel networking stack
+functionality. For example, it may need to terminate IP and UDP, makes
+use of the kernel-level :term:`SNMP` :term:`MIB` counters and
+netfilter firewall rules. However, a special-purpose TCP/IP stack will
+outperform the Linux stack. This is not because Linux stack is poorly
+implemented, but rather because it's very feature rich. Crossing the
+user-kernel boundary is also a very significant cost, including the
+requirement to make a memory copy (unless ``AF_XDP`` is used).
+
+7000 clock cycles is not an issue for something heavy-weight, like the
+average Kubernetes micro service (which typically aren't very micro at
+all), which will spend one or more orders of magntitude more cycles on
+processing higher layers (e.g., terminating gRPC and the actual
+service :term:`domain logic`). Even for :term:`high touch data plane
+applications <High touch application>`, 7000 clock cycles are
+prohibitly expensive and likely more than the per-packet budget for
+*all* processing.
+
+.. _Data Plane Threading:
+
+Data Plane Threading
 ====================
 
 Overview
 --------
+
+This chapter will describe the DPDK threading model. Since the DPDK
+model serves well in the roll of a prototypical threading model for
+data plane fast path applications, the chapter's title is relevant. For
+simplicity, the model will be refered to as the DPDK model, although
+
 
 The recipe for building and deploying an application adhering to the
 DPDK threading model, in its most basic form, is roughly as follows:
@@ -91,6 +967,15 @@ cons, and its variants and extensions.
 
 Benefits and Drawbacks
 ^^^^^^^^^^^^^^^^^^^^^^
+
+The benefits of the DPDK threading model, and indeed DPDK as a whole,
+can succinct summarized to: excellent runtime performance.
+
+DPDK does not add anything in terms of expressiveness; any task that
+can be achieved by a DPDK-based data plane fast path application can
+also be done so by an application built in accordance to the standard
+model, only it's standarda application will have lower throughput,
+higher latency, and generate more heat in the process.
 
 In summary, the DPDK threading model has the following benefits:
 
@@ -167,12 +1052,11 @@ interface of which the logical core is a key part is called an
 A logical core may be realized as a :term:`hardware thread <Hardware
 threading>`, a :term:`full core`, or in exceptional cases, a
 software-emulated core - all of which are functionally equivalent,
-from a software point of view.  [#logicalcoreperformance]_ The
-seemingly useful term logical core seems rarely used, as does a
-synonym: :term:`virtual core`.
+from a software point of view.  [#logicalcoreperformance]_ This useful
+term is rarely used, as is a synonym: the :term:`virtual core`.
 
 When the term :term:`logical core` is used in a DPDK context - usally
-abbreivated to :term:`lcore` - it means something related, but
+abbreivated to :term:`lcore` - it means something related but
 distinct from the generic, hardware-level concept.
 
 The DPDK lcore is a only a different name for an :term:`EAL
@@ -338,17 +1222,17 @@ Cooperative Multitasking
 """"""""""""""""""""""""
 
 :term:`Peer preemptable EAL threads <Peer preemptable EAL thread>`
-coexisting (i.e., are being scheduled) on by the same CPU core may be
+coexisting (i.e., are being scheduled) on the same CPU core may be
 turned non-preemptable provided they all have the ``SCHED_FIFO``
 scheduling policy, the same priority, and use ``sched_yield()`` to
 yield the CPU in situations when it is safe to do.
 
 Cooperative multitasking allows for the use of EAL threads for the
 purpose of concurrency (e.g., to run different modules), at the cost
-of context switches and the significant complexity introduced by the
-use of a combination of high CPU utilization and real-time scheduling
-policies. See the section on :ref:`Real Time Scheduling Policies` for
-more information on the latter.
+of context switching overhead and the significant complexity
+introduced by the use of a combination of high CPU utilization and
+real-time scheduling policies. See the section on :ref:`Real Time
+Scheduling Policies` for more information on the latter.
 
 .. _Floating EAL Threads:
 
@@ -932,6 +1816,9 @@ lcores <Worker lcore>` to :term:`service lcores <Service lcore>` is
 likely best managed by the application itself, being an
 process-internal implementation detail.
 
+Core Sharing
+^^^^^^^^^^^^
+
 Thread Type Summary
 -------------------
 
@@ -1023,11 +1910,31 @@ Real Time Scheduling Policies
 
 .. rubric:: Footnotes
 
+.. [#arrested]
+   The Volvo approach has the additional benefit of typically not
+   getting you arrested, something that fortunately doesn't have an
+   equivalent in the software part of this analogy, or the author
+   would be behind bars.
+
+.. [#physics]
+   No, you will not find any fermions or bosons in this model.
+
 .. [#alternatives]
    An application running on *bare metal* (in the original sense of
    the word, i.e. a system bare of anything resembling an operating
    system), with supervisor capabilities, and carrying its own
    special-purpose kernel, would have other options.
+
+.. [#rtyield]
+   If the thread is configured with the ``SCHED_RT`` or ``SCHED_FIFO``
+   scheduling policy, ``sched_yield()`` is more than a hint, and will
+   result in a context switch, assuming there is another runnable
+   real-time process with the same priority as the caller.
+
+.. [#memoryprotection]
+   If you go back further, to systems which lacked memory protection,
+   for example to the venerable AmigaOS, all processes were in fact
+   threads by today's standards, sharing the same address space.
 
 .. [#cppthreadoptions]
    Nowadays, coroutines and fibers are options to using POSIX threads
@@ -1042,6 +1949,13 @@ Real Time Scheduling Policies
    now-largely-extinct operating system that are trademarked UNIX, but
    also those that are API compatible with the POSIX APIs, such as
    FreeBSD and Linux.
+
+.. [#napi]
+   This description may give the misleading impression that each
+   received Ethernet frame cause an interrupt. The Linux kernel uses a
+   combination of interrupt-driven I/O and polling to mitigate
+   interrupt overhead at high packet rates. This technique in its
+   Linux kernel implementation is referred to as the New API (NAPI).
 
 .. [#mainthread]
    The original thread that called the program's main() function is

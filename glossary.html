@@ -45,9 +45,14 @@ matching packet (e.g., drop or accept).</p>
 (in terms of reduced <a class="reference internal" href="#term-Processing-latency"><span class="xref std std-term">processing latency</span></a>) when multiple
 processors are used to complete a partly parallel task.</p>
 </dd>
+<dt id="term-ASIC">ASIC<a class="headerlink" href="#term-ASIC" title="Permalink to this term">¶</a></dt><dd><p>An application-specific integrated circuit (ASIC) is a chip
+built to implementation a particular function, or set of related
+functions.</p>
+</dd>
 <dt id="term-ATM">ATM<a class="headerlink" href="#term-ATM" title="Permalink to this term">¶</a></dt><dd><p>Asynchronous Transfer Mode (ATM) is a type of fixed (wired)
 telecommunications network, that has largely fallen into disuse.
-As opposed to IP, ATM is connection-oriented on the data link layer.</p>
+As opposed to IP, ATM is connection-oriented on the <a class="reference internal" href="#term-Data-link-layer"><span class="xref std std-term">data
+link layer</span></a>.</p>
 </dd>
 <dt id="term-ARP">ARP<a class="headerlink" href="#term-ARP" title="Permalink to this term">¶</a></dt><dd><p>The Address Resolution Protocol (ARP) is used in conjunction
 with IPv4 for discovering the link layer (e.g., Ethernet MAC
@@ -55,6 +60,8 @@ address) for a particular IPv4 address.</p>
 </dd>
 <dt id="term-BGP">BGP<a class="headerlink" href="#term-BGP" title="Permalink to this term">¶</a></dt><dd><p>The Border Gateway Protocol (BGP) is a protocol used by Internet
 routers to exchange routing and reachability information.</p>
+</dd>
+<dt id="term-Bottom-half">Bottom half<a class="headerlink" href="#term-Bottom-half" title="Permalink to this term">¶</a></dt><dd><p>See <a class="reference internal" href="#term-Top-half"><span class="xref std std-term">top half</span></a>.</p>
 </dd>
 <dt id="term-Data-plane-platform">Data plane platform<a class="headerlink" href="#term-Data-plane-platform" title="Permalink to this term">¶</a></dt><dd><p>The part of the data plane applications that provides hardware
 abstractions and the associated hardware drivers, and other
@@ -71,6 +78,18 @@ random or pseudo random conditions such as the interleaving of
 the program’s threads. A program containing a data race may also
 produce different results depending on which <a class="reference internal" href="#term-ISA"><span class="xref std std-term">ISA</span></a>, CPU,
 compiler, or compiler flags are used.</p>
+</dd>
+<dt id="term-DVFS">DVFS<a class="headerlink" href="#term-DVFS" title="Permalink to this term">¶</a></dt><dd><p>Dynamic voltage and frequency scaling (DVFS), sometimes
+shortened to just <em>frequency scaling</em>, is a CPU feature in where
+the operating frequency and the voltage for a particular
+<a class="reference internal" href="#term-Physical-core"><span class="xref std std-term">physical CPU core</span></a>, or cluster of cores,
+may be reduced, to improve energy efficiency (e.g., the amount
+energy required to finish some task). DVFS may be available in
+the core itself, for a cluster of core, or for non-core hardware
+blocks such as the interconnect, or accelerators.</p>
+<p>CPU core frequencies is either controlled by the automoously by
+the hardware the by kernel, or by a user application, using
+kernel runtime configuration to do so.</p>
 </dd>
 <dt id="term-eBPF">eBPF<a class="headerlink" href="#term-eBPF" title="Permalink to this term">¶</a></dt><dd><p>Extended Berkeley Packet Filter (eBPF) is a low-level
 programming language. The original version of BPF was, just as
@@ -92,6 +111,12 @@ an upper bound to their execution time.</p>
 </dd>
 <dt id="term-CNF"><a class="reference internal" href="intro.html#network-function"><span class="std std-ref">CNF</span></a><a class="headerlink" href="#term-CNF" title="Permalink to this term">¶</a></dt><dd><p>A container network function (CNF) is a <a class="reference internal" href="#term-Network-function"><span class="xref std std-term">network function</span></a>
 hosted in a container.</p>
+</dd>
+<dt id="term-Event-fd">Event fd<a class="headerlink" href="#term-Event-fd" title="Permalink to this term">¶</a></dt><dd><p>An event <a class="reference internal" href="#term-File-descriptor"><span class="xref std std-term">file descriptor</span></a> is a reference to a
+kernel-level event fd object, designed to be used by user
+application for thread synchronization. An event fd object has
+sempahor-like semantics, but unlike POSIX semaphores, event fds
+are proper fds and thus may be used in e.g. <code class="docutils literal notranslate"><span class="pre">select()</span></code>.</p>
 </dd>
 <dt id="term-Cache-line">Cache line<a class="headerlink" href="#term-Cache-line" title="Permalink to this term">¶</a></dt><dd><p>A cache line is the smallest unit managed by the cache hierarchy
 of current-day <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> systems. A cache line usally holds 64
@@ -128,6 +153,17 @@ threads are available than there are CPU cores available,
 multitasking, with the assistance of the kernel’s process
 scheduler, may be employed to maintain concurrency (without full
 parallelism).</p>
+</dd>
+<dt id="term-Context-switch">Context switch<a class="headerlink" href="#term-Context-switch" title="Permalink to this term">¶</a></dt><dd><p>A process context switch, or context switch for short, is the act
+of replacing a thread (belong to a particular process or the
+kernel) executing on a particular CPU core with another thread
+(of the same process or another process), on that core.</p>
+<p>In Linux terms is replacing the executing <em>task</em> with another
+task.</p>
+<p>The term context switch is occasionally used for the processing
+required when making a system call, which is done for a different
+purpose, but where the steps required are much the same (e.g.,
+switching stack).</p>
 </dd>
 <dt id="term-Core-isolation">Core isolation<a class="headerlink" href="#term-Core-isolation" title="Permalink to this term">¶</a></dt><dd><p>An isolated core is a CPU core managed by the operating system
 kernel, but for which steps are taken to dedicated its use
@@ -199,6 +235,10 @@ configuration or observability).</p>
 <dt id="term-Critical-section">Critical section<a class="headerlink" href="#term-Critical-section" title="Permalink to this term">¶</a></dt><dd><p>Critical section (also known as <em>critical region</em>) is a section
 of the program which cannot be executed by more than one thread
 in parallel. This may be achieved by means of a lock.</p>
+</dd>
+<dt id="term-Data-link-layer">Data link layer<a class="headerlink" href="#term-Data-link-layer" title="Permalink to this term">¶</a></dt><dd><p>The data link layer is another name for <a class="reference internal" href="#term-Layer-2"><span class="xref std std-term">layer 2</span></a> in the
+<a class="reference internal" href="#term-OSI-model"><span class="xref std std-term">OSI model</span></a>. A related term is the <a class="reference internal" href="#term-Link-layer"><span class="xref std std-term">link layer</span></a> of
+the Internet <a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">protocol suite</span></a></p>
 </dd>
 <dt id="term-Domain-logic">Domain logic<a class="headerlink" href="#term-Domain-logic" title="Permalink to this term">¶</a></dt><dd><p>Domain logic, also known as business logic, is the part of a
 program that directly corresponds to it’s core function, from a
@@ -304,9 +344,16 @@ every packet in a flow.</p>
 <dt id="term-Forwarding-plane">Forwarding plane<a class="headerlink" href="#term-Forwarding-plane" title="Permalink to this term">¶</a></dt><dd><p>A synonym to data plane, often used for in the context of switches
 and IP router implementations.</p>
 </dd>
+<dt id="term-Frame">Frame<a class="headerlink" href="#term-Frame" title="Permalink to this term">¶</a></dt><dd><p>A frame is a <a class="reference internal" href="#term-Data-link-layer"><span class="xref std std-term">data link layer</span></a> <a class="reference internal" href="#term-PDU"><span class="xref std std-term">PDU</span></a> (e.g., an
+Ethernet frame).</p>
+</dd>
 <dt id="term-Full-core">Full core<a class="headerlink" href="#term-Full-core" title="Permalink to this term">¶</a></dt><dd><p>A full core is colloquial term for either a <a class="reference internal" href="#term-SMT"><span class="xref std std-term">SMT</span></a>
 <a class="reference internal" href="#term-CPU-core"><span class="xref std std-term">CPU core</span></a> where all but one of the hardware threads are
 left unused (or disabled), or a non-SMT core.</p>
+</dd>
+<dt id="term-User-thread">User thread<a class="headerlink" href="#term-User-thread" title="Permalink to this term">¶</a></dt><dd><p>A user thread is a thread which is managed not by the kernel,
+but by some userspace entity, such a library, language virtual
+machine runtime or the application itself.</p>
 </dd>
 <dt id="term-Hardware-threading">Hardware threading<a class="headerlink" href="#term-Hardware-threading" title="Permalink to this term">¶</a></dt><dd><p>Hardware threading is a design technique where a CPU core is
 divided into two or more virtual CPU cores, called <em>hardware
@@ -372,6 +419,41 @@ are often referred to as “huge pages”.</p>
 <dt id="term-Interrupt-thread">Interrupt thread<a class="headerlink" href="#term-Interrupt-thread" title="Permalink to this term">¶</a></dt><dd><p>A DPDK control thread used to process hardware interrupt
 notifications from the kernel.</p>
 </dd>
+<dt id="term-IPC">IPC<a class="headerlink" href="#term-IPC" title="Permalink to this term">¶</a></dt><dd><p>Instruction per cycle (IPC) is a measure on how many
+instructions a particular CPU core retires, on the average, per
+clock cycle.</p>
+<p>IPC is often used to compare the performance of different
+implementations of a particular <a class="reference internal" href="#term-ISA"><span class="xref std std-term">ISA</span></a>. Various changes to
+a CPU core or the CPU cache hierarchy or memory interfaces may
+lead to a higher IPC, which in turns leads to higher performance
+at the same clock frequency.</p>
+<p>IPC may also be used an indication of program
+efficiency. According to this rule of a thumb, a program
+resulting in high IPC is considered highly optimized, and a
+program with comparatively low IPC the opposite. However, this
+rule does not take time complex of the program’s algorithms into
+play. It may well be that the high-IPC program implements a very
+naive algorithm, which results in the CPU having to execute a
+very large number instructions, but may do so at a high IPC, as
+opposed to a variant where the same task is achieved with a
+lower time complexity algorithm, which requires fewer
+instructions to be run, but potentially at a lower IPC. An
+example such a situation is one program using linear search to
+find an item in an array, with good IPC and an easy-to-handle
+situation for the CPU hardware prefetcher, and one using a
+binary tree, which results in both more cache misses and branch
+mispredictions, causing the IPC to be lower. Still, the latter
+may on average be much quicker to find the needle in the
+haystack.</p>
+<p>Another situation that may occur, are two programs implementing
+the same basic algorithm, but one using simple non-vector
+instructions and the other using more complex and costly (on a
+per-instrution basis) <a class="reference internal" href="#term-SIMD"><span class="xref std std-term">SIMD</span></a> instructions. The latter will
+have likely have better performance, but may well have lower
+IPC than its non-SIMD counterpart.</p>
+<p>IPC is also commonly used abbrevition of inter-process
+communcation.</p>
+</dd>
 <dt id="term-ISA">ISA<a class="headerlink" href="#term-ISA" title="Permalink to this term">¶</a></dt><dd><p>An Instruction Set Architecture (ISA) specifies the interface
 between software and the CPU hardware. The ISA defines things like
 the available machine language instructions (and how they
@@ -389,10 +471,25 @@ retrieve some information about the state of the fast path.</p>
 </dd>
 <dt id="term-Jitter">Jitter<a class="headerlink" href="#term-Jitter" title="Permalink to this term">¶</a></dt><dd><p>Jitter is a measure of latency (i.e., delay) variation.</p>
 </dd>
+<dt id="term-Kernel-thread">Kernel thread<a class="headerlink" href="#term-Kernel-thread" title="Permalink to this term">¶</a></dt><dd><p>A kernel thread is an <a class="reference internal" href="#term-Operating-system-thread"><span class="xref std std-term">operating system thread</span></a> which runs
+exclusively in kernel space.</p>
+<p>Kernel threads perform background tasks in the Linux kernel. A
+kernel thread shares most characteristics with its <a class="reference internal" href="#term-User-space-thread"><span class="xref std std-term">user
+space cousin</span></a>, including the fact that it
+may be preempted and replace by another thread, of the kernel or
+user space variety.</p>
+</dd>
+<dt id="term-Layer-1">Layer 1<a class="headerlink" href="#term-Layer-1" title="Permalink to this term">¶</a></dt><dd><p>The physical layer is the first layer in the OSI model.</p>
+</dd>
 <dt id="term-Layer-2">Layer 2<a class="headerlink" href="#term-Layer-2" title="Permalink to this term">¶</a></dt><dd><p>The data link layer is the second layer in OSI model, and handles
 data transmission between different nodes on the same physical
 network segment. Ethernet is an example of a layer 2 data link
 layer protocol.</p>
+</dd>
+<dt id="term-Layer-3">Layer 3<a class="headerlink" href="#term-Layer-3" title="Permalink to this term">¶</a></dt><dd><p>The network layer is the third layer in the OSI model, and
+handles communication between different hosts on the same or
+different <a class="reference internal" href="#term-Layer-2"><span class="xref std std-term">layer 2</span></a> network segments. IPv4 and IPv6 and
+examples of network protocols.</p>
 </dd>
 <dt id="term-Lcore">Lcore<a class="headerlink" href="#term-Lcore" title="Permalink to this term">¶</a></dt><dd><p>A seemingly DPDK-specific abbreviation of <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical core</span></a>.</p>
 <p>The DPDK term is related to the generic hardware-level term,
@@ -411,6 +508,11 @@ specified (e.g, by <a class="reference internal" href="#term-EAL-parameters"><sp
 kernel-level CPU core id has the same value for EAL threads.</p>
 <p>Registered non-EAL threads are given higher-numbered, previously
 unused, lcore ids.</p>
+</dd>
+<dt id="term-Link-layer">Link layer<a class="headerlink" href="#term-Link-layer" title="Permalink to this term">¶</a></dt><dd><p>The link layer is the lowest layer in the Internet
+<a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">protocol suite</span></a>. It consists of
+functionality similar to that of the <a class="reference internal" href="#term-OSI-model"><span class="xref std std-term">OSI model</span></a> allocates to its <a class="reference internal" href="#term-Layer-1"><span class="xref std std-term">layer 1</span></a> and <a class="reference internal" href="#term-Layer-2"><span class="xref std std-term">layer 2</span></a>.</p>
+<p>Ethernet is an example of a link layer.</p>
 </dd>
 <dt id="term-Logical-core">Logical core<a class="headerlink" href="#term-Logical-core" title="Permalink to this term">¶</a></dt><dd><p>A logical core is an entity, usually a piece of hardware, that
 behaves like a <a class="reference internal" href="#term-CPU-core"><span class="xref std std-term">CPU core</span></a> from the point of view of a
@@ -463,12 +565,25 @@ monitoring.</p>
 functions, may safely be called by multiple threads
 simultaneously.</p>
 </dd>
+<dt id="term-Multiprocessing">Multiprocessing<a class="headerlink" href="#term-Multiprocessing" title="Permalink to this term">¶</a></dt><dd><p>In the context of operating systems, multiprocessing refers to
+the ability to run multiple processes on multiple CPU cores, in
+term:<cite>parallell</cite>.</p>
+<p>In the context of CPU architecture, multiprocessing is what
+a multiprocessor (e.g., a <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> system) does.</p>
+</dd>
 <dt id="term-Multitasking">Multitasking<a class="headerlink" href="#term-Multitasking" title="Permalink to this term">¶</a></dt><dd><p>Multitasking is the ability of an operating system to
 <a class="reference internal" href="#term-Concurrency"><span class="xref std std-term">concurrently</span></a> executing multiple task. The
 kernel’s process scheduler will frequently (by human standards)
 switch from one task to the other, creating the impression of
 <a class="reference internal" href="#term-Parallelism"><span class="xref std std-term">parallel</span></a>, even in situations where there are
 more runnable tasks than there are CPU cores in the system.</p>
+</dd>
+<dt id="term-Multithreading">Multithreading<a class="headerlink" href="#term-Multithreading" title="Permalink to this term">¶</a></dt><dd><p>Multithreading is the use of multiple <a class="reference internal" href="#term-Operating-system-thread"><span class="xref std std-term">threads</span></a> in the same operating system process.</p>
+<p>As oppposed to threads in different processes, all threads in
+the same process shared the same memory. Even data that is
+generally considered thread-private, such as the stack and data
+in <a class="reference internal" href="#term-TLS"><span class="xref std std-term">thread-local storage</span></a>, is accessible to other
+threads as well.</p>
 </dd>
 <dt id="term-Mythical-Man-Month">Mythical Man-Month<a class="headerlink" href="#term-Mythical-Man-Month" title="Permalink to this term">¶</a></dt><dd><p>In the book titled <em>The Mythical Man-Month: Essays on Software
 Engineering</em>, Fredrick Brooks of IBM debunks the myth that a
@@ -490,6 +605,11 @@ redirection.</p>
 <dt id="term-NETCONF">NETCONF<a class="headerlink" href="#term-NETCONF" title="Permalink to this term">¶</a></dt><dd><p>The Network Configuration Protocol (NETCONF) is an XML-based
 network configuration management protocol developed by the IEFT.</p>
 </dd>
+<dt id="term-Network-application">Network application<a class="headerlink" href="#term-Network-application" title="Permalink to this term">¶</a></dt><dd><p>A network application receives input from, and produces output
+to, a computer network. Examples are a web browser, a DHCP
+server, or a micro service serving as a part of a distributed
+web application.</p>
+</dd>
 <dt id="term-Network-function"><a class="reference internal" href="intro.html#network-function"><span class="std std-ref">Network function</span></a><a class="headerlink" href="#term-Network-function" title="Permalink to this term">¶</a></dt><dd><p>For the purpose of this book, the data plane application and its
 immediate surroundings, which work in concert to provide a data
 plane function to interface with entities in the control plane
@@ -498,9 +618,22 @@ and other instances of data plane functions.</p>
 <dt id="term-Network-protocol-suite">Network protocol suite<a class="headerlink" href="#term-Network-protocol-suite" title="Permalink to this term">¶</a></dt><dd><p>A set of related communication protocols, usually arranged in
 layered architecture, used in a computer network.</p>
 </dd>
+<dt id="term-Network-layer">Network layer<a class="headerlink" href="#term-Network-layer" title="Permalink to this term">¶</a></dt><dd><p>The network layer is another name for <a class="reference internal" href="#term-Layer-3"><span class="xref std std-term">layer 3</span></a> in the
+<a class="reference internal" href="#term-OSI-model"><span class="xref std std-term">OSI model</span></a>.</p>
+</dd>
 <dt id="term-Network-stack">Network stack<a class="headerlink" href="#term-Network-stack" title="Permalink to this term">¶</a></dt><dd><p>A network stack, also known as a protocol stack, is an
 implementation, usually in software, of a family or
 <a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">suite</span></a> of network protocols.</p>
+</dd>
+<dt id="term-NIC">NIC<a class="headerlink" href="#term-NIC" title="Permalink to this term">¶</a></dt><dd><p>A network interface controller (NIC) is a piece of hardware that
+connects a computer to a computer network. On one side of the
+NIC is a bus of some sort (e.g., PCIe), and on the other is a
+network interface, either the physical layer of an local
+network, or an on-chip link to some other hardware module (e.g.,
+a switch).</p>
+<p>A NIC is also known as a network interface card (even in cases
+where it’s not implemented as a discrete card) or a network
+adapter.</p>
 </dd>
 <dt id="term-Noisy-neighbour">Noisy neighbour<a class="headerlink" href="#term-Noisy-neighbour" title="Permalink to this term">¶</a></dt><dd><p>An application is considered a noisy neighbour in case it causes
 performance degradation for other applications, running on a
@@ -541,18 +674,6 @@ appropriate system configuration, achieve a non-preemptable
 status.</p>
 <p>What qualify as a “short period of time” depends on application-
 level throughput, latency and latency jitter requirements.</p>
-</dd>
-<dt id="term-Unregistered-non-EAL-thread">Unregistered non-EAL thread<a class="headerlink" href="#term-Unregistered-non-EAL-thread" title="Permalink to this term">¶</a></dt><dd><p>An unregistered non-EAL thread is an operating system thread
-which not registered with the <a class="reference internal" href="#term-EAL"><span class="xref std std-term">EAL</span></a>, and thus, for
-example, does not have a <a class="reference internal" href="#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>. In other words;
-a perfectly normal operating system thread, where no
-special actions or precautions have been taken.</p>
-<p>An unregistered non-EAL thread is created by the fast path
-application, or some non-DPDK library it calls into.</p>
-<p>Unregistered thread may not call DPDK APIs which require the
-caller to have a lcore id. Unregistered thread are often also
-<a class="reference internal" href="#term-Preemptable-thread"><span class="xref std std-term">preemptable</span></a>, which further restricts
-what DPDK APIs may be used.</p>
 </dd>
 <dt id="term-NPU">NPU<a class="headerlink" href="#term-NPU" title="Permalink to this term">¶</a></dt><dd><p>A Network Processing Unit (NPU) (also known as network
 processor) is an integrated circuit designed for data plane fast
@@ -603,6 +724,20 @@ datapaths in OVS terminology. There is a Linux kernel OVS
 datapath and a DPDK-based datapath. There are also a number of
 hardware switches than can act as a OVS datapath.</p>
 </dd>
+<dt id="term-Operating-system-thread"><a class="reference internal" href="threading/threading.html#threads"><span class="std std-ref">Operating system thread</span></a><a class="headerlink" href="#term-Operating-system-thread" title="Permalink to this term">¶</a></dt><dd><p>A <a class="reference internal" href="#term-Thread"><span class="xref std std-term">thread</span></a> which is scheduled and otherwise managed by the
+operating system kernel. There are two types of operating system
+threads; the <a class="reference internal" href="#term-User-space-thread"><span class="xref std std-term">user space thread</span></a> and the <a class="reference internal" href="#term-Kernel-thread"><span class="xref std std-term">kernel
+thread</span></a>.</p>
+</dd>
+<dt id="term-OSI-model">OSI model<a class="headerlink" href="#term-OSI-model" title="Permalink to this term">¶</a></dt><dd><p>Open Systems Interconnection (OSI) model is a conceptual model,
+describing an layered architecture, and the division of
+concearns among the layers.</p>
+</dd>
+<dt id="term-Packet">Packet<a class="headerlink" href="#term-Packet" title="Permalink to this term">¶</a></dt><dd><p>A packet is a <a class="reference internal" href="#term-Network-layer"><span class="xref std std-term">network layer</span></a> <a class="reference internal" href="#term-PDU"><span class="xref std std-term">PDU</span></a> (e.g., an IPv4
+packet). Often, while technically incorrect, term is also for
+PDUs of other network protocol layers, such as the <a class="reference internal" href="#term-Data-link-layer"><span class="xref std std-term">data
+link layer</span></a>.</p>
+</dd>
 <dt id="term-Parallelism">Parallelism<a class="headerlink" href="#term-Parallelism" title="Permalink to this term">¶</a></dt><dd><p>The term parallel, as used in this book, is reserved for
 situations when two or more tasks are literally performed during
 the same, or at least overlapping, time period. The result of
@@ -620,6 +755,14 @@ or more instructions from the same instruction stream may be
 executed at the same time (e.g., using different core execution
 units, or at different stages at the CPU pipeline).</p>
 </dd>
+<dt id="term-PDU">PDU<a class="headerlink" href="#term-PDU" title="Permalink to this term">¶</a></dt><dd><p>A protocol data unit (PDU) is a unit of information, transmitted
+between entities of some particular protocol layer.</p>
+<p>A PDU typically consists of a protocol layer-specific header and
+payload data, which itself may be part of a PDU for the next
+higher layer in the <a class="reference internal" href="#term-Network-protocol-suite"><span class="xref std std-term">network protocol suite</span></a>.</p>
+<p>For example, the <a class="reference internal" href="#term-Data-link-layer"><span class="xref std std-term">data link layer</span></a> PDU is the
+<a class="reference internal" href="#term-Frame"><span class="xref std std-term">frame</span></a>.</p>
+</dd>
 <dt id="term-Peer-preemptable-EAL-thread">Peer preemptable EAL thread<a class="headerlink" href="#term-Peer-preemptable-EAL-thread" title="Permalink to this term">¶</a></dt><dd><p>A peer preemptable EAL thread is an EAL thread which may be
 preempted by the kernel’s process scheduler and be replaced with
 an EAL thread originating from the same DPDK process.</p>
@@ -630,6 +773,8 @@ prevent this scenario from ever occuring.</p>
 circuitry that either implements a single <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical core</span></a>,
 or, in the <a class="reference internal" href="#term-SMT"><span class="xref std std-term">SMT</span></a> case, multiple such, in the form of
 hardware threads.</p>
+</dd>
+<dt id="term-Physical-function">Physical function<a class="headerlink" href="#term-Physical-function" title="Permalink to this term">¶</a></dt><dd><p>See <a class="reference internal" href="#term-SR-IOV"><span class="xref std std-term">SR-IOV</span></a>.</p>
 </dd>
 <dt id="term-PMD">PMD<a class="headerlink" href="#term-PMD" title="Permalink to this term">¶</a></dt><dd><p>In the early days of DPDK’s history, the poll mode driver (PMD)
 was an Ethernet driver ported from FreeBSD to run in user
@@ -654,7 +799,7 @@ thread’s execution (e.g., a kernel-induced process context
 switch occurs) does not threaten the correctness of the program,
 or have very detrimental effects performance. In this book, the
 preemption unsafe constructs covered only cause performance
-degradation, although at time very serious such.</p>
+degradations, although at time very serious such.</p>
 </dd>
 <dt id="term-Preemptable-thread">Preemptable thread<a class="headerlink" href="#term-Preemptable-thread" title="Permalink to this term">¶</a></dt><dd><p>A preemptable thread is a thread which may suffer an involuntary
 context switch and other kind of kernel-induced interruptions.
@@ -665,8 +810,8 @@ spent on a particular task (i.e., the number of CPU core
 cycles).  In case the processing is performed on multiple cores
 in parallel, the processing latency may be greater than the
 <a class="reference internal" href="#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>. In case a packet is buffered (e.g.,
-on the NIC), and the data plane CPU cores are very busy, the
-processing latency may be only a small fraction of the total
+on the <a class="reference internal" href="#term-NIC"><span class="xref std std-term">NIC</span></a>), and the data plane CPU cores are very busy,
+the processing latency may be only a small fraction of the total
 port-to-port wall-clock latency experience by that packet.</p>
 <p>In the context of IP routers, the term is used to denote all
 latency that occurs within the router (i.e., both CPU related
@@ -689,13 +834,14 @@ represented by a ‘1’ in the thread’s affinity mask.</p>
 <code class="docutils literal notranslate"><span class="pre">sched_setaffinity(2)</span></code> system call, a the <code class="docutils literal notranslate"><span class="pre">taskset(1)</span></code>
 command-line program, or via the <code class="docutils literal notranslate"><span class="pre">/proc</span></code> file system.</p>
 <p>The act of configuring processor affinity is also known as CPU
-pinning, where the latter term is often used when a thread is
-limited to a single CPU core only (i.e., the thread is “pinned to
-a core”).</p>
+pinning. The use of the term pinning is often restricted to
+situations where a thread limited to a single CPU core only
+(i.e., the thread is “pinned to a core”).</p>
 </dd>
-<dt id="term-Program-order">Program order<a class="headerlink" href="#term-Program-order" title="Permalink to this term">¶</a></dt><dd><p>Operations are said to be done in program order if their results
-are globally visible in the same order as the operations were
-specified in the program’s source code.</p>
+<dt id="term-Program-order">Program order<a class="headerlink" href="#term-Program-order" title="Permalink to this term">¶</a></dt><dd><p>Operations are said to be done in program order if the result of
+their execution is globally visible (e.g., to other CPU cores in
+the system) in the same order as the operations were specified
+in the program’s source code.</p>
 </dd>
 <dt id="term-RAN">RAN<a class="headerlink" href="#term-RAN" title="Permalink to this term">¶</a></dt><dd><p>The Radio Access Network (RAN) is the network that sits between
 the <a class="reference internal" href="#term-UE"><span class="xref std std-term">UE</span></a> and the <a class="reference internal" href="#term-CN"><span class="xref std std-term">CN</span></a> in a mobile telecommunications
@@ -719,11 +865,15 @@ are neither a worker nor the main lcore.</p>
 </dd>
 <dt id="term-RFS">RFS<a class="headerlink" href="#term-RFS" title="Permalink to this term">¶</a></dt><dd><p>See <a class="reference internal" href="#term-RSS"><span class="xref std std-term">RSS</span></a>.</p>
 </dd>
-<dt id="term-RSS">RSS<a class="headerlink" href="#term-RSS" title="Permalink to this term">¶</a></dt><dd><p>Receive Side Scaling. A NIC function which distributes packets
-to different NIC RX descriptor queues, usually based on the
-source and destination IP. If transport layer fields are taken
-into a account, the same function is sometimes called
+<dt id="term-RSS">RSS<a class="headerlink" href="#term-RSS" title="Permalink to this term">¶</a></dt><dd><p>Receive Side Scaling. A <a class="reference internal" href="#term-NIC"><span class="xref std std-term">NIC</span></a> function which distributes
+packets to different NIC RX descriptor queues, usually based on
+the source and destination IP. If transport layer fields are
+taken into a account, the same function is sometimes called
 Receive Flow Scaling (RFS).</p>
+</dd>
+<dt id="term-Scheduling-latency">Scheduling latency<a class="headerlink" href="#term-Scheduling-latency" title="Permalink to this term">¶</a></dt><dd><p>Sheduling latency is the <a class="reference internal" href="#term-Wall-clock-latency"><span class="xref std std-term">time</span></a> from
+a thread could, in principle, be execute (i.e., it’s <em>runnable</em>),
+to the time when it’s actually running on a CPU core.</p>
 </dd>
 <dt id="term-Sequence-counter">Sequence counter<a class="headerlink" href="#term-Sequence-counter" title="Permalink to this term">¶</a></dt><dd><p>A sequence counter is a low-overhead reader-writer synchronization
 mechanism.</p>
@@ -757,6 +907,17 @@ what processing goes where).</p>
 <p>The service cores framework does <em>not</em> dynamically load balance
 services over available service lcores.</p>
 </dd>
+<dt id="term-SIMD">SIMD<a class="headerlink" href="#term-SIMD" title="Permalink to this term">¶</a></dt><dd><p>A SIMD (single instruction, multiple data) instruction takes
+multiple data as input, performs an operation, usually the same,
+across all input, and (usually) produces multiple data as output.</p>
+<p>The SIMD instruction input and output registers are often called
+vectors, and SIMD instructions also goes under the name of vector
+instructions. This has spilled over on naming of compiler
+features, where generating SIMD instructions often is referred to
+as vectorization.</p>
+<p>An example of SIMD instruction sets are AVX extensions to the x86
+family <a class="reference internal" href="#term-ISA"><span class="xref std std-term">ISAs</span></a>, and AltiVec/VMX in PowerPC.</p>
+</dd>
 <dt id="term-Slow-path">Slow path<a class="headerlink" href="#term-Slow-path" title="Permalink to this term">¶</a></dt><dd><p>The part of a data plane application that process exception traffic.</p>
 </dd>
 <dt id="term-SMP">SMP<a class="headerlink" href="#term-SMP" title="Permalink to this term">¶</a></dt><dd><p>Symmetric multiprocessing (SMP) is a computer architecture
@@ -788,6 +949,23 @@ lock operation is successful. Spinlocks are common in operating
 systems kernels, but unusual in user space applications, since
 they are not <a class="reference internal" href="#term-Preemption-safety"><span class="xref std std-term">preemption safe</span></a>.</p>
 </dd>
+<dt id="term-SR-IOV">SR-IOV<a class="headerlink" href="#term-SR-IOV" title="Permalink to this term">¶</a></dt><dd><p>Single Root I/O virtualization (SR-IOV) is PCI Express (PCIe)
+virtualization standard.</p>
+<p>With SR-IOV, the PCIe device is split into a physical function
+(PF) and a number of virtual functions (VFs).</p>
+<p>The PF is primarily used for adminstrative tasks. A VF is used
+to access the actual PCIe device function (e.g., sending and
+receiving packets, in case of a PCIe <a class="reference internal" href="#term-NIC"><span class="xref std std-term">NIC</span></a>).</p>
+<p>The PF is usually kept by the host, while the VFs are handed out
+to virtual machines or containers.</p>
+<p>The concept of a PFs and VFs are often used in situations, for
+non-PCIe devices, where “full” PCIe is not used (e.g, only
+PCI-like device enumeration), or not at all.</p>
+<p>The PF/VF division also reflects on the driver structure, where
+one driver is responsible for the PF, and another for the VFs.
+Often, the PF driver resides in the kernel, while the VF driver
+may be either in userspace (e.g., in DPDK), or in the kernel.</p>
+</dd>
 <dt id="term-SSH">SSH<a class="headerlink" href="#term-SSH" title="Permalink to this term">¶</a></dt><dd><p>Secure Shell (SSH) is a protocol for remote shell access and
 command execution. It may also be used as a secure transport
 layer (e.g., for <a class="reference internal" href="#term-NETCONF"><span class="xref std std-term">NETCONF</span></a>).</p>
@@ -802,6 +980,26 @@ the user-kernel space boundary.</p>
 syslog is now specified (or more accurately, documented) in IEFT
 <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5424.txt">RFC 5424</a>.</p>
 </dd>
+<dt id="term-Thread">Thread<a class="headerlink" href="#term-Thread" title="Permalink to this term">¶</a></dt><dd><p>Thread is short for <em>thread of control</em> and represents an
+on-going execution of a program. It consists of a stack, a set
+of registers, meta data such as its <a class="reference internal" href="#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a>,
+scheduling policy, priority, and potentially a reference to a process
+context as well.</p>
+<p>There are a number of different types of threads, including:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#term-Kernel-thread"><span class="xref std std-term">Kernel threads</span></a>.</p></li>
+<li><p><a class="reference internal" href="#term-User-space-thread"><span class="xref std std-term">User space threads</span></a>.</p></li>
+<li><p><a class="reference internal" href="#term-User-mode-thread"><span class="xref std std-term">User mode threads</span></a>.</p></li>
+</ul>
+<p>Data plane threads may serve in a variety of different roles, for
+example:</p>
+<ul class="simple">
+<li><p>As an <a class="reference internal" href="#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>, usually as a <a class="reference internal" href="#term-Fast-path-lcore"><span class="xref std std-term">fast path lcore</span></a>.</p></li>
+<li><p>As a <a class="reference internal" href="#term-Registered-non-EAL-thread"><span class="xref std std-term">registered</span></a> or
+<a class="reference internal" href="#term-Unregistered-non-EAL-thread"><span class="xref std std-term">unregistered</span></a>
+<a class="reference internal" href="#term-Control-thread"><span class="xref std std-term">control thread</span></a>.</p></li>
+</ul>
+</dd>
 <dt id="term-Thread-safety">Thread safety<a class="headerlink" href="#term-Thread-safety" title="Permalink to this term">¶</a></dt><dd><p>A function is considered multi-thread (MT) safe, often
 abbreviated to thread-safe, if it may safely be called from
 multiple operating system thread in parallel, without
@@ -815,13 +1013,56 @@ the process. C11 uses <code class="docutils literal notranslate"><span class="pr
 local, but in DPDK the practice is to instead use the GCC
 extensions <code class="docutils literal notranslate"><span class="pre">__thread</span></code>.</p>
 </dd>
+<dt id="term-Top-half">Top half<a class="headerlink" href="#term-Top-half" title="Permalink to this term">¶</a></dt><dd><p>A traditional interrupt service routine (ISR) performs all
+processing caused for a particular hardware interrupt in that
+function. This may include running the RX path of an Ethernet
+driver and higher layers of the network stack, and marking a
+user space process to be run.</p>
+<p>Keeping interrupts disabled for a long time may cause issues if
+other interrupts occur. Keeping the core occuppied some
+particular task which is not strictly required to handle the
+interrupt, but rather is just caused by it, may prevent the core
+from working on some more urgent task.</p>
+<p>To solve those problems, serving an interrupt is divided into
+two parts. One, the <em>top half</em>, is the actual ISR, does as
+little as possible, which usually translate to clearing the
+interrupt and deferring the rest of the processing to the
+<em>bottom half</em>.</p>
+<p>In Linux, there is a set of different mechanisms that qualifies
+as bottom halves (e.g., soft IRQs and tasklets).</p>
+</dd>
+<dt id="term-Transparent-huge-pages">Transparent huge pages<a class="headerlink" href="#term-Transparent-huge-pages" title="Permalink to this term">¶</a></dt><dd><p>Transparent huge pages (THP) is a Linux kernel feature which
+make a non-huge pages aware application use huge pages. The
+process of moving data from regular-sized pages (4kB) to huge
+pages may be so high that it defeat the gains made due a
+reduction in TLB misses.</p>
+</dd>
 <dt id="term-UE">UE<a class="headerlink" href="#term-UE" title="Permalink to this term">¶</a></dt><dd><p>User Equipment (UE) is 3GPP term for a mobile terminal. A UE is
 roughly equivalent of a <em>host</em> in a TCP/IP network. To complicate
 things, a UE is also almost always a <em>host</em> as well, since the
 mobile network is used as a data link layer for IP.</p>
 </dd>
+<dt id="term-Unregistered-non-EAL-thread">Unregistered non-EAL thread<a class="headerlink" href="#term-Unregistered-non-EAL-thread" title="Permalink to this term">¶</a></dt><dd><p>An unregistered non-EAL thread is an operating system thread
+which not registered with the <a class="reference internal" href="#term-EAL"><span class="xref std std-term">EAL</span></a>, and thus, for
+example, does not have a <a class="reference internal" href="#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>. In other words;
+a perfectly normal operating system thread, where no
+special actions or precautions have been taken.</p>
+<p>An unregistered non-EAL thread is created by the fast path
+application, or some non-DPDK library it calls into.</p>
+<p>Unregistered thread may not call DPDK APIs which require the
+caller to have a lcore id. Unregistered thread are often also
+<a class="reference internal" href="#term-Preemptable-thread"><span class="xref std std-term">preemptable</span></a>, which further restricts
+what DPDK APIs may be used.</p>
+</dd>
 <dt id="term-User-plane">User plane<a class="headerlink" href="#term-User-plane" title="Permalink to this term">¶</a></dt><dd><p>A synonym to <a class="reference internal" href="#term-Data-plane"><span class="xref std std-term">data plane</span></a>, commonly used in the context of
 telecommunications networks.</p>
+</dd>
+<dt id="term-User-mode-thread">User mode thread<a class="headerlink" href="#term-User-mode-thread" title="Permalink to this term">¶</a></dt><dd><p>A thread which is scheduled and otherwise managed by an user space
+application. The actual execution of a user mode thread always
+happens in the context of a operating system thread.</p>
+</dd>
+<dt id="term-User-space-thread">User space thread<a class="headerlink" href="#term-User-space-thread" title="Permalink to this term">¶</a></dt><dd><p>A user space thread is an <a class="reference internal" href="#term-Operating-system-thread"><span class="xref std std-term">operating system thread</span></a>
+which forms a part of the user space process.</p>
 </dd>
 <dt id="term-Vector-packet-processing">Vector packet processing<a class="headerlink" href="#term-Vector-packet-processing" title="Permalink to this term">¶</a></dt><dd><p>Vector packet processing is a network stack design pattern,
 where the packets traverse the different layers in network stack
@@ -851,6 +1092,8 @@ name - <a class="reference internal" href="#term-VPP"><span class="xref std std-
 hosted in a virtual machine.</p>
 </dd>
 <dt id="term-Virtual-core">Virtual core<a class="headerlink" href="#term-Virtual-core" title="Permalink to this term">¶</a></dt><dd><p>A synonym for <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical core</span></a>.</p>
+</dd>
+<dt id="term-Virtual-function">Virtual function<a class="headerlink" href="#term-Virtual-function" title="Permalink to this term">¶</a></dt><dd><p>See <a class="reference internal" href="#term-SR-IOV"><span class="xref std std-term">SR-IOV</span></a>.</p>
 </dd>
 <dt id="term-VPP">VPP<a class="headerlink" href="#term-VPP" title="Permalink to this term">¶</a></dt><dd><p><a class="reference external" href="https://fd.io/">Vector Packet Processing</a> (VPP) is a Open
 Source data plane platform, with built-in router and switch

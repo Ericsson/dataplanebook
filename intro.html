@@ -82,11 +82,10 @@ User Plane (CU-UP) handles the data plane.</p>
 internally (or indeed, not at all). The protocols and means of
 communication between the different planes are proprietary <a class="footnote-reference brackets" href="#rfc5810" id="id4">1</a>
 .</p>
-<p>A pragmatic rule of a thumb for what type of processing goes into
-which plane is the rate of change, or rate of operations, the process
-entails.</p>
+<p>A rule of a thumb for what type of processing goes into which plane is
+the rate of change, or rate of operations, the process entails.</p>
 <p>The data plane usually handle one or two orders of magnitude more
-operations per second that does the control plane. The ratio between
+operations per second than does the control plane. The ratio between
 the management plane and the control plane is roughly the same.</p>
 <p>A <a class="reference internal" href="#network-function"><span class="std std-ref">network function</span></a> may be able to handle
 million of packets per second, a couple of thousands control plane
@@ -134,7 +133,7 @@ of this book.</p>
 </section>
 </section>
 <section id="data-plane-applications">
-<span id="data-plane-application"></span><h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this headline">¶</a></h2>
 <p>For the purpose of this book, a <em>data plane application</em> is a piece of
 software which implements a part of the data plane, on a particular
 node in the network.</p>
@@ -223,12 +222,13 @@ plane applications.</p>
 <p>With DPDK, the developer need not face the challenging programming
 environment of the kernel, and instead only have to deal with the
 somewhat less challenging DPDK programming model.</p>
-<p>For DPDK to bypass the kernel, the Network Interface Controller (NIC)
-hardware (or a virtual function thereof) is mapped in the process’
-address space. Instead of, or in addition to, the kernel’s NIC driver,
-the application uses a driver provided by DPDK, for that particular
-hardware. In addition to the NIC driver, a packet buffer memory
-manager is needed, but not much else in terms of infrastructure.</p>
+<p>For DPDK to bypass the kernel, the <a class="reference internal" href="glossary.html#term-NIC"><span class="xref std std-term">Network Interface Controller
+(NIC)</span></a> hardware (or a <a class="reference internal" href="glossary.html#term-Virtual-function"><span class="xref std std-term">virtual function</span></a> thereof) is
+mapped in the process’ address space. Instead of, or in addition to,
+the kernel’s NIC driver, the application uses a driver provided by
+DPDK, for that particular hardware. In addition to the NIC driver, a
+packet buffer memory manager is needed, but not much else in terms of
+infrastructure.</p>
 <p>This “I/O only” way of using DPDK is still commonplace today.</p>
 <p>Any non-trivial DPDK application will, as its core functionality
 grows, begin to require the kind of support functionality (e.g., for
@@ -272,8 +272,8 @@ essentially do everything in the fast path application.</p>
 assumes the division of concern between the platform and the
 application to be that of <a class="reference internal" href="#dpdk">DPDK</a>, as opposed to a more opinionated
 platform like <a class="reference internal" href="glossary.html#term-VPP"><span class="xref std std-term">VPP</span></a>.</p>
-<p>To achieve high efficiency and to avoid extensive packet latency
-jitter, fast path processing is usually allocated a number of
+<p>To achieve high efficiency and to avoid large amounts of
+<a class="reference internal" href="glossary.html#term-Jitter"><span class="xref std std-term">jitter</span></a>, fast path processing is usually allocated a number of
 dedicated CPU cores.</p>
 </section>
 <section id="data-plane-slow-path">
@@ -310,7 +310,7 @@ the packets are crafted in such a way, they all require expensive slow
 path processing.</p>
 </section>
 <section id="data-plane-control">
-<span id="id10"></span><h3>Data Plane Control<a class="headerlink" href="#data-plane-control" title="Permalink to this headline">¶</a></h3>
+<span id="id11"></span><h3>Data Plane Control<a class="headerlink" href="#data-plane-control" title="Permalink to this headline">¶</a></h3>
 <p>The data plane fast and slow path handles the processing of data plane
 packets, but there are other kinds of input to and output from a data
 plane application.</p>
@@ -343,7 +343,7 @@ serving in the data plane control role. Such usage of the word is
 misleading. The <a class="reference internal" href="glossary.html#term-Slow-path"><span class="xref std std-term">slow path</span></a> handles user data (only slower),
 which is distinct from the task of data plane control.</p>
 <section id="control-threads">
-<span id="id11"></span><h4>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this headline">¶</a></h4>
+<span id="id12"></span><h4>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this headline">¶</a></h4>
 <p>In data plane applications that follows the DPDK pattern with one (and
 only one) thread per CPU core, it usually makes sense to have
 additional threads in the same process to terminate interfaces to the
@@ -460,7 +460,7 @@ cp --&gt; dpc
 </section>
 </section>
 <section id="network-function">
-<span id="id12"></span><h2>Network Function<a class="headerlink" href="#network-function" title="Permalink to this headline">¶</a></h2>
+<span id="id13"></span><h2>Network Function<a class="headerlink" href="#network-function" title="Permalink to this headline">¶</a></h2>
 <p>A data plane application is usually packaged and deployed together
 with a number of supporting platform type functions, providing
 services such as process monitoring and management, and log
