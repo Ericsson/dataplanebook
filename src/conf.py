@@ -41,6 +41,10 @@ exclude_patterns = ['build']
 
 pygments_style = None
 
+# -- PlantUML Options --
+
+plantuml_output_format = 'png'
+plantuml_latex_output_format = 'pdf'
 
 # -- HTML Options --
 
