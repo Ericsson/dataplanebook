@@ -54,7 +54,7 @@ Equally different, and in part the result of, or the reason for, the
 DPDK threading model, is the choice of synchronization primitives,
 inter-thread messaging mechanisms, and work scheduling in a DPDK-based
 application, compared to an application designed in the UNIX
-tradition.
+tradition. [#unix]_
 
 This chapter leaves out :term:`concurrency` and :term:`work scheduling
 <Work scheduler>`. This topic will be covered in a separate chapter.
@@ -767,8 +767,8 @@ does not require a mode switch.
 
 .. _AF_XDP:
 
-AF_XDP
-^^^^^^
+Express Data Path
+^^^^^^^^^^^^^^^^^
 
 Process Context Switches
 ------------------------
@@ -955,15 +955,16 @@ DPDK threading model, in its most basic form, is roughly as follows:
 * In the application's ``main()`` function, call DPDK's
   `rte_eal_init() <https://doc.dpdk.org/api/rte__eal_8h.html>`_,
   which, among other things, spawns as many :term:`EAL threads <EAL
-  thread>` as there are application-owned :term:`CPU cores <CPU core>`
-  [#mainthread]_, and :term:`pin <Processor affinity>` each thread to
-  one of the cores.
+  thread>` (also known as :term:`lcores <Lcore>`) as there are
+  application-owned :term:`CPU cores <CPU core>` [#mainthread]_, and
+  :term:`pin <Processor affinity>` each thread to one of the cores.
 * Have the fast path packet processing EAL threads run continously
   and indefinitely, polling NIC receive queues and other sources of
   work.
 
-This section will dwell into the details of this model, its pros and
-cons, and its variants and extensions.
+.. figure:: deployment-basic.svg
+
+   Simplified data plane threading in action on a 4-core system.
 
 Benefits and Drawbacks
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1338,6 +1339,8 @@ number of lcores. Note however that this count also include
 :term:`registered non-EAL threads <Registered non-EAL thread>`, if any
 such have been created.
 
+.. _Invitation Only APIs:
+
 Invitation Only APIs
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -1523,6 +1526,8 @@ call).
 
 For a discussion on why DPDK's thread-related terminology is not
 internally consistent, see :ref:`A Terminology Side Note`.
+
+.. _DPDK Control Threads:
 
 Control Threads
 ---------------
@@ -1819,6 +1824,104 @@ process-internal implementation detail.
 Core Sharing
 ^^^^^^^^^^^^
 
+.. _Deployment Example:
+
+Deployment Example
+------------------
+
+This section describes an example deployment with a :term:`management
+plane`, a :term:`control plane`, a :term:`data plane`, and a platform
+application process - all hosted in same :term:`network function`.
+
+.. _Deployment Example Diagram:
+
+.. figure:: deployment-ctrl.svg
+
+   A combined control, management and data plane NF deployment example.
+
+Data Plane
+^^^^^^^^^^
+
+In this example, the :term:`main lcore` is employed as a :term:`fast
+path lcore`, as are the two :term:`worker lcores <Worker lcore>`. The
+run in the normal data plane threading way, with :term:`isolated CPU
+cores <Core isolation>` one (and only one) thread each per
+:term:`logical core`. Since the thread is alone, save potentially for
+some almost-always-idle :term:`kernel thread`, even with
+``SCHED_NORMAL`` interruptions should be rare indeed.
+
+Two of the original five cores in the DPDK fastpath application's
+original :term:`processor affinity` are used by DPDK control
+threads. This particular configuration is more illustrate that a
+control threads will, by DPDK default, float across those two
+non-lcore cores. Often, one core is enough.  See also the
+:ref:`DPDK Control Threads` section.
+
+The data plane control thread is spawned using
+``rte_ctrl_thread_create()``.  To allow its use of DPDK facilities
+requiring the caller to have an :term:`lcore id`, it has registered
+using ``rte_register_thread()``. See the :ref:`Invitation Only APIs`
+section for more information.
+
+The data plane control thread is configured with a ``SCHED_RT``
+scheduling policy, making it :term:`preemption safe <Preemption
+safety>`. It may safely coexist with ``SCHED_NORMAL`` or
+lower-priority real-time threads. See the section on :ref:`Real Time
+Scheduling Policies` for more information.
+
+The example could have included a :term:`slow path` thread as well, in
+the form of another :term:`control thread` or another process.
+
+Control Plane
+^^^^^^^^^^^^^
+
+In :ref:`the example <Deployment Example Diagram>`, the two cores used
+for control threads are also used by a processor-intensive, but not
+nessarily very latency-sensitive, multithreaded control plane
+application.
+
+Had the control plane application been latency sensitive, it could
+have been configured with a real-time scheduling policy, but given a
+lower static priority than the data plane control
+thread. Alternatively, it could have been given the same priority and
+cooperated with the data plane control thread in a round-robin
+scheduling manner, either as ``SCHED_RT`` or ``SCHED_FIFO``.
+
+Management Plane
+^^^^^^^^^^^^^^^^
+
+The :ref:`example <Deployment Example Diagram>` includes a
+single-threaded management process.
+
+From the point of view of the data plane time scale, management plane
+operations tend to be rare and far between, but the operations as such
+may be very expensive indeed. Usually, such operations come with very
+soft real-time requirements to avoid network management protocols to
+time out, and to avoid having adverse effects of a human CLI user's
+mental health.
+
+The example management plane needs only a single core to meet its
+performance requirements.
+
+Had the system's management plane processing been more heavy-weight,
+or the latency requirements more stringent, an option would have been
+to employ multithreaded (or multiprocessed) management application,
+and set the processor affinity so, that the threads could be scheduled
+on core 1 and 2 as well. In such a case, considerations must be made
+concearning priority between the management and control plane
+processing. Usually, it's undesirable to have a system where a heavy
+management plane operation may cause severe (but temporary) impact on
+control plane charateristics.
+
+The example also includes a platform process. This process is
+unrelated to any of the network planes. For example, it could be an a
+process monitoring and life cycle management daemon.
+
+.. _Service Cores:
+
+Service Cores
+-------------
+
 Thread Type Summary
 -------------------
 
@@ -1858,11 +1961,6 @@ Thread Type Summary
        lcore CPU cores removed.
      - Yes
 
-.. _Service Cores:
-
-Service Cores
--------------
-
 .. _A Terminology Side Note:
 
 A Terminology Side Note
@@ -1889,16 +1987,16 @@ lcore. However, these threads are excluded from ``RTE_LCORE_FOREACH``,
 suggesting they were not lcores.
 
 Although the current state of affairs resulted a fair amount headache
-and verbiage for dataplane book authors, it doesn't cause much trouble
-in data plane software developers' everyday DPDK
+and verbiage for data plane book authors, it doesn't cause much
+trouble in data plane software developers' everyday DPDK
 discussions. [#headache]_ There are two reasons for this:
 
-1. The defacto one-to-one relationship between lcore and CPU core is
-   even in contemporary applications *almost* always true. This
+1. The defacto one-to-one relationship between lcore and CPU core is,
+   even in contemporary applications, almost always true. This
    subject is gets an in-depth treatment in the :ref:`Lcore Affinity`
    section.
 2. :term:`Registered non-EAL thread <Registered non-EAL thread>` are
-   releatively scarce and does not serve a central roll, especially
+   few and far between and rarely serve a central roll, especially
    for the DPDK platform itself. Thus, their complicated, incoherent
    nature, where they are sometimes an EAL thread (lcore) and
    sometimes not, is rarely exposed.
