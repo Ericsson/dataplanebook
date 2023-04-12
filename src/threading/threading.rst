@@ -936,11 +936,9 @@ Data Plane Threading
 Overview
 --------
 
-This chapter will describe the DPDK threading model. Since the DPDK
-model serves well in the roll of a prototypical threading model for
-data plane fast path applications, the chapter's title is
-relevant. For simplicity, the model will also be referred to as the
-DPDK model.
+This chapter describes the DPDK threading model. The DPDK way of using
+threads is a prototypical model for data plane threading, justifying
+the section's more abstract title.
 
 The recipe for building and deploying an application adhering to the
 DPDK threading model, in its most basic form, is roughly as follows:
