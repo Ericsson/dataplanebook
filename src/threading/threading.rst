@@ -25,8 +25,8 @@ author's knowledge, there are no alternatives that are able achieve
 data plane type characteristics on top of a general-purpose operating
 system kernel. [#alternatives]_ Therefor, since the DPDK approach is
 the prototypical data plane threading model, its chapter is named
-:ref:`Data Plane Threading`, although it contents is very much
-DPDK-centric.
+:ref:`Data Plane Threading`, although its contents centered around
+DPDK.
 
 The DPDK threading model provides excellent performance
 characteristics, but at the cost of somewhat difficult-to-deploy and
@@ -98,8 +98,8 @@ Multithreading may also be used as a way to achieve
 :term:`concurrency`. Such a use of operating system threads comes with
 some limitations in scalability (i.e., the number of concurrent tasks)
 and reduced efficiency (e.g., increased context switch overhead). For
-moderately-concurrent applications with long runtimes per input
-stimuli, this model is often more than suffient, performance-wise.
+moderately-concurrent applications with long run times per input
+stimuli, this model is often more than sufficient, performance-wise.
 
 .. _User Mode Threads:
 
@@ -107,7 +107,7 @@ User Mode Threads
 ^^^^^^^^^^^^^^^^^
 
 A :term:`user mode thread`, sometimes shortened to user thread, is a
-thread which is managed not by the kernel, but by some userspace
+thread which is managed not by the kernel, but by some user space
 library, programming language virtual machine or runtime, or the
 application itself.
 
@@ -125,16 +125,16 @@ thread.
 The N:M model is an attempt to have the cake, and eat it. It tries to
 maintain a decent level of efficiency (i.e., thread-related overhead)
 and scalability (allowing for many concurrent threads), while
-maintaing the sequential, convenient programming model of
+maintaining the sequential, convenient programming model of
 multithreading.
 
 User mode thread context switching is generally less costly than an
-operating system context switch, and while maintaing a stack can still
-be a significant cost, if it's made dynamic in size one can
+operating system context switch, and while maintaining a stack can
+still be a significant cost, if it's made dynamic in size one can
 potentially have much more user mode threads than you can have
 operating system threads, allowing user mode threads to be used to
-implementation :term:`concurrency`. Dynamically-sized stacks may
-not be possible to implement without compiler support.
+implementation :term:`concurrency`. Dynamically-sized stacks may not
+be possible to implement without compiler support.
 
 Switching between tasks in the form of two user mode threads is still
 going to be much more expensive than switching between two tasks
@@ -145,7 +145,7 @@ before each instance there is a need to wait for some future event (a
 timeout, or a response from some remote process), relevant state for
 future processing much be explicitly save, and then restored again
 when the event occurs. This is required since the thread may be
-repurpose to work on some other task meanwhile.
+repurposed to work on some other task meanwhile.
 
 A well-behaved user mode thread implementation has many concern it
 most take into consideration. For example, it must avoid a situation
@@ -164,7 +164,7 @@ that partly mitigates these costs.
 
 From the point of view of user thread-to-user thread context
 switching, user mode threads implements cooperative multitasking,
-although no exlicit yield calls may be required on the application
+although no explicit yield calls may be required on the application
 source level. Thus, a user thread is never preempted and replaced with
 another user thread, but the underlying operating system thread may
 well be.
@@ -270,11 +270,11 @@ scale. The machinery, for example the length of time slices (i.e., the
 chunks of time a thread is allowed to run), is designed for "normal"
 desktop and server applications, where the size of one task is
 measured in the order of tens of milliseconds, as opposed to the data
-plane, where tasks are on the order of microseconds. Similiar, the
+plane, where tasks are on the order of microseconds. Similarly, the
 latency budget and :term:`jitter` requirements also differ in the
 order of magnitudes.
 
-A commmon scenario in case fast path processing is mixed with other
+A common scenario in case fast path processing is mixed with other
 types of threads is where CFS shows a tendency to prioritize the
 execution of a non-vital, periodically running, :term:`management
 plane` over a busy, "batch-looking", packet processing thread.
@@ -326,7 +326,7 @@ Wake Up Latency
 
 Many modern CPUs, especially large x86_64 cores, come equipped with
 the possible to enter sleep states, when not being used. There are a
-usally a number of different CPU core och package-level sleep
+usually a number of different CPU core och package-level sleep
 states. The trade off is being the cost, in terms of energy and time,
 to enter and exit ("wake up" from) a sleep state, and the benefit of
 residing in that state, in terms of energy savings, compared to some
@@ -341,10 +341,10 @@ ISA).  During light load, the wake up latency adds to
 `These benchmarks
 <https://www.theseus.fi/bitstream/handle/10024/169205/Vladislav%20Govtvas%20Thesis.pdf>`_
 gives some indication of what wake up latencies to expect on a server
-processor. For example, on a Skylake-generation Intel Xeon core in the
-C6 state, the deepest core-level sleep state, the wakeup latency is
-~80 us. In the more shallow C1E state, the latency is less than ~16
-us, but the power savings are also much less noticable.
+processor. For example, a Skylake-generation Intel Xeon core in the
+the deepest core-level sleep state C6 has a wake-up latency of ~80
+us. In the more shallow C1E state, the latency is less than ~16 us,
+but less are also the power savings.
 
 A failure to use CPU power management can lead to very poor energy
 efficiency, especially for CPUs operating at high frequencies.
@@ -352,13 +352,15 @@ efficiency, especially for CPUs operating at high frequencies.
 This topic will receive a more in-depth treatment in a future chapter
 on energy efficiency.
 
+.. _Standard Threading:
+
 Standard Threading
 ==================
 
 Overview
 --------
 
-This section attempts to describe the de-facto standard architecture
+This section attempts to describe the de facto standard architecture
 for :term:`network applications <Network application>`. This book will
 refer to this as the *standard threading model*, or just the *standard
 model* [#physics]_. This section's focus is the use of :term:`threads
@@ -393,7 +395,7 @@ some programming language virtual machines take a somewhat DPDK-like
 approach (e.g., Golang and its use of usually per-core worker
 operating system threads). The use of fibers, coroutines, or green
 threads - all variations of the same theme - also address some of the
-same concearns as the data plane threading model discussed in the
+same concerns as the data plane threading model discussed in the
 :ref:`next section <Data Plane Threading>`.
 
 In the author's opinion, none of these variations significantly
@@ -417,11 +419,11 @@ The upsides of the standard model include:
   of the application's problem (e.g., TCP/IP).
 
 A major benefit of the standard model is that few or even none of the
-mandantory steps of the data plane threading model are required. Such
+mandatory steps of the data plane threading model are required. Such
 benefits are:
 
 * The application process need not run as the superuser (root), or be
-  equipped with any special priviligies.
+  equipped with any special privileges.
 * The kernel provides a stable, secure, hardware abstraction layer, in
   particular for networking hardware.
 * :term:`NICs <NIC>` or other hardware devices need not be mapped
@@ -429,13 +431,13 @@ benefits are:
 * Explicit use of :term:`huge memory pages <Huge pages>` may be
   replaced with :term:`transparent huge pages`, or not used at all.
 * :term:`Core isolation` may not be needed.
-* Power management is the concearn of the operating system kernel.
+* Power management is the concern of the operating system kernel.
 
   * Frequency scaling is done automatically.
   * CPU cores are put to sleep when not used.
 
 * No busy-waiting is required, but rather an application waiting to
-  receive an item of work (or a timeout) using the regular I/O
+  receive an :term:`item of work` (or a timeout) using the regular I/O
   multiplexing mechanisms (e.g., ``epoll_wait()``, either directly, or
   more commonly, via some library or framework.
 * CPU cores may easily be shared by different applications, improving
@@ -453,7 +455,7 @@ model, when applied to data plane fast path applications:
 * System call overhead.
 * NIC (and other) interrupt handling overhead.
 * Lack of efficient access to hardware accelerators (e.g., for
-  cryptographic operations or DMA).
+  cryptography).
 * Process preemption causing excessive :term:`jitter` and reduced
   throughput.
 * CPU sleep state-related wake up-latencies, especially in low-load
@@ -513,7 +515,7 @@ may be a :term:`frame`. Except for the most low-level applications
 (e.g., an Ethernet software bridge), for each successive layer,
 headers are generally stripped off, and the payload may be split into
 several high-layer :term:`PDUs <PDU>`, or merged into a single PDU, or
-somewhere in between. Such multiplexing and demultiplexing will be
+somewhere in between. Such multiplexing and de-multiplexing will be
 ignored here. For simplicity, in the diagrams that follow, one
 external stimuli is assumed to ripple through the stack, and back out
 again, in some form, or another. In a real application, this
@@ -541,7 +543,7 @@ Single Threaded Standard Application
          :Network stack RX processing;
       }
    }
-   partition "Userspace Network Application" {
+   partition "User Space Network Application" {
       :Read socket;
       :Parse request;
       :Domain logic;
@@ -589,8 +591,8 @@ overhead between socket types is relatively small. This is because all
 :term:`file descriptor`-based communication carries a high overhead in
 the form of system calls and context switches.
 
-Userspace Processing
-""""""""""""""""""""
+User Space Processing
+"""""""""""""""""""""
 
 As data arrives on the socket buffer, the socket's (one or more)
 :term:`file descriptors <File descriptor>` will be marked active,
@@ -599,7 +601,7 @@ in ``epoll_wait()`` (or some equivalent I/O multiplexing system call),
 if they aren't already running.
 
 In case Linux receive packet steering (RFS) is used, the kernel- and
-userspace-level processing generally happens on the same CPU core,
+user space-level processing generally happens on the same CPU core,
 improving cache locality and thus performance.
 
 Multithreaded Standard Application
@@ -609,9 +611,9 @@ For applications that work with many sockets (e.g., the typical
 TCP-based server), multiple :term:`operating system threads <Operating
 system thread>` may be used to increase :term:`parallelism`, and to
 avoid having a set of long-running requests block all other processing
-(i.e., for :term:`concurrency`), in a very straigh-forward manner.
+(i.e., for :term:`concurrency`), in a very straight-forward manner.
 
-* Maintain a one-to-one relationsship between threads and connections
+* Maintain a one-to-one relationship between threads and connections
   (and file descriptors).
 * As new connections arrive, create a new thread or allocate a thread
   from a set existing, idle threads (i.e., a thread pool).
@@ -629,7 +631,7 @@ generally possible to have more user mode threads than operating
 system threads, allowing for more concurrent connections. The next
 issue that occurs if scalability needs be extended further, is the
 large amount of memory required by the many user mode thread
-stacks. Depending on the stack sized requried and whether or not those
+stacks. Depending on the stack sized required and whether or not those
 stacks are dynamically or statically sized, this issue may occur
 sooner, or later.
 
@@ -653,25 +655,25 @@ which will write on the fd. By the very least, the worker threads
 needs to synchronize to produce output.
 
 An issue with the "fan out" pattern is that the work threads, when not
-doing anything useful, will need to blockingly wait, on a mutex lock,
-a condition variable, a sempahore, or a file descriptor. The cost of
-for a thread dispatching incoming items to sleeping workers is steep
-indeed. The workers could busy-wait, as could the input dispatcher
-thread, but that would be big step toward :ref:`data plane threading
-model <Data plane threading>`, including many of the drawbacks and
-lacking some of the benefits.
+doing anything useful, will need to wait in a blocking manner: on a
+mutex lock, a condition variable, a semaphore, or a file
+descriptor. The cost of for a thread dispatching incoming items to
+sleeping workers is steep indeed. The workers could busy-wait, as
+could the input dispatcher thread, but that would be big step toward
+:ref:`data plane threading model <Data plane threading>`, including
+many of the drawbacks and lacking some of the benefits.
 
 Multithreaded Receive
 """""""""""""""""""""
 
 In UNIX, ``read()`` or ``recv()`` operations on file descriptors are
-thread safe, but rarely make sense to access in parallel from multiple
-threads for byte stream-type input, since one part of a message may
-end up on one thread, while the other part is read by some other
-thread. For UDP sockets, or other ``SOCK_DGRAM`` or ``SOCK_SEQPACKET``
-type sockets, where PDUs are delivered atomically (i.e., in one system
-call), a design with multiple threads blocking on the same fd may be
-feasable.
+thread safe, but it rarely make sense to access in parallel from
+multiple threads for byte stream-type input, since one part of a
+message may end up on one thread, while the other part is read by some
+other thread. For UDP sockets, or other ``SOCK_DGRAM`` or
+``SOCK_SEQPACKET`` type sockets, where PDUs are delivered atomically
+(i.e., in one system call), a design with multiple threads blocking on
+the same fd may be feasible.
 
 .. uml::
    :caption: Life of Packet for a Multithreaded Standard Application
@@ -689,7 +691,7 @@ feasable.
          :Network stack RX processing;
       }
    }
-   partition "Userspace Network Application" {
+   partition "User Space Network Application" {
       :Read socket;
       :Dispatch to worker;
       fork
@@ -776,8 +778,8 @@ Process Context Switches
 Latencies
 ---------
 
-This section makes an attempt to quantifiying the cost of various
-operations commonly occuring when the standard model is employed.
+This section makes an attempt to quantifying the cost of various
+operations commonly occurring when the standard model is employed.
 
 These latencies were measured on an Intel Xeon 6230N CPU (Cascade
 Lake), operating at 2.30 GHz. The system was running Linux 5.15.
@@ -855,7 +857,7 @@ meaningful, since the so much depend on application behavior and the
 CPU sleep state-related configuration and :term:`DVFS`.
 
 For example, in the Intel Idle Linux kernel driver, the Skylake C1E is
-specified as having a wakeup latency of 10 us. Assuming a CPU core
+specified as having a wake-up latency of 10 us. Assuming a CPU core
 operating at 2,2 GHz, this shallow sleep state adds the equivalent of
 22000 clock cycles to the context switch latency. A core in C6, the
 deepest core sleep state, adds ~10x more.
@@ -874,9 +876,10 @@ data. In the TCP case, the ``write()`` results in an actual TCP
 segment being sent.
 
 Larger packets (or chunks of data) are somewhat more costly, but it
-primariy shows as indirect cost (e.g.., the ``send()`` call doesn't
-take that much longer time, but the user-kernel copy with pollute the
-cache, leading to an indirect cost).
+primarily shows as an indirect cost (e.g.., the ``send()`` call
+doesn't take that much longer time, but the user-kernel copy with
+pollute the cache, leading to future instruction being more expensive
+to retire).
 
 ``SOCK_RAW`` type sockets have a performance similar to UDP
 sockets. However, for link-layer sockets, recent versions of the Linux
@@ -921,11 +924,11 @@ requirement to make a memory copy (unless ``AF_XDP`` is used).
 
 7000 clock cycles is not an issue for something heavy-weight, like the
 average Kubernetes micro service (which typically aren't very micro at
-all), which will spend one or more orders of magntitude more cycles on
+all), which will spend one or more orders of magnitude more cycles on
 processing higher layers (e.g., terminating gRPC and the actual
 service :term:`domain logic`). Even for :term:`high touch data plane
 applications <High touch application>`, 7000 clock cycles are
-prohibitly expensive and likely more than the per-packet budget for
+prohibitively expensive and likely more than the per-packet budget for
 *all* processing.
 
 .. _Data Plane Threading:
@@ -956,7 +959,7 @@ DPDK threading model, in its most basic form, is roughly as follows:
   thread>` (also known as :term:`lcores <Lcore>`) as there are
   application-owned :term:`CPU cores <CPU core>` [#mainthread]_, and
   :term:`pin <Processor affinity>` each thread to one of the cores.
-* Have the fast path packet processing EAL threads run continously
+* Have the fast path packet processing EAL threads run continuously
   and indefinitely, polling NIC receive queues and other sources of
   work.
 
@@ -973,8 +976,9 @@ can succinct summarized to: excellent runtime performance.
 DPDK does not add anything in terms of expressiveness; any task that
 can be achieved by a DPDK-based data plane fast path application can
 also be done so by an application built in accordance to the standard
-model, only it's standarda application will have lower throughput,
-higher latency, and generate more heat in the process.
+model. The difference is that the standard application will have lower
+throughput, higher latency, and generate more heat and otherwise use
+more resources.
 
 In summary, the DPDK threading model has the following benefits:
 
@@ -1005,7 +1009,7 @@ The drawbacks for the basic model are, in short:
   * Reduced performance for :term:`SMT` systems, since an EAL thread
     will use significant :term:`physical core` resources, even when
     no useful work is performed (i.e., being a :term:`noisy SMT
-    neighbour <Noisy neighbour>` to another thread running on the same
+    neighbour <Noisy neighbor>` to another thread running on the same
     physical core).
 
 * The use of :term:`core isolation` leads to cores allocated to the
@@ -1019,7 +1023,7 @@ The drawbacks for the basic model are, in short:
   libraries and device drivers, but may pose a challenge for the
   application itself, which potentially rely on per-lcore objects
   (e.g., timers, :term:`RCU` memory reclamation, or event device and
-  ethernet device ports/queues), which cannot be left unattended.
+  Ethernet device ports/queues), which cannot be left unattended.
 * For :term:`CNFs <CNF>`, core isolation somewhat complicates
   container-level scheduling.
 
@@ -1054,8 +1058,8 @@ software-emulated core - all of which are functionally equivalent,
 from a software point of view.  [#logicalcoreperformance]_ This useful
 term is rarely used, as is a synonym: the :term:`virtual core`.
 
-When the term :term:`logical core` is used in a DPDK context - usally
-abbreivated to :term:`lcore` - it means something related but
+When the term :term:`logical core` is used in a DPDK context - usually
+abbreviated to :term:`lcore` - it means something related but
 distinct from the generic, hardware-level concept.
 
 The DPDK lcore is a only a different name for an :term:`EAL
@@ -1077,7 +1081,7 @@ As a part of the :term:`EAL` initialization (i.e., the
 ``rte_eal_init()`` call), the calling thread is repurposed as an
 :term:`EAL thread`, and designated the :term:`main lcore`.
 
-The EAL default is to assign the lowested-numbered lcore the main
+The EAL default is to assign the lowest-numbered lcore the main
 lcore role. The default may be overridden with the ``--main-lcore``
 :term:`EAL parameter <EAL parameters>`.
 
@@ -1103,7 +1107,7 @@ The ``RTE_LCORE_FOREACH()`` and ``RTE_LCORE_FOREACH_WORKER()`` macros
 may be used to iterate over both the main and the worker lcores, or
 just the worker lcores, respectively.
 
-Progammatically or by using :term:`EAL Parameters`, certain worker
+Programmatically or by using :term:`EAL Parameters`, certain worker
 lcores may be asked to take the role of a :term:`service lcore`. See
 the :ref:`Service Cores` section for details.
 
@@ -1117,12 +1121,12 @@ assigned tasks using the `<rte_launch.h>
 A common pattern is launch a more-or-less permanently running
 function, and then deal with more fine-grained work scheduling by
 other means (e.g., a combination of DPDK event devices, DPDK timers
-and DPDK ethernet devices). See the future chapter on :ref:`Work
+and DPDK Ethernet devices). See the future chapter on :ref:`Work
 scheduling` for more information on this subject.
 
 After having finished initializing the DPDK platform and application,
 and launched all workers, the :term:`main lcore` itself may take on
-some long-runnning fast path task.
+some long-running fast path task.
 
 .. literalinclude:: launch.c
 
@@ -1137,8 +1141,8 @@ form of a function to execute, to an already-existing thread.
 
 One way to see DPDK worker lcores, is as a fixed-sized thread worker
 pool, which works on one task at a time, and where the assignment of
-tasks is directed at a particular worker, putting the burdon of load
-balancing the caller. However, in DPDK, the task is often of the
+tasks is directed at a particular worker, putting the burden of load
+balancing on the caller. However, in DPDK, the task is often of the
 never-ending nature, only terminating when some :term:`control thread`
 says it's time for an orderly shut down of the application.
 
@@ -1205,7 +1209,7 @@ affinity mask of more than one EAL thread. For example, a 2:1 mapping
 may be used, where two lcores are mapped against one logical core.
 
 In case such EAL threads are configured with a normal time-sharing,
-preemptible multitasking, scheduling policy (e.g., ``SCHED_OTHER`` on
+preemptable multitasking, scheduling policy (e.g., ``SCHED_OTHER`` on
 Linux), which is the default, they do not qualify as
 :term:`non-preemptable <Non-preemptable thread>`.
 
@@ -1278,7 +1282,7 @@ scenario, they are less likely to be considered batch-type thread, and
 less likely to be interrupted by threads that are considered
 interactive.
 
-Floating and preemptible EAL threads only make sense under very
+Floating and preemptable EAL threads only make sense under very
 specific circumstances (e.g., in the context of functional tests).
 The author has trouble imaging a real-world production scenario in
 which floating EAL threads provides a net benefit.
@@ -1308,8 +1312,8 @@ frequently accessed EAL thread-related data in :term:`thread-local
 storage <TLS>`. Such data includes the EAL thread's :term:`NUMA node`
 and thread's :term:`processor affinity` at the time it was
 created. This caching scheme implies that EAL considers the affinity
-and :term:`NUMA` placement as an constant invariants across
-the DPDK process life cycle.
+and :term:`NUMA` placement as an invariant across the DPDK process
+life cycle.
 
 In addition, many DPDK libraries and :term:`PMDs <PMD>` keep per-EAL
 thread data, usually in the form of a static array indexed by the
@@ -1329,7 +1333,7 @@ higher than, but still the same order of magnitude as, the highest
 core count system the build is targeting. On POWER and x86_64 builds,
 for example, the compile-time default for ``RTE_MAX_LCORE`` is 128.
 
-The ``RTE_MAX_LCORE`` limit must be set to also accomodate any
+The ``RTE_MAX_LCORE`` limit must be set to also accommodate any
 :term:`registered non-EAL threads <Registered non-EAL thread>`.
 
 The ``rte_lcore_count()`` function may be used to retrieve the actual
@@ -1395,7 +1399,7 @@ The result of a thread calling a non-preemption safe API, and then
 being interrupted by the kernel during the call, is that it may
 interfere with the forward progress of (i.e, block) other
 threads. Such a situation is generally not a threat to functional
-correctness of the application, but may have disasterous affects on
+correctness of the application, but may have disastrous affects on
 throughput and latency - in particular latency jitter. Simply put,
 :term:`preemption safety` is to performance what :term:`thread safety`
 is for correctness.
@@ -1422,7 +1426,7 @@ application would have done. This is especially true for
 explored further in the future :ref:`Synchronization` chapter.
 
 :term:`EAL threads <EAL thread>` are normally spared from preemption,
-and in particular completly safe from :term:`peer preemption <Peer
+and in particular completely safe from :term:`peer preemption <Peer
 preemptable EAL thread>`.
 
 There is at least one other way to avoid preemption, than the method
@@ -1507,7 +1511,7 @@ A registered non-EAL thread is generally *not* considered an lcore
 (i.e., an EAL thread), and the ``RTE_LCORE_FOREACH()`` loop macro will
 exclude registered non-EAL threads.
 
-However, the EAL-internal represention of a registered non-EAL thread
+However, the EAL-internal representation of a registered non-EAL thread
 is an instance of the EAL thread data structure, but with a role
 attribute set to ``ROLE_NON_EAL``.
 
@@ -1536,7 +1540,7 @@ calls a :term:`control thread`.
 A DPDK control thread starts its life as an :term:`unregistered
 non-EAL thread`. The EAL sets control thread's :term:`affinity mask
 <Processor affinity>` to that of the process original ``main()``
-sthread's affinity mask, at the time it initialized the EAL, but with
+thread's affinity mask, at the time it initialized the EAL, but with
 all cores used for running EAL threads removed.
 
 An alternative to using this DPDK convenience function for thread
@@ -1616,16 +1620,16 @@ events, and other information from the fast path data structures.
 
 For updates larger than 64 bits, relying machine-level atomic
 instructions may not be possible. In that case, a sequence lock may
-look like a temption option, for data which is often-read from the
-fast path, and only occasionally written by the control
-thread. However, a sequence lock is not preemption-safe on the writer
-side, although the criticial section is usually small, so depending on
-application it may be an acceptable level of risk. The risk being one
-or more :term:`fast path lcores <Fast path lcore>` being unable to
-make progress. Sequence lock does provide a means to abandoned a
-failed read transaction, which may be used to allow the thread to make
-progress, provided it keeps copy of the old data, and using the old
-data doesn't threaten application correctness.
+look like a viable option, for data which is often-read from the fast
+path, and only occasionally written by the control thread. However, a
+sequence lock is not preemption-safe on the writer side, although the
+critical section is usually small, so depending on application it may
+be an acceptable level of risk. The risk being one or more :term:`fast
+path lcores <Fast path lcore>` being unable to make progress. Sequence
+lock does provide a means to abandoned a failed read transaction,
+which may be used to allow the thread to make progress, provided it
+keeps copy of the old data, and using the old data doesn't threaten
+application correctness.
 
 :TERM:`Read-copy-update (RCU)<RCU>` may be used to update more
 elaborate configuration or other data structures, with a set of
@@ -1636,7 +1640,7 @@ By default, DPDK rings are not preemption-safe, but when operated in
 good option for messaging. A clean, and conservative design is to
 interact between the control threads and the fast path lcores only by
 means of messaging. It may results in more code, and lower
-performance, for control plane signaling-intesive applications. Such a
+performance, for control plane signaling-intensive applications. Such a
 ring may also be used as a relay, or a very basic deferred-work
 mechanism, just passing a function pointer to a :term:`fast path
 lcore`, asking it to perform some action (e.g., an configuration
@@ -1670,7 +1674,7 @@ EAL Control Threads
 The EAL creates a number of DPDK control threads for internal
 use. They are control threads in the DPDK sense only, not in the sense
 described in :ref:`Data Plane Control`. They are usually employed in
-an auxaliary role, and not in the form of a control plane agent.
+an auxiliary role, and not in the form of a control plane agent.
 
 Interrupt Thread
 """"""""""""""""
@@ -1756,7 +1760,7 @@ of the fast path application black box constraints, e.g.:
 
 * The minimum and maximum number of shared CPU cores, for data plane
   control and other control threads.
-* For a heterogenous system, if small or large CPU cores, or a
+* For a heterogeneous system, if small or large CPU cores, or a
   combination thereof, are preferred.
 
 Usually, one or more cores are reserved for :term:`data plane
@@ -1792,13 +1796,13 @@ consisting of logical cores 2 and 3.
 Internal Allocation
 ^^^^^^^^^^^^^^^^^^^
 
-A task related to, but dinstinct from, core allocation is to decide
+A task related to, but distinct from, core allocation is to decide
 in what role each of the available lcores will serve *within* the fast
 path application. This in turn is much related to the application
 architecture, for example how :term:`work scheduling <Work scheduler>`
 is implemented.  The organization of the packet processing pipeline,
-and the division of concearns between lcores, and the implementation
-of :term:`concurrency` is an decidely application-internal questions,
+and the division of concerns between lcores, and the implementation
+of :term:`concurrency` is an decidedly application-internal questions,
 and a topic left to future chapters.
 
 Service Lcore Allocation
@@ -1848,12 +1852,12 @@ cores <Core isolation>` one (and only one) thread each per
 some almost-always-idle :term:`kernel thread`, even with
 ``SCHED_NORMAL`` interruptions should be rare indeed.
 
-Two of the original five cores in the DPDK fastpath application's
+Two of the original five cores in the DPDK fast path application's
 original :term:`processor affinity` are used by DPDK control
 threads. This particular configuration is more illustrate that a
 control threads will, by DPDK default, float across those two
-non-lcore cores. Often, one core is enough.  See also the
-:ref:`DPDK Control Threads` section.
+non-lcore cores. Often, one core is enough.  See also the :ref:`DPDK
+Control Threads` section.
 
 The data plane control thread is spawned using
 ``rte_ctrl_thread_create()``.  To allow its use of DPDK facilities
@@ -1875,7 +1879,7 @@ Control Plane
 
 In :ref:`the example <Deployment Example Diagram>`, the two cores used
 for control threads are also used by a processor-intensive, but not
-nessarily very latency-sensitive, multithreaded control plane
+necessarily very latency-sensitive, multithreaded control plane
 application.
 
 Had the control plane application been latency sensitive, it could
@@ -1903,13 +1907,13 @@ performance requirements.
 
 Had the system's management plane processing been more heavy-weight,
 or the latency requirements more stringent, an option would have been
-to employ multithreaded (or multiprocessed) management application,
-and set the processor affinity so, that the threads could be scheduled
-on core 1 and 2 as well. In such a case, considerations must be made
-concearning priority between the management and control plane
-processing. Usually, it's undesirable to have a system where a heavy
-management plane operation may cause severe (but temporary) impact on
-control plane charateristics.
+to employ multithreading (or multiprocessing) in the management
+application, and set the processor affinity so, that the threads could
+be scheduled on core 1 and 2 as well. In such a case, considerations
+must be made concerning priority between the management and control
+plane processing. Usually, it's undesirable to have a system where a
+heavy management plane operation may cause severe (but temporary)
+impact on control plane characteristics.
 
 The example also includes a platform process. This process is
 unrelated to any of the network planes. For example, it could be an a
@@ -1955,7 +1959,7 @@ Thread Type Summary
        | :term:`Interrupt Thread`
      - EAL or application via ``rte_ctrl_thread_create()``.
      - No
-     - Original pre-``rte_eal_init()`` main thread affinity, with the
+     - Main thread affinity prior to the ``rte_eal_init()``, but with the
        lcore CPU cores removed.
      - Yes
 
@@ -1964,8 +1968,8 @@ Thread Type Summary
 A Terminology Side Note
 -----------------------
 
-The misleading use of *lcore* and its derivate terms in DPDK has a
-historical basis. The terminology dates back to pre-2.0.0 version of
+The misleading use of *lcore* (and terms derived from it) in DPDK has
+a historical basis. The terminology dates back to pre-2.0.0 version of
 the software. In early DPDK incarnations the lcore was a hardware
 :term:`logical core` drafted into service as a DPDK lcore, and was
 represented by and in various data in the core DPDK framework (the
@@ -1989,7 +1993,7 @@ and verbiage for data plane book authors, it doesn't cause much
 trouble in data plane software developers' everyday DPDK
 discussions. [#headache]_ There are two reasons for this:
 
-1. The defacto one-to-one relationship between lcore and CPU core is,
+1. The de facto one-to-one relationship between lcore and CPU core is,
    even in contemporary applications, almost always true. This
    subject is gets an in-depth treatment in the :ref:`Lcore Affinity`
    section.
@@ -2059,7 +2063,7 @@ Real Time Scheduling Policies
    need to be spawned for this lcore.
 
 .. [#logicalcoreperformance]
-   The performance characterstics may vary wildly.
+   The performance characteristics may vary wildly.
 
 .. [#noterm]
    Presumably the reason is that the authors assumed that EAL threads
@@ -2067,9 +2071,9 @@ Real Time Scheduling Policies
    for a separate term.
 
 .. [#headache]
-   The author suspects the plentphora of terms required to talk about
-   DPDK threads in a reasonbly precise manner might result in some
-   headache also for the readers of this text.
+   The author suspects the large amount of terms and definitions
+   required to talk about DPDK threads in a reasonably precise manner
+   might result in some headache also for the readers of this text.
 
 .. [#ladawait]
    The quality of experience of such a data plane would be on par with

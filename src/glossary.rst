@@ -70,7 +70,7 @@ Glossary
       the core itself, for a cluster of core, or for non-core hardware
       blocks such as the interconnect, or accelerators.
 
-      CPU core frequencies is either controlled by the automoously by
+      CPU core frequencies is either controlled by the autonomously by
       the hardware the by kernel, or by a user application, using
       kernel runtime configuration to do so.
 
@@ -105,16 +105,16 @@ Glossary
       An event :term:`file descriptor` is a reference to a
       kernel-level event fd object, designed to be used by user
       application for thread synchronization. An event fd object has
-      sempahor-like semantics, but unlike POSIX semaphores, event fds
+      semaphore-like semantics, but unlike POSIX semaphores, event fds
       are proper fds and thus may be used in e.g. ``select()``.
 
    Cache line
       A cache line is the smallest unit managed by the cache hierarchy
-      of current-day :term:`SMP` systems. A cache line usally holds 64
-      bytes of data, and in some relatively rare cases 128 bytes.
+      of current-day :term:`SMP` systems. In contemporary CPUs, a cache
+      line almost always holds 64 bytes of data.
 
    Communications Processor
-      An older name for a :term:`DPU`.
+      An older term for a :term:`DPU`.
 
    :ref:`Control plane <Control Plane>`
       The part of the network that negotiates, computes or otherwise handles
@@ -372,7 +372,7 @@ Glossary
 
    Floating thread
       A floating thread is an operating system thread which
-      :term:`processor affinity` mask makes it eligable to be
+      :term:`processor affinity` mask makes it eligible to be
       scheduled on more than one core.
 
    Flow cache
@@ -397,7 +397,7 @@ Glossary
 
    User thread
       A user thread is a thread which is managed not by the kernel,
-      but by some userspace entity, such a library, language virtual
+      but by some user space entity, such a library, language virtual
       machine runtime or the application itself.
 
    Hardware threading
@@ -450,7 +450,7 @@ Glossary
       the threads' instruction streams).
 
    Heterogeneous multiprocessors
-      A heterogeneous multiprocessor is a :term:`SMP` multicore CPU,
+      A heterogeneous multiprocessor is a :term:`SMP` multi-core CPU,
       with a heterogeneous CPU topology in the sense that some cores
       are faster than others. The faster cores are usually physically
       bigger and equipped with larger caches, and may also operate on
@@ -486,14 +486,14 @@ Glossary
       lead to a higher IPC, which in turns leads to higher performance
       at the same clock frequency.
 
-      IPC may also be used an indication of program
-      efficiency. According to this rule of a thumb, a program
-      resulting in high IPC is considered highly optimized, and a
-      program with comparatively low IPC the opposite. However, this
-      rule does not take time complex of the program's algorithms into
-      play. It may well be that the high-IPC program implements a very
-      naive algorithm, which results in the CPU having to execute a
-      very large number instructions, but may do so at a high IPC, as
+      IPC may also be used an indication of program efficiency.
+      According to this rule of a thumb, a program resulting in high
+      IPC is considered highly optimized, and a program with
+      comparatively low IPC the opposite. However, this rule does not
+      take time complex of the program's algorithms into play. It may
+      well be that the high-IPC program implements a very naive
+      algorithm, which results in the CPU having to execute a very
+      large number instructions, but may do so at a high IPC, as
       opposed to a variant where the same task is achieved with a
       lower time complexity algorithm, which requires fewer
       instructions to be run, but potentially at a lower IPC. An
@@ -508,12 +508,12 @@ Glossary
       Another situation that may occur, are two programs implementing
       the same basic algorithm, but one using simple non-vector
       instructions and the other using more complex and costly (on a
-      per-instrution basis) :term:`SIMD` instructions. The latter will
+      per-instruction basis) :term:`SIMD` instructions. The latter will
       have likely have better performance, but may well have lower
       IPC than its non-SIMD counterpart.
 
-      IPC is also commonly used abbrevition of inter-process
-      communcation.
+      IPC is also commonly used abbreviation of inter-process
+      communication.
 
    ISA
       An Instruction Set Architecture (ISA) specifies the interface
@@ -676,7 +676,7 @@ Glossary
       Multithreading is the use of multiple :term:`threads <Operating
       system thread>` in the same operating system process.
 
-      As oppposed to threads in different processes, all threads in
+      As opposed to threads in different processes, all threads in
       the same process shared the same memory. Even data that is
       generally considered thread-private, such as the stack and data
       in :term:`thread-local storage <TLS>`, is accessible to other
@@ -743,8 +743,8 @@ Glossary
       where it's not implemented as a discrete card) or a network
       adapter.
 
-   Noisy neighbour
-      An application is considered a noisy neighbour in case it causes
+   Noisy neighbor
+      An application is considered a noisy neighbor in case it causes
       performance degradation for other applications, running on a
       different set of :term:`logical cores <Logical core>`, because
       of its extensive use of shared hardware resources, such as
@@ -815,7 +815,7 @@ Glossary
 
       In practice, NUMA refers to DRAM access times. With the advent
       of CPU caches, *all* systems are NUMA in the sense that memory
-      access varies with how far into the memory hiarcharchy the core
+      access varies with how far into the memory hierarchy the core
       needs to reach to retrieve the relevant :term:`cache line`.  A
       SMP system may well have some asymmetry when it comes to DRAM
       memory access characteristics, but it's only considered NUMA
@@ -859,7 +859,7 @@ Glossary
    OSI model
       Open Systems Interconnection (OSI) model is a conceptual model,
       describing an layered architecture, and the division of
-      concearns among the layers.
+      concerns among the layers.
 
    Packet
       A packet is a :term:`network layer` :term:`PDU` (e.g., an IPv4
@@ -904,7 +904,7 @@ Glossary
       an EAL thread originating from the same DPDK process.
 
       A DPDK application is normally deployed in a manner which will
-      prevent this scenario from ever occuring.
+      prevent this scenario from ever occurring.
 
    Physical core
       The term physical core refers to the underlying electric
@@ -944,7 +944,7 @@ Glossary
       switch occurs) does not threaten the correctness of the program,
       or have very detrimental effects performance. In this book, the
       preemption unsafe constructs covered only cause performance
-      degradations, although at time very serious such.
+      degradation, although at time very serious such.
 
    Preemptable thread
       A preemptable thread is a thread which may suffer an involuntary
@@ -1034,7 +1034,7 @@ Glossary
       Receive Flow Scaling (RFS).
 
    Scheduling latency
-      Sheduling latency is the :term:`time <Wall-clock latency>` from
+      Scheduling latency is the :term:`time <Wall-clock latency>` from
       a thread could, in principle, be execute (i.e., it's *runnable*),
       to the time when it's actually running on a CPU core.
 
@@ -1137,7 +1137,7 @@ Glossary
       With SR-IOV, the PCIe device is split into a physical function
       (PF) and a number of virtual functions (VFs).
 
-      The PF is primarily used for adminstrative tasks. A VF is used
+      The PF is primarily used for administrative tasks. A VF is used
       to access the actual PCIe device function (e.g., sending and
       receiving packets, in case of a PCIe :term:`NIC`).
 
@@ -1151,7 +1151,7 @@ Glossary
       The PF/VF division also reflects on the driver structure, where
       one driver is responsible for the PF, and another for the VFs.
       Often, the PF driver resides in the kernel, while the VF driver
-      may be either in userspace (e.g., in DPDK), or in the kernel.
+      may be either in user space (e.g., in DPDK), or in the kernel.
 
    SSH
       Secure Shell (SSH) is a protocol for remote shell access and
@@ -1215,7 +1215,7 @@ Glossary
       user space process to be run.
 
       Keeping interrupts disabled for a long time may cause issues if
-      other interrupts occur. Keeping the core occuppied some
+      other interrupts occur. Keeping the core occupied with some
       particular task which is not strictly required to handle the
       interrupt, but rather is just caused by it, may prevent the core
       from working on some more urgent task.
@@ -1226,8 +1226,8 @@ Glossary
       interrupt and deferring the rest of the processing to the
       *bottom half*.
 
-      In Linux, there is a set of different mechanisms that qualifies
-      as bottom halves (e.g., soft IRQs and tasklets).
+      In Linux, there are a number of different mechanisms that
+      qualifies as bottom halves (e.g., soft IRQs and tasklets).
 
    Transparent huge pages
       Transparent huge pages (THP) is a Linux kernel feature which
@@ -1316,7 +1316,7 @@ Glossary
 
    Wait-free algorithm
       An wait-free algorithm is kind of :term:`non-blocking algorithm`
-      that guarantees that all threads involve make progress.
+      that guarantees that all threads involved make progress.
 
    Wall-clock latency
       Wall-clock latency, or wall-time latency, is the latency in
