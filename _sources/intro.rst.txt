@@ -499,7 +499,7 @@ Reference Architecture B
 This architecture groups data plane control and the fast path into the
 same application, deployed in the same process.
 
-Architecture B is also more centralized in that it doesn't employ the
+Architecture B is also more centralized in that it does not employ the
 kernel's network stack as the slow path, but instead carry its own
 slow path domain logic.
 

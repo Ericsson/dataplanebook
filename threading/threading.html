@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Work Scheduling" href="../work.html" />
+    <link rel="next" title="Work Scheduling" href="../work/work.html" />
     <link rel="prev" title="Introduction" href="../intro.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -50,8 +50,8 @@ author’s knowledge, there are no alternatives that are able achieve
 data plane type characteristics on top of a general-purpose operating
 system kernel. <a class="footnote-reference brackets" href="#alternatives" id="id2">3</a> Therefor, since the DPDK approach is
 the prototypical data plane threading model, its chapter is named
-<a class="reference internal" href="#data-plane-threading"><span class="std std-ref">Data Plane Threading</span></a>, although it contents is very much
-DPDK-centric.</p>
+<a class="reference internal" href="#data-plane-threading"><span class="std std-ref">Data Plane Threading</span></a>, although its contents centered around
+DPDK.</p>
 <p>The DPDK threading model provides excellent performance
 characteristics, but at the cost of somewhat difficult-to-deploy and
 difficult-to-understand applications, among other things.</p>
@@ -104,12 +104,12 @@ for an application to utilize multiple CPU cores in <a class="reference internal
 <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>. Such a use of operating system threads comes with
 some limitations in scalability (i.e., the number of concurrent tasks)
 and reduced efficiency (e.g., increased context switch overhead). For
-moderately-concurrent applications with long runtimes per input
-stimuli, this model is often more than suffient, performance-wise.</p>
+moderately-concurrent applications with long run times per input
+stimuli, this model is often more than sufficient, performance-wise.</p>
 <section id="user-mode-threads">
 <span id="id6"></span><h4>User Mode Threads<a class="headerlink" href="#user-mode-threads" title="Permalink to this headline">¶</a></h4>
 <p>A <a class="reference internal" href="../glossary.html#term-User-mode-thread"><span class="xref std std-term">user mode thread</span></a>, sometimes shortened to user thread, is a
-thread which is managed not by the kernel, but by some userspace
+thread which is managed not by the kernel, but by some user space
 library, programming language virtual machine or runtime, or the
 application itself.</p>
 <p>Such thread management includes thread switching; both replacing
@@ -124,15 +124,15 @@ thread.</p>
 <p>The N:M model is an attempt to have the cake, and eat it. It tries to
 maintain a decent level of efficiency (i.e., thread-related overhead)
 and scalability (allowing for many concurrent threads), while
-maintaing the sequential, convenient programming model of
+maintaining the sequential, convenient programming model of
 multithreading.</p>
 <p>User mode thread context switching is generally less costly than an
-operating system context switch, and while maintaing a stack can still
-be a significant cost, if it’s made dynamic in size one can
+operating system context switch, and while maintaining a stack can
+still be a significant cost, if it’s made dynamic in size one can
 potentially have much more user mode threads than you can have
 operating system threads, allowing user mode threads to be used to
-implementation <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>. Dynamically-sized stacks may
-not be possible to implement without compiler support.</p>
+implementation <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>. Dynamically-sized stacks may not
+be possible to implement without compiler support.</p>
 <p>Switching between tasks in the form of two user mode threads is still
 going to be much more expensive than switching between two tasks
 without requiring the stack to be maintained (e.g., as in an
@@ -142,7 +142,7 @@ before each instance there is a need to wait for some future event (a
 timeout, or a response from some remote process), relevant state for
 future processing much be explicitly save, and then restored again
 when the event occurs. This is required since the thread may be
-repurpose to work on some other task meanwhile.</p>
+repurposed to work on some other task meanwhile.</p>
 <p>A well-behaved user mode thread implementation has many concern it
 most take into consideration. For example, it must avoid a situation
 where a single user mode thread starve other user mode threads
@@ -158,7 +158,7 @@ overhead related to system calls, but there are less naive approaches
 that partly mitigates these costs.</p>
 <p>From the point of view of user thread-to-user thread context
 switching, user mode threads implements cooperative multitasking,
-although no exlicit yield calls may be required on the application
+although no explicit yield calls may be required on the application
 source level. Thus, a user thread is never preempted and replaced with
 another user thread, but the underlying operating system thread may
 well be.</p>
@@ -235,7 +235,7 @@ Scheduler (CFS), which handles threads configured with the
 <code class="docutils literal notranslate"><span class="pre">SCHED_NORMAL</span></code> (also known as <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code>) scheduling policy,
 shoulders most of this responsibility. Often, a small subset of the
 system’s threads are configured with a real-time scheduling
-policy. See the section on <a class="reference internal" href="#id33"><span class="std std-ref">Real Time Scheduling Policies</span></a> for
+policy. See the section on <a class="reference internal" href="#id34"><span class="std std-ref">Real Time Scheduling Policies</span></a> for
 more information.</p>
 <p>A good general-purpose process scheduler needs to maintain certain
 soft real-time characteristics. More specifically, it will attempt to
@@ -249,10 +249,10 @@ scale. The machinery, for example the length of time slices (i.e., the
 chunks of time a thread is allowed to run), is designed for “normal”
 desktop and server applications, where the size of one task is
 measured in the order of tens of milliseconds, as opposed to the data
-plane, where tasks are on the order of microseconds. Similiar, the
+plane, where tasks are on the order of microseconds. Similarly, the
 latency budget and <a class="reference internal" href="../glossary.html#term-Jitter"><span class="xref std std-term">jitter</span></a> requirements also differ in the
 order of magnitudes.</p>
-<p>A commmon scenario in case fast path processing is mixed with other
+<p>A common scenario in case fast path processing is mixed with other
 types of threads is where CFS shows a tendency to prioritize the
 execution of a non-vital, periodically running, <a class="reference internal" href="../glossary.html#term-Management-plane"><span class="xref std std-term">management
 plane</span></a> over a busy, “batch-looking”, packet processing thread.</p>
@@ -296,7 +296,7 @@ such tuning the affect the whole system.</p>
 <h4>Wake Up Latency<a class="headerlink" href="#wake-up-latency" title="Permalink to this headline">¶</a></h4>
 <p>Many modern CPUs, especially large x86_64 cores, come equipped with
 the possible to enter sleep states, when not being used. There are a
-usally a number of different CPU core och package-level sleep
+usually a number of different CPU core och package-level sleep
 states. The trade off is being the cost, in terms of energy and time,
 to enter and exit (“wake up” from) a sleep state, and the benefit of
 residing in that state, in terms of energy savings, compared to some
@@ -308,10 +308,10 @@ ISA).  During light load, the wake up latency adds to
 <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a>.</p>
 <p><a class="reference external" href="https://www.theseus.fi/bitstream/handle/10024/169205/Vladislav%20Govtvas%20Thesis.pdf">These benchmarks</a>
 gives some indication of what wake up latencies to expect on a server
-processor. For example, on a Skylake-generation Intel Xeon core in the
-C6 state, the deepest core-level sleep state, the wakeup latency is
-~80 us. In the more shallow C1E state, the latency is less than ~16
-us, but the power savings are also much less noticable.</p>
+processor. For example, a Skylake-generation Intel Xeon core in the
+the deepest core-level sleep state C6 has a wake-up latency of ~80
+us. In the more shallow C1E state, the latency is less than ~16 us,
+but less are also the power savings.</p>
 <p>A failure to use CPU power management can lead to very poor energy
 efficiency, especially for CPUs operating at high frequencies.</p>
 <p>This topic will receive a more in-depth treatment in a future chapter
@@ -320,13 +320,13 @@ on energy efficiency.</p>
 </section>
 </section>
 <section id="standard-threading">
-<h2>Standard Threading<a class="headerlink" href="#standard-threading" title="Permalink to this headline">¶</a></h2>
+<span id="id10"></span><h2>Standard Threading<a class="headerlink" href="#standard-threading" title="Permalink to this headline">¶</a></h2>
 <section id="overview">
 <h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
-<p>This section attempts to describe the de-facto standard architecture
+<p>This section attempts to describe the de facto standard architecture
 for <a class="reference internal" href="../glossary.html#term-Network-application"><span class="xref std std-term">network applications</span></a>. This book will
 refer to this as the <em>standard threading model</em>, or just the <em>standard
-model</em> <a class="footnote-reference brackets" href="#physics" id="id10">2</a>. This section’s focus is the use of <a class="reference internal" href="../glossary.html#term-Thread"><span class="xref std std-term">threads</span></a>, for <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a> and <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>, but to
+model</em> <a class="footnote-reference brackets" href="#physics" id="id11">2</a>. This section’s focus is the use of <a class="reference internal" href="../glossary.html#term-Thread"><span class="xref std std-term">threads</span></a>, for <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a> and <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>, but to
 give a more complete picture, the use of other operating system
 services is covered as well.</p>
 <p>A network application built per the standard model consists of a user
@@ -351,7 +351,7 @@ some programming language virtual machines take a somewhat DPDK-like
 approach (e.g., Golang and its use of usually per-core worker
 operating system threads). The use of fibers, coroutines, or green
 threads - all variations of the same theme - also address some of the
-same concearns as the data plane threading model discussed in the
+same concerns as the data plane threading model discussed in the
 <a class="reference internal" href="#data-plane-threading"><span class="std std-ref">next section</span></a>.</p>
 <p>In the author’s opinion, none of these variations significantly
 improves the suitability for the standard model to serve in a data
@@ -370,11 +370,11 @@ for improved efficiency, <a class="reference internal" href="../glossary.html#te
 of the application’s problem (e.g., TCP/IP).</p></li>
 </ul>
 <p>A major benefit of the standard model is that few or even none of the
-mandantory steps of the data plane threading model are required. Such
+mandatory steps of the data plane threading model are required. Such
 benefits are:</p>
 <ul class="simple">
 <li><p>The application process need not run as the superuser (root), or be
-equipped with any special priviligies.</p></li>
+equipped with any special privileges.</p></li>
 <li><p>The kernel provides a stable, secure, hardware abstraction layer, in
 particular for networking hardware.</p></li>
 <li><p><a class="reference internal" href="../glossary.html#term-NIC"><span class="xref std std-term">NICs</span></a> or other hardware devices need not be mapped
@@ -382,14 +382,14 @@ into the process’ address space.</p></li>
 <li><p>Explicit use of <a class="reference internal" href="../glossary.html#term-Huge-pages"><span class="xref std std-term">huge memory pages</span></a> may be
 replaced with <a class="reference internal" href="../glossary.html#term-Transparent-huge-pages"><span class="xref std std-term">transparent huge pages</span></a>, or not used at all.</p></li>
 <li><p><a class="reference internal" href="../glossary.html#term-Core-isolation"><span class="xref std std-term">Core isolation</span></a> may not be needed.</p></li>
-<li><p>Power management is the concearn of the operating system kernel.</p>
+<li><p>Power management is the concern of the operating system kernel.</p>
 <ul>
 <li><p>Frequency scaling is done automatically.</p></li>
 <li><p>CPU cores are put to sleep when not used.</p></li>
 </ul>
 </li>
 <li><p>No busy-waiting is required, but rather an application waiting to
-receive an item of work (or a timeout) using the regular I/O
+receive an <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">item of work</span></a> (or a timeout) using the regular I/O
 multiplexing mechanisms (e.g., <code class="docutils literal notranslate"><span class="pre">epoll_wait()</span></code>, either directly, or
 more commonly, via some library or framework.</p></li>
 <li><p>CPU cores may easily be shared by different applications, improving
@@ -407,7 +407,7 @@ model, when applied to data plane fast path applications:</p>
 <li><p>System call overhead.</p></li>
 <li><p>NIC (and other) interrupt handling overhead.</p></li>
 <li><p>Lack of efficient access to hardware accelerators (e.g., for
-cryptographic operations or DMA).</p></li>
+cryptography).</p></li>
 <li><p>Process preemption causing excessive <a class="reference internal" href="../glossary.html#term-Jitter"><span class="xref std std-term">jitter</span></a> and reduced
 throughput.</p></li>
 <li><p>CPU sleep state-related wake up-latencies, especially in low-load
@@ -426,7 +426,7 @@ Formula 1 race car to work. The Volvo-based approach is safer, more
 inexpensive, more energy efficient, easier to develop, maintain and
 deploy, requires a much less qualified operator, and allows for
 relatively friction-free coexistence with other road
-users. <a class="footnote-reference brackets" href="#arrested" id="id11">1</a></p>
+users. <a class="footnote-reference brackets" href="#arrested" id="id12">1</a></p>
 <p>However, developers of data plane <a class="reference internal" href="../glossary.html#term-Fast-path"><span class="xref std std-term">fast path</span></a> applications are,
 sooner or later, likely to find out they are in fact on the race
 track, and their competition revs up to 15000 PMs.</p>
@@ -444,7 +444,7 @@ would still suffer the same (or worse) fate in terms of poor fast path
 performance characteristics.</p>
 </section>
 <section id="life-of-a-packet">
-<span id="id12"></span><h3>Life of a Packet<a class="headerlink" href="#life-of-a-packet" title="Permalink to this headline">¶</a></h3>
+<span id="id13"></span><h3>Life of a Packet<a class="headerlink" href="#life-of-a-packet" title="Permalink to this headline">¶</a></h3>
 <p>This section attempts to describe the standard model using a set of
 activity diagrams, each describing the <em>life of a packet</em>.</p>
 <p>Life of a packet is a way to explain the workings of a data plane
@@ -459,7 +459,7 @@ may be a <a class="reference internal" href="../glossary.html#term-Frame"><span 
 (e.g., an Ethernet software bridge), for each successive layer,
 headers are generally stripped off, and the payload may be split into
 several high-layer <a class="reference internal" href="../glossary.html#term-PDU"><span class="xref std std-term">PDUs</span></a>, or merged into a single PDU, or
-somewhere in between. Such multiplexing and demultiplexing will be
+somewhere in between. Such multiplexing and de-multiplexing will be
 ignored here. For simplicity, in the diagrams that follow, one
 external stimuli is assumed to ripple through the stack, and back out
 again, in some form, or another. In a real application, this
@@ -469,9 +469,9 @@ making up the original packet, until processing may continue to the
 next layer.</p>
 <section id="single-threaded-standard-application">
 <h4>Single Threaded Standard Application<a class="headerlink" href="#single-threaded-standard-application" title="Permalink to this headline">¶</a></h4>
-<figure class="align-default" id="id35">
+<figure class="align-default" id="id36">
 <p class="plantuml">
-<img src="../_images/plantuml-82bdcc3f0438c47837f335bef08460ea3db095aa.png" alt="&#64;startuml
+<img src="../_images/plantuml-ad74b8e01e5b2e4ea04d17bf36b133aadb297200.png" alt="&#64;startuml
 
 start
 
@@ -484,7 +484,7 @@ partition &quot;Kernel&quot; {
       :Network stack RX processing;
    }
 }
-partition &quot;Userspace Network Application&quot; {
+partition &quot;User Space Network Application&quot; {
    :Read socket;
    :Parse request;
    :Domain logic;
@@ -500,7 +500,7 @@ end
 </p>
 <figcaption>
 <p><span class="caption-text"><p>Life of Packet for a Single Threaded Application</p>
-</span><a class="headerlink" href="#id35" title="Permalink to this image">¶</a></p>
+</span><a class="headerlink" href="#id36" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>This diagram shows roughly what steps are performed when processing
@@ -510,7 +510,7 @@ model-type network application.</p>
 <h5>Kernel RX Processing<a class="headerlink" href="#kernel-rx-processing" title="Permalink to this headline">¶</a></h5>
 <p>First, an Ethernet frames arrives from the network, and is allocated
 an entry in one of the <a class="reference internal" href="../glossary.html#term-NIC"><span class="xref std std-term">NIC</span></a>’s RX descriptor queues. The kernel
-receives an interrupt <a class="footnote-reference brackets" href="#napi" id="id13">8</a>, the interrupt service routine (ISR)
+receives an interrupt <a class="footnote-reference brackets" href="#napi" id="id14">8</a>, the interrupt service routine (ISR)
 (or <a class="reference internal" href="../glossary.html#term-Top-half"><span class="xref std std-term">top half</span></a>) of the Ethernet driver is run, which in turn
 marks the <a class="reference internal" href="../glossary.html#term-Bottom-half"><span class="xref std std-term">bottom half</span></a> interrupt handler to be run. The bottom
 half runs the Ethernet driver and the rest of the RX path in the
@@ -532,15 +532,15 @@ overhead between socket types is relatively small. This is because all
 <a class="reference internal" href="../glossary.html#term-File-descriptor"><span class="xref std std-term">file descriptor</span></a>-based communication carries a high overhead in
 the form of system calls and context switches.</p>
 </section>
-<section id="userspace-processing">
-<h5>Userspace Processing<a class="headerlink" href="#userspace-processing" title="Permalink to this headline">¶</a></h5>
+<section id="user-space-processing">
+<h5>User Space Processing<a class="headerlink" href="#user-space-processing" title="Permalink to this headline">¶</a></h5>
 <p>As data arrives on the socket buffer, the socket’s (one or more)
 <a class="reference internal" href="../glossary.html#term-File-descriptor"><span class="xref std std-term">file descriptors</span></a> will be marked active,
 which in turn will wake up the relevant application threads, blocking
 in <code class="docutils literal notranslate"><span class="pre">epoll_wait()</span></code> (or some equivalent I/O multiplexing system call),
 if they aren’t already running.</p>
 <p>In case Linux receive packet steering (RFS) is used, the kernel- and
-userspace-level processing generally happens on the same CPU core,
+user space-level processing generally happens on the same CPU core,
 improving cache locality and thus performance.</p>
 </section>
 </section>
@@ -549,9 +549,9 @@ improving cache locality and thus performance.</p>
 <p>For applications that work with many sockets (e.g., the typical
 TCP-based server), multiple <a class="reference internal" href="../glossary.html#term-Operating-system-thread"><span class="xref std std-term">operating system threads</span></a> may be used to increase <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a>, and to
 avoid having a set of long-running requests block all other processing
-(i.e., for <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>), in a very straigh-forward manner.</p>
+(i.e., for <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>), in a very straight-forward manner.</p>
 <ul class="simple">
-<li><p>Maintain a one-to-one relationsship between threads and connections
+<li><p>Maintain a one-to-one relationship between threads and connections
 (and file descriptors).</p></li>
 <li><p>As new connections arrive, create a new thread or allocate a thread
 from a set existing, idle threads (i.e., a thread pool).</p></li>
@@ -568,7 +568,7 @@ generally possible to have more user mode threads than operating
 system threads, allowing for more concurrent connections. The next
 issue that occurs if scalability needs be extended further, is the
 large amount of memory required by the many user mode thread
-stacks. Depending on the stack sized requried and whether or not those
+stacks. Depending on the stack sized required and whether or not those
 stacks are dynamically or statically sized, this issue may occur
 sooner, or later.</p>
 <p>The next step in the evolution of such a design, or an upfront
@@ -588,26 +588,26 @@ resulting packet (e.g., a response) back to some singleton thread,
 which will write on the fd. By the very least, the worker threads
 needs to synchronize to produce output.</p>
 <p>An issue with the “fan out” pattern is that the work threads, when not
-doing anything useful, will need to blockingly wait, on a mutex lock,
-a condition variable, a sempahore, or a file descriptor. The cost of
-for a thread dispatching incoming items to sleeping workers is steep
-indeed. The workers could busy-wait, as could the input dispatcher
-thread, but that would be big step toward <a class="reference internal" href="#data-plane-threading"><span class="std std-ref">data plane threading
-model</span></a>, including many of the drawbacks and
-lacking some of the benefits.</p>
+doing anything useful, will need to wait in a blocking manner: on a
+mutex lock, a condition variable, a semaphore, or a file
+descriptor. The cost of for a thread dispatching incoming items to
+sleeping workers is steep indeed. The workers could busy-wait, as
+could the input dispatcher thread, but that would be big step toward
+<a class="reference internal" href="#data-plane-threading"><span class="std std-ref">data plane threading model</span></a>, including
+many of the drawbacks and lacking some of the benefits.</p>
 <section id="multithreaded-receive">
 <h5>Multithreaded Receive<a class="headerlink" href="#multithreaded-receive" title="Permalink to this headline">¶</a></h5>
 <p>In UNIX, <code class="docutils literal notranslate"><span class="pre">read()</span></code> or <code class="docutils literal notranslate"><span class="pre">recv()</span></code> operations on file descriptors are
-thread safe, but rarely make sense to access in parallel from multiple
-threads for byte stream-type input, since one part of a message may
-end up on one thread, while the other part is read by some other
-thread. For UDP sockets, or other <code class="docutils literal notranslate"><span class="pre">SOCK_DGRAM</span></code> or <code class="docutils literal notranslate"><span class="pre">SOCK_SEQPACKET</span></code>
-type sockets, where PDUs are delivered atomically (i.e., in one system
-call), a design with multiple threads blocking on the same fd may be
-feasable.</p>
-<figure class="align-default" id="id36">
+thread safe, but it rarely make sense to access in parallel from
+multiple threads for byte stream-type input, since one part of a
+message may end up on one thread, while the other part is read by some
+other thread. For UDP sockets, or other <code class="docutils literal notranslate"><span class="pre">SOCK_DGRAM</span></code> or
+<code class="docutils literal notranslate"><span class="pre">SOCK_SEQPACKET</span></code> type sockets, where PDUs are delivered atomically
+(i.e., in one system call), a design with multiple threads blocking on
+the same fd may be feasible.</p>
+<figure class="align-default" id="id37">
 <p class="plantuml">
-<img src="../_images/plantuml-84cdf3eac82ca44a8b24d330808a1d47d4110265.png" alt="&#64;startuml
+<img src="../_images/plantuml-310dc4ad2e0555786ee233f0a026868ceb6250e8.png" alt="&#64;startuml
 
 start
 
@@ -620,7 +620,7 @@ partition &quot;Kernel&quot; {
       :Network stack RX processing;
    }
 }
-partition &quot;Userspace Network Application&quot; {
+partition &quot;User Space Network Application&quot; {
    :Read socket;
    :Dispatch to worker;
    fork
@@ -649,7 +649,7 @@ end
 </p>
 <figcaption>
 <p><span class="caption-text"><p>Life of Packet for a Multithreaded Standard Application</p>
-</span><a class="headerlink" href="#id36" title="Permalink to this image">¶</a></p>
+</span><a class="headerlink" href="#id37" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>As mentioned, there are also other patterns, where instead each worker
@@ -706,8 +706,8 @@ does not require a mode switch.</p>
 </section>
 <section id="latencies">
 <h3>Latencies<a class="headerlink" href="#latencies" title="Permalink to this headline">¶</a></h3>
-<p>This section makes an attempt to quantifiying the cost of various
-operations commonly occuring when the standard model is employed.</p>
+<p>This section makes an attempt to quantifying the cost of various
+operations commonly occurring when the standard model is employed.</p>
 <p>These latencies were measured on an Intel Xeon 6230N CPU (Cascade
 Lake), operating at 2.30 GHz. The system was running Linux 5.15.</p>
 <p>The purpose of the benchmark data is only to give an
@@ -718,8 +718,8 @@ behavior.</p>
 <p>The costs covered here are the direct cost, and thus does not include
 indirect cost such kernel-induced cache pollution. The indirect costs
 are much harder to quantify.</p>
-<table class="colwidths-given docutils align-default" id="id37">
-<caption><span class="caption-text">Network Application Operation Processing Latency</span><a class="headerlink" href="#id37" title="Permalink to this table">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id38">
+<caption><span class="caption-text">Network Application Operation Processing Latency</span><a class="headerlink" href="#id38" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 50%" />
 <col style="width: 50%" />
@@ -782,7 +782,7 @@ state.</p>
 meaningful, since the so much depend on application behavior and the
 CPU sleep state-related configuration and <a class="reference internal" href="../glossary.html#term-DVFS"><span class="xref std std-term">DVFS</span></a>.</p>
 <p>For example, in the Intel Idle Linux kernel driver, the Skylake C1E is
-specified as having a wakeup latency of 10 us. Assuming a CPU core
+specified as having a wake-up latency of 10 us. Assuming a CPU core
 operating at 2,2 GHz, this shallow sleep state adds the equivalent of
 22000 clock cycles to the context switch latency. A core in C6, the
 deepest core sleep state, adds ~10x more.</p>
@@ -799,9 +799,10 @@ the equal amount. Generally, sending a little cheaper than receiving
 data. In the TCP case, the <code class="docutils literal notranslate"><span class="pre">write()</span></code> results in an actual TCP
 segment being sent.</p>
 <p>Larger packets (or chunks of data) are somewhat more costly, but it
-primariy shows as indirect cost (e.g.., the <code class="docutils literal notranslate"><span class="pre">send()</span></code> call doesn’t
-take that much longer time, but the user-kernel copy with pollute the
-cache, leading to an indirect cost).</p>
+primarily shows as an indirect cost (e.g.., the <code class="docutils literal notranslate"><span class="pre">send()</span></code> call
+doesn’t take that much longer time, but the user-kernel copy with
+pollute the cache, leading to future instruction being more expensive
+to retire).</p>
 <p><code class="docutils literal notranslate"><span class="pre">SOCK_RAW</span></code> type sockets have a performance similar to UDP
 sockets. However, for link-layer sockets, recent versions of the Linux
 kernels provides an alternative, much more efficient, mechanism to
@@ -841,18 +842,18 @@ user-kernel boundary is also a very significant cost, including the
 requirement to make a memory copy (unless <code class="docutils literal notranslate"><span class="pre">AF_XDP</span></code> is used).</p>
 <p>7000 clock cycles is not an issue for something heavy-weight, like the
 average Kubernetes micro service (which typically aren’t very micro at
-all), which will spend one or more orders of magntitude more cycles on
+all), which will spend one or more orders of magnitude more cycles on
 processing higher layers (e.g., terminating gRPC and the actual
 service <a class="reference internal" href="../glossary.html#term-Domain-logic"><span class="xref std std-term">domain logic</span></a>). Even for <a class="reference internal" href="../glossary.html#term-High-touch-application"><span class="xref std std-term">high touch data plane
 applications</span></a>, 7000 clock cycles are
-prohibitly expensive and likely more than the per-packet budget for
+prohibitively expensive and likely more than the per-packet budget for
 <em>all</em> processing.</p>
 </section>
 </section>
 <section id="data-plane-threading">
-<span id="id14"></span><h2>Data Plane Threading<a class="headerlink" href="#data-plane-threading" title="Permalink to this headline">¶</a></h2>
-<section id="id15">
-<h3>Overview<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<span id="id15"></span><h2>Data Plane Threading<a class="headerlink" href="#data-plane-threading" title="Permalink to this headline">¶</a></h2>
+<section id="id16">
+<h3>Overview<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <p>This chapter describes the DPDK threading model. The DPDK way of using
 threads is a prototypical model for data plane threading, justifying
 the section’s more abstract title.</p>
@@ -869,26 +870,27 @@ which cores to use.</p></li>
 <li><p>In the application’s <code class="docutils literal notranslate"><span class="pre">main()</span></code> function, call DPDK’s
 <a class="reference external" href="https://doc.dpdk.org/api/rte__eal_8h.html">rte_eal_init()</a>,
 which, among other things, spawns as many <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> (also known as <a class="reference internal" href="../glossary.html#term-Lcore"><span class="xref std std-term">lcores</span></a>) as there are
-application-owned <a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">CPU cores</span></a> <a class="footnote-reference brackets" href="#mainthread" id="id16">9</a>, and
+application-owned <a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">CPU cores</span></a> <a class="footnote-reference brackets" href="#mainthread" id="id17">9</a>, and
 <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">pin</span></a> each thread to one of the cores.</p></li>
-<li><p>Have the fast path packet processing EAL threads run continously
+<li><p>Have the fast path packet processing EAL threads run continuously
 and indefinitely, polling NIC receive queues and other sources of
 work.</p></li>
 </ul>
-<figure class="align-default" id="id38">
+<figure class="align-default" id="id39">
 <img alt="../_images/deployment-basic.svg" src="../_images/deployment-basic.svg" /><figcaption>
-<p><span class="caption-text">Simplified data plane threading in action on a 4-core system.</span><a class="headerlink" href="#id38" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Simplified data plane threading in action on a 4-core system.</span><a class="headerlink" href="#id39" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
-<section id="id17">
-<h4>Benefits and Drawbacks<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<section id="id18">
+<h4>Benefits and Drawbacks<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
 <p>The benefits of the DPDK threading model, and indeed DPDK as a whole,
 can succinct summarized to: excellent runtime performance.</p>
 <p>DPDK does not add anything in terms of expressiveness; any task that
 can be achieved by a DPDK-based data plane fast path application can
 also be done so by an application built in accordance to the standard
-model, only it’s standarda application will have lower throughput,
-higher latency, and generate more heat in the process.</p>
+model. The difference is that the standard application will have lower
+throughput, higher latency, and generate more heat and otherwise use
+more resources.</p>
 <p>In summary, the DPDK threading model has the following benefits:</p>
 <ul class="simple">
 <li><p>Arriving packets (and other <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">items of work</span></a>)
@@ -919,7 +921,7 @@ constantly kept at maximum operating frequency and out of any
 sleep states.</p></li>
 <li><p>Reduced performance for <a class="reference internal" href="../glossary.html#term-SMT"><span class="xref std std-term">SMT</span></a> systems, since an EAL thread
 will use significant <a class="reference internal" href="../glossary.html#term-Physical-core"><span class="xref std std-term">physical core</span></a> resources, even when
-no useful work is performed (i.e., being a <a class="reference internal" href="../glossary.html#term-Noisy-neighbour"><span class="xref std std-term">noisy SMT
+no useful work is performed (i.e., being a <a class="reference internal" href="../glossary.html#term-Noisy-neighbor"><span class="xref std std-term">noisy SMT
 neighbour</span></a> to another thread running on the same
 physical core).</p></li>
 </ul>
@@ -935,7 +937,7 @@ use of certain EAL threads, which generally is supported by DPDK
 libraries and device drivers, but may pose a challenge for the
 application itself, which potentially rely on per-lcore objects
 (e.g., timers, <a class="reference internal" href="../glossary.html#term-RCU"><span class="xref std std-term">RCU</span></a> memory reclamation, or event device and
-ethernet device ports/queues), which cannot be left unattended.</p></li>
+Ethernet device ports/queues), which cannot be left unattended.</p></li>
 <li><p>For <a class="reference internal" href="../glossary.html#term-CNF"><span class="xref std std-term">CNFs</span></a>, core isolation somewhat complicates
 container-level scheduling.</p></li>
 </ul>
@@ -962,10 +964,10 @@ interface of which the logical core is a key part is called an
 <a class="reference internal" href="../glossary.html#term-ISA"><span class="xref std std-term">instruction set architecture (ISA)</span></a>.</p>
 <p>A logical core may be realized as a <a class="reference internal" href="../glossary.html#term-Hardware-threading"><span class="xref std std-term">hardware thread</span></a>, a <a class="reference internal" href="../glossary.html#term-Full-core"><span class="xref std std-term">full core</span></a>, or in exceptional cases, a
 software-emulated core - all of which are functionally equivalent,
-from a software point of view.  <a class="footnote-reference brackets" href="#logicalcoreperformance" id="id18">10</a> This useful
+from a software point of view.  <a class="footnote-reference brackets" href="#logicalcoreperformance" id="id19">10</a> This useful
 term is rarely used, as is a synonym: the <a class="reference internal" href="../glossary.html#term-Virtual-core"><span class="xref std std-term">virtual core</span></a>.</p>
-<p>When the term <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> is used in a DPDK context - usally
-abbreivated to <a class="reference internal" href="../glossary.html#term-Lcore"><span class="xref std std-term">lcore</span></a> - it means something related but
+<p>When the term <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> is used in a DPDK context - usually
+abbreviated to <a class="reference internal" href="../glossary.html#term-Lcore"><span class="xref std std-term">lcore</span></a> - it means something related but
 distinct from the generic, hardware-level concept.</p>
 <p>The DPDK lcore is a only a different name for an <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL
 thread</span></a>. The reason for the lcore designation is that an EAL thread is
@@ -982,7 +984,7 @@ and status queries.</p>
 <p>As a part of the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> initialization (i.e., the
 <code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> call), the calling thread is repurposed as an
 <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>, and designated the <a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a>.</p>
-<p>The EAL default is to assign the lowested-numbered lcore the main
+<p>The EAL default is to assign the lowest-numbered lcore the main
 lcore role. The default may be overridden with the <code class="docutils literal notranslate"><span class="pre">--main-lcore</span></code>
 <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL parameter</span></a>.</p>
 <p>By default, EAL, during its initialization, spawns one operating
@@ -1001,7 +1003,7 @@ and <a class="reference internal" href="#core-allocation"><span class="std std-r
 <p>The <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH()</span></code> and <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH_WORKER()</span></code> macros
 may be used to iterate over both the main and the worker lcores, or
 just the worker lcores, respectively.</p>
-<p>Progammatically or by using <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameters</span></a>, certain worker
+<p>Programmatically or by using <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameters</span></a>, certain worker
 lcores may be asked to take the role of a <a class="reference internal" href="../glossary.html#term-Service-lcore"><span class="xref std std-term">service lcore</span></a>. See
 the <a class="reference internal" href="#service-cores"><span class="std std-ref">Service Cores</span></a> section for details.</p>
 <section id="worker-launch">
@@ -1011,10 +1013,10 @@ assigned tasks using the <a class="reference external" href="https://doc.dpdk.or
 <p>A common pattern is launch a more-or-less permanently running
 function, and then deal with more fine-grained work scheduling by
 other means (e.g., a combination of DPDK event devices, DPDK timers
-and DPDK ethernet devices). See the future chapter on <a class="reference internal" href="../work.html#work-scheduling"><span class="std std-ref">Work Scheduling</span></a> for more information on this subject.</p>
+and DPDK Ethernet devices). See the future chapter on <a class="reference internal" href="../work/work.html#work-scheduling"><span class="std std-ref">Work Scheduling</span></a> for more information on this subject.</p>
 <p>After having finished initializing the DPDK platform and application,
 and launched all workers, the <a class="reference internal" href="../glossary.html#term-Main-lcore"><span class="xref std std-term">main lcore</span></a> itself may take on
-some long-runnning fast path task.</p>
+some long-running fast path task.</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_eal.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_lcore.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rte_debug.h&gt;</span><span class="cp"></span>
@@ -1053,8 +1055,8 @@ creating it, but rather only assigning an <a class="reference internal" href="..
 form of a function to execute, to an already-existing thread.</p>
 <p>One way to see DPDK worker lcores, is as a fixed-sized thread worker
 pool, which works on one task at a time, and where the assignment of
-tasks is directed at a particular worker, putting the burdon of load
-balancing the caller. However, in DPDK, the task is often of the
+tasks is directed at a particular worker, putting the burden of load
+balancing on the caller. However, in DPDK, the task is often of the
 never-ending nature, only terminating when some <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>
 says it’s time for an orderly shut down of the application.</p>
 </section>
@@ -1080,10 +1082,10 @@ Linux’ RT scheduling policies, discussed in the ref:<cite>Real Time
 Scheduling Policies</cite> section.</p>
 <p>The DPDK documentation doesn’t have a word for fast path lcores,
 although in at least one instance <em>DPDK processing threads</em> and
-<em>forwarding threads</em> is used. <a class="footnote-reference brackets" href="#noterm" id="id19">11</a></p>
+<em>forwarding threads</em> is used. <a class="footnote-reference brackets" href="#noterm" id="id20">11</a></p>
 </section>
 <section id="lcore-affinity">
-<span id="id20"></span><h4>Lcore Affinity<a class="headerlink" href="#lcore-affinity" title="Permalink to this headline">¶</a></h4>
+<span id="id21"></span><h4>Lcore Affinity<a class="headerlink" href="#lcore-affinity" title="Permalink to this headline">¶</a></h4>
 <p>By default, the <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> of the <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> is set is such a manner, that each EAL thread may only
 be scheduled on one <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>, and that each logical core
 has exactly one EAL thread pinned to it. In other words, there’s a
@@ -1096,7 +1098,7 @@ mask. See the <a class="reference internal" href="#core-allocation"><span class=
 subject.</p>
 <p>Most DPDK-based fast path applications are designed with the
 assumption of a one-to-one relationship between EAL thread and
-<a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>. <a class="footnote-reference brackets" href="#ton" id="id21">14</a></p>
+<a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>. <a class="footnote-reference brackets" href="#ton" id="id22">14</a></p>
 <section id="peer-preemptable-eal-threads">
 <h5>Peer Preemptable EAL Threads<a class="headerlink" href="#peer-preemptable-eal-threads" title="Permalink to this headline">¶</a></h5>
 <p>By using the <code class="docutils literal notranslate"><span class="pre">--lcores</span></code> <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameter</span></a>, the
@@ -1107,7 +1109,7 @@ a number of different process scheduling scenarios.</p>
 affinity mask of more than one EAL thread. For example, a 2:1 mapping
 may be used, where two lcores are mapped against one logical core.</p>
 <p>In case such EAL threads are configured with a normal time-sharing,
-preemptible multitasking, scheduling policy (e.g., <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code> on
+preemptable multitasking, scheduling policy (e.g., <code class="docutils literal notranslate"><span class="pre">SCHED_OTHER</span></code> on
 Linux), which is the default, they do not qualify as
 <a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">non-preemptable</span></a>.</p>
 <p>Preemptable EAL threads suffer severe limitations in terms of what
@@ -1116,7 +1118,7 @@ used for fast path packet processing. In addition, they cannot safely
 use many DPDK APIs. See the section on <a class="reference internal" href="#non-preemption-safe-apis"><span class="std std-ref">Non-preemption Safe APIs</span></a>.</p>
 </section>
 <section id="cooperative-multitasking">
-<span id="id22"></span><h5>Cooperative Multitasking<a class="headerlink" href="#cooperative-multitasking" title="Permalink to this headline">¶</a></h5>
+<span id="id23"></span><h5>Cooperative Multitasking<a class="headerlink" href="#cooperative-multitasking" title="Permalink to this headline">¶</a></h5>
 <p><a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">Peer preemptable EAL threads</span></a>
 coexisting (i.e., are being scheduled) on the same CPU core may be
 turned non-preemptable provided they all have the <code class="docutils literal notranslate"><span class="pre">SCHED_FIFO</span></code>
@@ -1126,10 +1128,10 @@ yield the CPU in situations when it is safe to do.</p>
 purpose of concurrency (e.g., to run different modules), at the cost
 of context switching overhead and the significant complexity
 introduced by the use of a combination of high CPU utilization and
-real-time scheduling policies. See the section on <a class="reference internal" href="#id33"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more information on the latter.</p>
+real-time scheduling policies. See the section on <a class="reference internal" href="#id34"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more information on the latter.</p>
 </section>
 <section id="floating-eal-threads">
-<span id="id23"></span><h5>Floating EAL Threads<a class="headerlink" href="#floating-eal-threads" title="Permalink to this headline">¶</a></h5>
+<span id="id24"></span><h5>Floating EAL Threads<a class="headerlink" href="#floating-eal-threads" title="Permalink to this headline">¶</a></h5>
 <p>The <code class="docutils literal notranslate"><span class="pre">--lcores</span></code> <a class="reference internal" href="../glossary.html#term-EAL-parameters"><span class="xref std std-term">EAL Parameter</span></a> may be used to
 instruct the <a class="reference internal" href="../glossary.html#term-EAL"><span class="xref std std-term">EAL</span></a> to include more than one CPU core in one or
 more EAL threads’ <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity masks</span></a>.</p>
@@ -1163,7 +1165,7 @@ relayed over a file descriptor from the kernel, or by calling
 scenario, they are less likely to be considered batch-type thread, and
 less likely to be interrupted by threads that are considered
 interactive.</p>
-<p>Floating and preemptible EAL threads only make sense under very
+<p>Floating and preemptable EAL threads only make sense under very
 specific circumstances (e.g., in the context of functional tests).
 The author has trouble imaging a real-world production scenario in
 which floating EAL threads provides a net benefit.</p>
@@ -1189,8 +1191,8 @@ frequently accessed EAL thread-related data in <a class="reference internal" hre
 storage</span></a>. Such data includes the EAL thread’s <a class="reference internal" href="../glossary.html#term-NUMA-node"><span class="xref std std-term">NUMA node</span></a>
 and thread’s <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> at the time it was
 created. This caching scheme implies that EAL considers the affinity
-and <a class="reference internal" href="../glossary.html#term-NUMA"><span class="xref std std-term">NUMA</span></a> placement as an constant invariants across
-the DPDK process life cycle.</p>
+and <a class="reference internal" href="../glossary.html#term-NUMA"><span class="xref std std-term">NUMA</span></a> placement as an invariant across the DPDK process
+life cycle.</p>
 <p>In addition, many DPDK libraries and <a class="reference internal" href="../glossary.html#term-PMD"><span class="xref std std-term">PMDs</span></a> keep per-EAL
 thread data, usually in the form of a static array indexed by the
 <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>.</p>
@@ -1206,7 +1208,7 @@ very large numbers of EAL threads. Usually, <code class="docutils literal notran
 higher than, but still the same order of magnitude as, the highest
 core count system the build is targeting. On POWER and x86_64 builds,
 for example, the compile-time default for <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> is 128.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> limit must be set to also accomodate any
+<p>The <code class="docutils literal notranslate"><span class="pre">RTE_MAX_LCORE</span></code> limit must be set to also accommodate any
 <a class="reference internal" href="../glossary.html#term-Registered-non-EAL-thread"><span class="xref std std-term">registered non-EAL threads</span></a>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">rte_lcore_count()</span></code> function may be used to retrieve the actual
 number of lcores. Note however that this count also include
@@ -1214,11 +1216,11 @@ number of lcores. Note however that this count also include
 such have been created.</p>
 </section>
 <section id="invitation-only-apis">
-<span id="id24"></span><h4>Invitation Only APIs<a class="headerlink" href="#invitation-only-apis" title="Permalink to this headline">¶</a></h4>
+<span id="id25"></span><h4>Invitation Only APIs<a class="headerlink" href="#invitation-only-apis" title="Permalink to this headline">¶</a></h4>
 <p>Certain DPDK APIs and certain kind of DPDK synchronization primitives
 only be safely used by threads with certain properties.</p>
 <section id="lcore-id-only-apis">
-<span id="id25"></span><h5>Lcore Id Only APIs<a class="headerlink" href="#lcore-id-only-apis" title="Permalink to this headline">¶</a></h5>
+<span id="id26"></span><h5>Lcore Id Only APIs<a class="headerlink" href="#lcore-id-only-apis" title="Permalink to this headline">¶</a></h5>
 <p>Threads equipped with a <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a> posses special powers, in the
 sense there are DPDK APIs in where such threads get a preferential
 treatment, or indeed may be that only one that can safely use them.</p>
@@ -1237,7 +1239,7 @@ API design. For example, in the original <a class="reference external" href="htt
 addressed by means of the lcore id of the managing thread.</p>
 </section>
 <section id="non-preemption-safe-apis">
-<span id="id26"></span><h5>Non-preemption Safe APIs<a class="headerlink" href="#non-preemption-safe-apis" title="Permalink to this headline">¶</a></h5>
+<span id="id27"></span><h5>Non-preemption Safe APIs<a class="headerlink" href="#non-preemption-safe-apis" title="Permalink to this headline">¶</a></h5>
 <p>DPDK includes many synchronization primitives (e.g., the
 <a class="reference internal" href="../glossary.html#term-Spinlock"><span class="xref std std-term">spinlock</span></a> and the <a class="reference internal" href="../glossary.html#term-Sequence-counter"><span class="xref std std-term">sequence counter</span></a>) and
 <a class="reference internal" href="../glossary.html#term-Thread-safety"><span class="xref std std-term">thread-safe</span></a> low-level data structures (e.g.,
@@ -1251,7 +1253,7 @@ such constructs in their implementation, and thus also aren’t
 being interrupted by the kernel during the call, is that it may
 interfere with the forward progress of (i.e, block) other
 threads. Such a situation is generally not a threat to functional
-correctness of the application, but may have disasterous affects on
+correctness of the application, but may have disastrous affects on
 throughput and latency - in particular latency jitter. Simply put,
 <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safety</span></a> is to performance what <a class="reference internal" href="../glossary.html#term-Thread-safety"><span class="xref std std-term">thread safety</span></a>
 is for correctness.</p>
@@ -1260,7 +1262,7 @@ involuntary context switch, and is replaced with a thread which in
 turn is <em>busy-waiting</em> for previous thread to produce some result.
 This waiting normally continues until the next involuntary preemption,
 or the first thread being migrated to a new CPU core, either of which
-may take 10s to 100s of milliseconds. <a class="footnote-reference brackets" href="#ladawait" id="id27">13</a> This scenario is
+may take 10s to 100s of milliseconds. <a class="footnote-reference brackets" href="#ladawait" id="id28">13</a> This scenario is
 sometimes referred to as <em>lock holder preemption</em>. This book uses the
 term <a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">peer preemption</span></a>.</p>
 <p>Using spinlocks and other non-<a class="reference internal" href="../glossary.html#term-Wait-free-algorithm"><span class="xref std std-term">wait-free</span></a>
@@ -1275,7 +1277,7 @@ application would have done. This is especially true for
 <a class="reference internal" href="../glossary.html#term-Lock-contention"><span class="xref std std-term">high-contention</span></a> cases. This subject will be
 explored further in the future <a class="reference internal" href="../sync.html#synchronization"><span class="std std-ref">Synchronization</span></a> chapter.</p>
 <p><a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a> are normally spared from preemption,
-and in particular completly safe from <a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">peer preemption</span></a>.</p>
+and in particular completely safe from <a class="reference internal" href="../glossary.html#term-Peer-preemptable-EAL-thread"><span class="xref std std-term">peer preemption</span></a>.</p>
 <p>There is at least one other way to avoid preemption, than the method
 normally employed by the DPDK threading model. It may be perfectly
 safe for a thread configured with a real-time scheduling policy to use
@@ -1341,7 +1343,7 @@ their lcore id, in the same manner as an EAL thread would.</p>
 <p>A registered non-EAL thread is generally <em>not</em> considered an lcore
 (i.e., an EAL thread), and the <code class="docutils literal notranslate"><span class="pre">RTE_LCORE_FOREACH()</span></code> loop macro will
 exclude registered non-EAL threads.</p>
-<p>However, the EAL-internal represention of a registered non-EAL thread
+<p>However, the EAL-internal representation of a registered non-EAL thread
 is an instance of the EAL thread data structure, but with a role
 attribute set to <code class="docutils literal notranslate"><span class="pre">ROLE_NON_EAL</span></code>.</p>
 <p>A registered non-EAL thread is a disabled EAL thread, in the sense
@@ -1362,7 +1364,7 @@ internally consistent, see <a class="reference internal" href="#a-terminology-si
 calls a <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>.</p>
 <p>A DPDK control thread starts its life as an <a class="reference internal" href="../glossary.html#term-Unregistered-non-EAL-thread"><span class="xref std std-term">unregistered
 non-EAL thread</span></a>. The EAL sets control thread’s <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">affinity mask</span></a> to that of the process original <code class="docutils literal notranslate"><span class="pre">main()</span></code>
-sthread’s affinity mask, at the time it initialized the EAL, but with
+thread’s affinity mask, at the time it initialized the EAL, but with
 all cores used for running EAL threads removed.</p>
 <p>An alternative to using this DPDK convenience function for thread
 creation, is to rely on standard <code class="docutils literal notranslate"><span class="pre">libc</span></code> facilities (e.g.,
@@ -1406,7 +1408,7 @@ threads will qualify as non-preemptable. See <a class="reference internal" href=
 <p>Like always when absolute-priority, real-time scheduling policies are
 used, care must be taken not to starve other threads, in particular
 kernel threads bound to particular cores. See the section on
-<a class="reference internal" href="#id33"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more discussion on the use of
+<a class="reference internal" href="#id34"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more discussion on the use of
 real-time scheduling policies in data plane applications.</p>
 </section>
 <section id="preemptable-control-thread">
@@ -1421,16 +1423,16 @@ configuration updates, and atomically load state, statistics, trace
 events, and other information from the fast path data structures.</p>
 <p>For updates larger than 64 bits, relying machine-level atomic
 instructions may not be possible. In that case, a sequence lock may
-look like a temption option, for data which is often-read from the
-fast path, and only occasionally written by the control
-thread. However, a sequence lock is not preemption-safe on the writer
-side, although the criticial section is usually small, so depending on
-application it may be an acceptable level of risk. The risk being one
-or more <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a> being unable to
-make progress. Sequence lock does provide a means to abandoned a
-failed read transaction, which may be used to allow the thread to make
-progress, provided it keeps copy of the old data, and using the old
-data doesn’t threaten application correctness.</p>
+look like a viable option, for data which is often-read from the fast
+path, and only occasionally written by the control thread. However, a
+sequence lock is not preemption-safe on the writer side, although the
+critical section is usually small, so depending on application it may
+be an acceptable level of risk. The risk being one or more <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast
+path lcores</span></a> being unable to make progress. Sequence
+lock does provide a means to abandoned a failed read transaction,
+which may be used to allow the thread to make progress, provided it
+keeps copy of the old data, and using the old data doesn’t threaten
+application correctness.</p>
 <p><a class="reference internal" href="../glossary.html#term-RCU"><span class="xref std std-term">Read-copy-update (RCU)</span></a> may be used to update more
 elaborate configuration or other data structures, with a set of
 dependent values.</p>
@@ -1439,7 +1441,7 @@ dependent values.</p>
 good option for messaging. A clean, and conservative design is to
 interact between the control threads and the fast path lcores only by
 means of messaging. It may results in more code, and lower
-performance, for control plane signaling-intesive applications. Such a
+performance, for control plane signaling-intensive applications. Such a
 ring may also be used as a relay, or a very basic deferred-work
 mechanism, just passing a function pointer to a <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path
 lcore</span></a>, asking it to perform some action (e.g., an configuration
@@ -1469,7 +1471,7 @@ released.</p>
 <p>The EAL creates a number of DPDK control threads for internal
 use. They are control threads in the DPDK sense only, not in the sense
 described in <a class="reference internal" href="../intro.html#data-plane-control"><span class="std std-ref">Data Plane Control</span></a>. They are usually employed in
-an auxaliary role, and not in the form of a control plane agent.</p>
+an auxiliary role, and not in the form of a control plane agent.</p>
 <section id="interrupt-thread">
 <h5>Interrupt Thread<a class="headerlink" href="#interrupt-thread" title="Permalink to this headline">¶</a></h5>
 <p>Interrupts cannot be directly received by a user space
@@ -1495,7 +1497,7 @@ application.</p>
 </section>
 </section>
 <section id="core-allocation">
-<span id="id28"></span><h3>Core Allocation<a class="headerlink" href="#core-allocation" title="Permalink to this headline">¶</a></h3>
+<span id="id29"></span><h3>Core Allocation<a class="headerlink" href="#core-allocation" title="Permalink to this headline">¶</a></h3>
 <p>A <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a> hosting a DPDK-based fast path application
 must include an entity which decides which of the available CPU cores
 (and the <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical cores</span></a> they present to the
@@ -1547,7 +1549,7 @@ topology).</p></li>
 </li>
 <li><p>The minimum and maximum number of shared CPU cores, for data plane
 control and other control threads.</p></li>
-<li><p>For a heterogenous system, if small or large CPU cores, or a
+<li><p>For a heterogeneous system, if small or large CPU cores, or a
 combination thereof, are preferred.</p></li>
 </ul>
 <p>Usually, one or more cores are reserved for <a class="reference internal" href="../glossary.html#term-Data-plane-control"><span class="xref std std-term">data plane
@@ -1576,13 +1578,13 @@ core. Any DPDK control threads created will receive an affinity mask
 consisting of logical cores 2 and 3.</p>
 <section id="internal-allocation">
 <h4>Internal Allocation<a class="headerlink" href="#internal-allocation" title="Permalink to this headline">¶</a></h4>
-<p>A task related to, but dinstinct from, core allocation is to decide
+<p>A task related to, but distinct from, core allocation is to decide
 in what role each of the available lcores will serve <em>within</em> the fast
 path application. This in turn is much related to the application
 architecture, for example how <a class="reference internal" href="../glossary.html#term-Work-scheduler"><span class="xref std std-term">work scheduling</span></a>
 is implemented.  The organization of the packet processing pipeline,
-and the division of concearns between lcores, and the implementation
-of <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a> is an decidely application-internal questions,
+and the division of concerns between lcores, and the implementation
+of <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a> is an decidedly application-internal questions,
 and a topic left to future chapters.</p>
 </section>
 <section id="service-lcore-allocation">
@@ -1605,13 +1607,13 @@ process-internal implementation detail.</p>
 </section>
 </section>
 <section id="deployment-example">
-<span id="id29"></span><h3>Deployment Example<a class="headerlink" href="#deployment-example" title="Permalink to this headline">¶</a></h3>
+<span id="id30"></span><h3>Deployment Example<a class="headerlink" href="#deployment-example" title="Permalink to this headline">¶</a></h3>
 <p>This section describes an example deployment with a <a class="reference internal" href="../glossary.html#term-Management-plane"><span class="xref std std-term">management
 plane</span></a>, a <a class="reference internal" href="../glossary.html#term-Control-plane"><span class="xref std std-term">control plane</span></a>, a <a class="reference internal" href="../glossary.html#term-Data-plane"><span class="xref std std-term">data plane</span></a>, and a platform
 application process - all hosted in same <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a>.</p>
-<figure class="align-default" id="id39">
+<figure class="align-default" id="id40">
 <span id="deployment-example-diagram"></span><img alt="../_images/deployment-ctrl.svg" src="../_images/deployment-ctrl.svg" /><figcaption>
-<p><span class="caption-text">A combined control, management and data plane NF deployment example.</span><a class="headerlink" href="#id39" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">A combined control, management and data plane NF deployment example.</span><a class="headerlink" href="#id40" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <section id="data-plane">
@@ -1623,12 +1625,11 @@ cores</span></a> one (and only one) thread each per
 <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a>. Since the thread is alone, save potentially for
 some almost-always-idle <a class="reference internal" href="../glossary.html#term-Kernel-thread"><span class="xref std std-term">kernel thread</span></a>, even with
 <code class="docutils literal notranslate"><span class="pre">SCHED_NORMAL</span></code> interruptions should be rare indeed.</p>
-<p>Two of the original five cores in the DPDK fastpath application’s
+<p>Two of the original five cores in the DPDK fast path application’s
 original <a class="reference internal" href="../glossary.html#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> are used by DPDK control
 threads. This particular configuration is more illustrate that a
 control threads will, by DPDK default, float across those two
-non-lcore cores. Often, one core is enough.  See also the
-<a class="reference internal" href="#dpdk-control-threads"><span class="std std-ref">Control Threads</span></a> section.</p>
+non-lcore cores. Often, one core is enough.  See also the <a class="reference internal" href="#dpdk-control-threads"><span class="std std-ref">Control Threads</span></a> section.</p>
 <p>The data plane control thread is spawned using
 <code class="docutils literal notranslate"><span class="pre">rte_ctrl_thread_create()</span></code>.  To allow its use of DPDK facilities
 requiring the caller to have an <a class="reference internal" href="../glossary.html#term-Lcore-id"><span class="xref std std-term">lcore id</span></a>, it has registered
@@ -1636,7 +1637,7 @@ using <code class="docutils literal notranslate"><span class="pre">rte_register_
 section for more information.</p>
 <p>The data plane control thread is configured with a <code class="docutils literal notranslate"><span class="pre">SCHED_RT</span></code>
 scheduling policy, making it <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safe</span></a>. It may safely coexist with <code class="docutils literal notranslate"><span class="pre">SCHED_NORMAL</span></code> or
-lower-priority real-time threads. See the section on <a class="reference internal" href="#id33"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more information.</p>
+lower-priority real-time threads. See the section on <a class="reference internal" href="#id34"><span class="std std-ref">Real Time Scheduling Policies</span></a> for more information.</p>
 <p>The example could have included a <a class="reference internal" href="../glossary.html#term-Slow-path"><span class="xref std std-term">slow path</span></a> thread as well, in
 the form of another <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a> or another process.</p>
 </section>
@@ -1644,7 +1645,7 @@ the form of another <a class="reference internal" href="../glossary.html#term-Co
 <h4>Control Plane<a class="headerlink" href="#control-plane" title="Permalink to this headline">¶</a></h4>
 <p>In <a class="reference internal" href="#deployment-example-diagram"><span class="std std-ref">the example</span></a>, the two cores used
 for control threads are also used by a processor-intensive, but not
-nessarily very latency-sensitive, multithreaded control plane
+necessarily very latency-sensitive, multithreaded control plane
 application.</p>
 <p>Had the control plane application been latency sensitive, it could
 have been configured with a real-time scheduling policy, but given a
@@ -1667,25 +1668,25 @@ mental health.</p>
 performance requirements.</p>
 <p>Had the system’s management plane processing been more heavy-weight,
 or the latency requirements more stringent, an option would have been
-to employ multithreaded (or multiprocessed) management application,
-and set the processor affinity so, that the threads could be scheduled
-on core 1 and 2 as well. In such a case, considerations must be made
-concearning priority between the management and control plane
-processing. Usually, it’s undesirable to have a system where a heavy
-management plane operation may cause severe (but temporary) impact on
-control plane charateristics.</p>
+to employ multithreading (or multiprocessing) in the management
+application, and set the processor affinity so, that the threads could
+be scheduled on core 1 and 2 as well. In such a case, considerations
+must be made concerning priority between the management and control
+plane processing. Usually, it’s undesirable to have a system where a
+heavy management plane operation may cause severe (but temporary)
+impact on control plane characteristics.</p>
 <p>The example also includes a platform process. This process is
 unrelated to any of the network planes. For example, it could be an a
 process monitoring and life cycle management daemon.</p>
 </section>
 </section>
 <section id="service-cores">
-<span id="id30"></span><h3>Service Cores<a class="headerlink" href="#service-cores" title="Permalink to this headline">¶</a></h3>
+<span id="id31"></span><h3>Service Cores<a class="headerlink" href="#service-cores" title="Permalink to this headline">¶</a></h3>
 </section>
 <section id="thread-type-summary">
 <h3>Thread Type Summary<a class="headerlink" href="#thread-type-summary" title="Permalink to this headline">¶</a></h3>
-<table class="colwidths-given docutils align-default" id="id40">
-<caption><span class="caption-text">Data Plane Thread Types</span><a class="headerlink" href="#id40" title="Permalink to this table">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id41">
+<caption><span class="caption-text">Data Plane Thread Types</span><a class="headerlink" href="#id41" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 19%" />
 <col style="width: 16%" />
@@ -1734,7 +1735,7 @@ process monitoring and life cycle management daemon.</p>
 </td>
 <td><p>EAL or application via <code class="docutils literal notranslate"><span class="pre">rte_ctrl_thread_create()</span></code>.</p></td>
 <td><p>No</p></td>
-<td><p>Original pre-<code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code> main thread affinity, with the
+<td><p>Main thread affinity prior to the <code class="docutils literal notranslate"><span class="pre">rte_eal_init()</span></code>, but with the
 lcore CPU cores removed.</p></td>
 <td><p>Yes</p></td>
 </tr>
@@ -1742,9 +1743,9 @@ lcore CPU cores removed.</p></td>
 </table>
 </section>
 <section id="a-terminology-side-note">
-<span id="id31"></span><h3>A Terminology Side Note<a class="headerlink" href="#a-terminology-side-note" title="Permalink to this headline">¶</a></h3>
-<p>The misleading use of <em>lcore</em> and its derivate terms in DPDK has a
-historical basis. The terminology dates back to pre-2.0.0 version of
+<span id="id32"></span><h3>A Terminology Side Note<a class="headerlink" href="#a-terminology-side-note" title="Permalink to this headline">¶</a></h3>
+<p>The misleading use of <em>lcore</em> (and terms derived from it) in DPDK has
+a historical basis. The terminology dates back to pre-2.0.0 version of
 the software. In early DPDK incarnations the lcore was a hardware
 <a class="reference internal" href="../glossary.html#term-Logical-core"><span class="xref std std-term">logical core</span></a> drafted into service as a DPDK lcore, and was
 represented by and in various data in the core DPDK framework (the
@@ -1763,9 +1764,9 @@ suggesting they were not lcores.</p>
 <p>Although the current state of affairs resulted a fair amount headache
 and verbiage for data plane book authors, it doesn’t cause much
 trouble in data plane software developers’ everyday DPDK
-discussions. <a class="footnote-reference brackets" href="#headache" id="id32">12</a> There are two reasons for this:</p>
+discussions. <a class="footnote-reference brackets" href="#headache" id="id33">12</a> There are two reasons for this:</p>
 <ol class="arabic simple">
-<li><p>The defacto one-to-one relationship between lcore and CPU core is,
+<li><p>The de facto one-to-one relationship between lcore and CPU core is,
 even in contemporary applications, almost always true. This
 subject is gets an in-depth treatment in the <a class="reference internal" href="#lcore-affinity"><span class="std std-ref">Lcore Affinity</span></a>
 section.</p></li>
@@ -1776,17 +1777,17 @@ nature, where they are sometimes an EAL thread (lcore) and
 sometimes not, is rarely exposed.</p></li>
 </ol>
 </section>
-<section id="id33">
-<span id="id34"></span><h3>Real Time Scheduling Policies<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h3>
+<section id="id34">
+<span id="id35"></span><h3>Real Time Scheduling Policies<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h3>
 <p class="rubric">Footnotes</p>
 <dl class="footnote brackets">
-<dt class="label" id="arrested"><span class="brackets"><a class="fn-backref" href="#id11">1</a></span></dt>
+<dt class="label" id="arrested"><span class="brackets"><a class="fn-backref" href="#id12">1</a></span></dt>
 <dd><p>The Volvo approach has the additional benefit of typically not
 getting you arrested, something that fortunately doesn’t have an
 equivalent in the software part of this analogy, or the author
 would be behind bars.</p>
 </dd>
-<dt class="label" id="physics"><span class="brackets"><a class="fn-backref" href="#id10">2</a></span></dt>
+<dt class="label" id="physics"><span class="brackets"><a class="fn-backref" href="#id11">2</a></span></dt>
 <dd><p>No, you will not find any fermions or bosons in this model.</p>
 </dd>
 <dt class="label" id="alternatives"><span class="brackets"><a class="fn-backref" href="#id2">3</a></span></dt>
@@ -1820,37 +1821,37 @@ now-largely-extinct operating system that are trademarked UNIX, but
 also those that are API compatible with the POSIX APIs, such as
 FreeBSD and Linux.</p>
 </dd>
-<dt class="label" id="napi"><span class="brackets"><a class="fn-backref" href="#id13">8</a></span></dt>
+<dt class="label" id="napi"><span class="brackets"><a class="fn-backref" href="#id14">8</a></span></dt>
 <dd><p>This description may give the misleading impression that each
 received Ethernet frame cause an interrupt. The Linux kernel uses a
 combination of interrupt-driven I/O and polling to mitigate
 interrupt overhead at high packet rates. This technique in its
 Linux kernel implementation is referred to as the New API (NAPI).</p>
 </dd>
-<dt class="label" id="mainthread"><span class="brackets"><a class="fn-backref" href="#id16">9</a></span></dt>
+<dt class="label" id="mainthread"><span class="brackets"><a class="fn-backref" href="#id17">9</a></span></dt>
 <dd><p>The original thread that called the program’s main() function is
 employed as a EAL thread for the main lcore, and thus no thread
 need to be spawned for this lcore.</p>
 </dd>
-<dt class="label" id="logicalcoreperformance"><span class="brackets"><a class="fn-backref" href="#id18">10</a></span></dt>
-<dd><p>The performance characterstics may vary wildly.</p>
+<dt class="label" id="logicalcoreperformance"><span class="brackets"><a class="fn-backref" href="#id19">10</a></span></dt>
+<dd><p>The performance characteristics may vary wildly.</p>
 </dd>
-<dt class="label" id="noterm"><span class="brackets"><a class="fn-backref" href="#id19">11</a></span></dt>
+<dt class="label" id="noterm"><span class="brackets"><a class="fn-backref" href="#id20">11</a></span></dt>
 <dd><p>Presumably the reason is that the authors assumed that EAL threads
 are always employed as fast path lcores, and thus there’s no need
 for a separate term.</p>
 </dd>
-<dt class="label" id="headache"><span class="brackets"><a class="fn-backref" href="#id32">12</a></span></dt>
-<dd><p>The author suspects the plentphora of terms required to talk about
-DPDK threads in a reasonbly precise manner might result in some
-headache also for the readers of this text.</p>
+<dt class="label" id="headache"><span class="brackets"><a class="fn-backref" href="#id33">12</a></span></dt>
+<dd><p>The author suspects the large amount of terms and definitions
+required to talk about DPDK threads in a reasonably precise manner
+might result in some headache also for the readers of this text.</p>
 </dd>
-<dt class="label" id="ladawait"><span class="brackets"><a class="fn-backref" href="#id27">13</a></span></dt>
+<dt class="label" id="ladawait"><span class="brackets"><a class="fn-backref" href="#id28">13</a></span></dt>
 <dd><p>The quality of experience of such a data plane would be on par with
 the automotive industry of the Soviet Union, where the customer was
 asked to wait 10 years for the delivery of their new car.</p>
 </dd>
-<dt class="label" id="ton"><span class="brackets"><a class="fn-backref" href="#id21">14</a></span></dt>
+<dt class="label" id="ton"><span class="brackets"><a class="fn-backref" href="#id22">14</a></span></dt>
 <dd><p>Technically, such applications would likely allow a 1:N
 relationship between EAL thread and CPU core, as long as the N
 cores used are dedicated to that EAL thread. The author has trouble
@@ -1901,7 +1902,7 @@ serviceable CPU cores.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#data-plane-threading">Data Plane Threading</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id15">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Overview</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#eal-threads">EAL Threads</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#non-eal-threads">Non EAL Threads</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#control-threads">Control Threads</a></li>
@@ -1910,12 +1911,12 @@ serviceable CPU cores.</p>
 <li class="toctree-l3"><a class="reference internal" href="#service-cores">Service Cores</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#thread-type-summary">Thread Type Summary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#a-terminology-side-note">A Terminology Side Note</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id33">Real Time Scheduling Policies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id34">Real Time Scheduling Policies</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../work.html">Work Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../work/work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mbuf.html">The Packet Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../headers.html">Protocol Header Processing</a></li>
@@ -1939,7 +1940,7 @@ serviceable CPU cores.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../intro.html" title="previous chapter">Introduction</a></li>
-      <li>Next: <a href="../work.html" title="next chapter">Work Scheduling</a></li>
+      <li>Next: <a href="../work/work.html" title="next chapter">Work Scheduling</a></li>
   </ul></li>
 </ul>
 </div>

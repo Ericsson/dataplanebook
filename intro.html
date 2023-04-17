@@ -420,7 +420,7 @@ fp --&gt; kernel_stack : Slow Path
 <h4>Reference Architecture B<a class="headerlink" href="#reference-architecture-b" title="Permalink to this headline">¶</a></h4>
 <p>This architecture groups data plane control and the fast path into the
 same application, deployed in the same process.</p>
-<p>Architecture B is also more centralized in that it doesn’t employ the
+<p>Architecture B is also more centralized in that it does not employ the
 kernel’s network stack as the slow path, but instead carry its own
 slow path domain logic.</p>
 <p>Usually, the control and the slow path processing is run on threads
@@ -636,7 +636,7 @@ between the planes in an IP router. See
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="work/work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="headers.html">Protocol Header Processing</a></li>

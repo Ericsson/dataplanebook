@@ -87,7 +87,7 @@ may be reduced, to improve energy efficiency (e.g., the amount
 energy required to finish some task). DVFS may be available in
 the core itself, for a cluster of core, or for non-core hardware
 blocks such as the interconnect, or accelerators.</p>
-<p>CPU core frequencies is either controlled by the automoously by
+<p>CPU core frequencies is either controlled by the autonomously by
 the hardware the by kernel, or by a user application, using
 kernel runtime configuration to do so.</p>
 </dd>
@@ -115,14 +115,14 @@ hosted in a container.</p>
 <dt id="term-Event-fd">Event fd<a class="headerlink" href="#term-Event-fd" title="Permalink to this term">¶</a></dt><dd><p>An event <a class="reference internal" href="#term-File-descriptor"><span class="xref std std-term">file descriptor</span></a> is a reference to a
 kernel-level event fd object, designed to be used by user
 application for thread synchronization. An event fd object has
-sempahor-like semantics, but unlike POSIX semaphores, event fds
+semaphore-like semantics, but unlike POSIX semaphores, event fds
 are proper fds and thus may be used in e.g. <code class="docutils literal notranslate"><span class="pre">select()</span></code>.</p>
 </dd>
 <dt id="term-Cache-line">Cache line<a class="headerlink" href="#term-Cache-line" title="Permalink to this term">¶</a></dt><dd><p>A cache line is the smallest unit managed by the cache hierarchy
-of current-day <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> systems. A cache line usally holds 64
-bytes of data, and in some relatively rare cases 128 bytes.</p>
+of current-day <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> systems. In contemporary CPUs, a cache
+line almost always holds 64 bytes of data.</p>
 </dd>
-<dt id="term-Communications-Processor">Communications Processor<a class="headerlink" href="#term-Communications-Processor" title="Permalink to this term">¶</a></dt><dd><p>An older name for a <a class="reference internal" href="#term-DPU"><span class="xref std std-term">DPU</span></a>.</p>
+<dt id="term-Communications-Processor">Communications Processor<a class="headerlink" href="#term-Communications-Processor" title="Permalink to this term">¶</a></dt><dd><p>An older term for a <a class="reference internal" href="#term-DPU"><span class="xref std std-term">DPU</span></a>.</p>
 </dd>
 <dt id="term-Control-plane"><a class="reference internal" href="intro.html#control-plane"><span class="std std-ref">Control plane</span></a><a class="headerlink" href="#term-Control-plane" title="Permalink to this term">¶</a></dt><dd><p>The part of the network that negotiates, computes or otherwise handles
 higher-level policies, such as how routing is set up, and makes sure
@@ -332,7 +332,7 @@ UNIX signals, and several other types of I/O devices and other
 event sources.</p>
 </dd>
 <dt id="term-Floating-thread">Floating thread<a class="headerlink" href="#term-Floating-thread" title="Permalink to this term">¶</a></dt><dd><p>A floating thread is an operating system thread which
-<a class="reference internal" href="#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> mask makes it eligable to be
+<a class="reference internal" href="#term-Processor-affinity"><span class="xref std std-term">processor affinity</span></a> mask makes it eligible to be
 scheduled on more than one core.</p>
 </dd>
 <dt id="term-Flow-cache">Flow cache<a class="headerlink" href="#term-Flow-cache" title="Permalink to this term">¶</a></dt><dd><p>A flow cache is a data structure which is logically an overlay
@@ -352,7 +352,7 @@ Ethernet frame).</p>
 left unused (or disabled), or a non-SMT core.</p>
 </dd>
 <dt id="term-User-thread">User thread<a class="headerlink" href="#term-User-thread" title="Permalink to this term">¶</a></dt><dd><p>A user thread is a thread which is managed not by the kernel,
-but by some userspace entity, such a library, language virtual
+but by some user space entity, such a library, language virtual
 machine runtime or the application itself.</p>
 </dd>
 <dt id="term-Hardware-threading">Hardware threading<a class="headerlink" href="#term-Hardware-threading" title="Permalink to this term">¶</a></dt><dd><p>Hardware threading is a design technique where a CPU core is
@@ -397,7 +397,7 @@ extreme cases, SMT may even degrade aggregate throughput (e.g.,
 due to the increase of the total <a class="reference internal" href="#term-Working-set-size"><span class="xref std std-term">working set size</span></a> of
 the threads’ instruction streams).</p>
 </dd>
-<dt id="term-Heterogeneous-multiprocessors">Heterogeneous multiprocessors<a class="headerlink" href="#term-Heterogeneous-multiprocessors" title="Permalink to this term">¶</a></dt><dd><p>A heterogeneous multiprocessor is a <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> multicore CPU,
+<dt id="term-Heterogeneous-multiprocessors">Heterogeneous multiprocessors<a class="headerlink" href="#term-Heterogeneous-multiprocessors" title="Permalink to this term">¶</a></dt><dd><p>A heterogeneous multiprocessor is a <a class="reference internal" href="#term-SMP"><span class="xref std std-term">SMP</span></a> multi-core CPU,
 with a heterogeneous CPU topology in the sense that some cores
 are faster than others. The faster cores are usually physically
 bigger and equipped with larger caches, and may also operate on
@@ -427,14 +427,14 @@ implementations of a particular <a class="reference internal" href="#term-ISA"><
 a CPU core or the CPU cache hierarchy or memory interfaces may
 lead to a higher IPC, which in turns leads to higher performance
 at the same clock frequency.</p>
-<p>IPC may also be used an indication of program
-efficiency. According to this rule of a thumb, a program
-resulting in high IPC is considered highly optimized, and a
-program with comparatively low IPC the opposite. However, this
-rule does not take time complex of the program’s algorithms into
-play. It may well be that the high-IPC program implements a very
-naive algorithm, which results in the CPU having to execute a
-very large number instructions, but may do so at a high IPC, as
+<p>IPC may also be used an indication of program efficiency.
+According to this rule of a thumb, a program resulting in high
+IPC is considered highly optimized, and a program with
+comparatively low IPC the opposite. However, this rule does not
+take time complex of the program’s algorithms into play. It may
+well be that the high-IPC program implements a very naive
+algorithm, which results in the CPU having to execute a very
+large number instructions, but may do so at a high IPC, as
 opposed to a variant where the same task is achieved with a
 lower time complexity algorithm, which requires fewer
 instructions to be run, but potentially at a lower IPC. An
@@ -448,11 +448,11 @@ haystack.</p>
 <p>Another situation that may occur, are two programs implementing
 the same basic algorithm, but one using simple non-vector
 instructions and the other using more complex and costly (on a
-per-instrution basis) <a class="reference internal" href="#term-SIMD"><span class="xref std std-term">SIMD</span></a> instructions. The latter will
+per-instruction basis) <a class="reference internal" href="#term-SIMD"><span class="xref std std-term">SIMD</span></a> instructions. The latter will
 have likely have better performance, but may well have lower
 IPC than its non-SIMD counterpart.</p>
-<p>IPC is also commonly used abbrevition of inter-process
-communcation.</p>
+<p>IPC is also commonly used abbreviation of inter-process
+communication.</p>
 </dd>
 <dt id="term-ISA">ISA<a class="headerlink" href="#term-ISA" title="Permalink to this term">¶</a></dt><dd><p>An Instruction Set Architecture (ISA) specifies the interface
 between software and the CPU hardware. The ISA defines things like
@@ -579,7 +579,7 @@ switch from one task to the other, creating the impression of
 more runnable tasks than there are CPU cores in the system.</p>
 </dd>
 <dt id="term-Multithreading">Multithreading<a class="headerlink" href="#term-Multithreading" title="Permalink to this term">¶</a></dt><dd><p>Multithreading is the use of multiple <a class="reference internal" href="#term-Operating-system-thread"><span class="xref std std-term">threads</span></a> in the same operating system process.</p>
-<p>As oppposed to threads in different processes, all threads in
+<p>As opposed to threads in different processes, all threads in
 the same process shared the same memory. Even data that is
 generally considered thread-private, such as the stack and data
 in <a class="reference internal" href="#term-TLS"><span class="xref std std-term">thread-local storage</span></a>, is accessible to other
@@ -635,7 +635,7 @@ a switch).</p>
 where it’s not implemented as a discrete card) or a network
 adapter.</p>
 </dd>
-<dt id="term-Noisy-neighbour">Noisy neighbour<a class="headerlink" href="#term-Noisy-neighbour" title="Permalink to this term">¶</a></dt><dd><p>An application is considered a noisy neighbour in case it causes
+<dt id="term-Noisy-neighbor">Noisy neighbor<a class="headerlink" href="#term-Noisy-neighbor" title="Permalink to this term">¶</a></dt><dd><p>An application is considered a noisy neighbor in case it causes
 performance degradation for other applications, running on a
 different set of <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical cores</span></a>, because
 of its extensive use of shared hardware resources, such as
@@ -694,7 +694,7 @@ time experienced for a particular CPU core to memory varies
 if the memory is local or remote to that CPU.</p>
 <p>In practice, NUMA refers to DRAM access times. With the advent
 of CPU caches, <em>all</em> systems are NUMA in the sense that memory
-access varies with how far into the memory hiarcharchy the core
+access varies with how far into the memory hierarchy the core
 needs to reach to retrieve the relevant <a class="reference internal" href="#term-Cache-line"><span class="xref std std-term">cache line</span></a>.  A
 SMP system may well have some asymmetry when it comes to DRAM
 memory access characteristics, but it’s only considered NUMA
@@ -731,7 +731,7 @@ thread</span></a>.</p>
 </dd>
 <dt id="term-OSI-model">OSI model<a class="headerlink" href="#term-OSI-model" title="Permalink to this term">¶</a></dt><dd><p>Open Systems Interconnection (OSI) model is a conceptual model,
 describing an layered architecture, and the division of
-concearns among the layers.</p>
+concerns among the layers.</p>
 </dd>
 <dt id="term-Packet">Packet<a class="headerlink" href="#term-Packet" title="Permalink to this term">¶</a></dt><dd><p>A packet is a <a class="reference internal" href="#term-Network-layer"><span class="xref std std-term">network layer</span></a> <a class="reference internal" href="#term-PDU"><span class="xref std std-term">PDU</span></a> (e.g., an IPv4
 packet). Often, while technically incorrect, term is also for
@@ -767,7 +767,7 @@ higher layer in the <a class="reference internal" href="#term-Network-protocol-s
 preempted by the kernel’s process scheduler and be replaced with
 an EAL thread originating from the same DPDK process.</p>
 <p>A DPDK application is normally deployed in a manner which will
-prevent this scenario from ever occuring.</p>
+prevent this scenario from ever occurring.</p>
 </dd>
 <dt id="term-Physical-core">Physical core<a class="headerlink" href="#term-Physical-core" title="Permalink to this term">¶</a></dt><dd><p>The term physical core refers to the underlying electric
 circuitry that either implements a single <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical core</span></a>,
@@ -799,7 +799,7 @@ thread’s execution (e.g., a kernel-induced process context
 switch occurs) does not threaten the correctness of the program,
 or have very detrimental effects performance. In this book, the
 preemption unsafe constructs covered only cause performance
-degradations, although at time very serious such.</p>
+degradation, although at time very serious such.</p>
 </dd>
 <dt id="term-Preemptable-thread">Preemptable thread<a class="headerlink" href="#term-Preemptable-thread" title="Permalink to this term">¶</a></dt><dd><p>A preemptable thread is a thread which may suffer an involuntary
 context switch and other kind of kernel-induced interruptions.
@@ -871,7 +871,7 @@ the source and destination IP. If transport layer fields are
 taken into a account, the same function is sometimes called
 Receive Flow Scaling (RFS).</p>
 </dd>
-<dt id="term-Scheduling-latency">Scheduling latency<a class="headerlink" href="#term-Scheduling-latency" title="Permalink to this term">¶</a></dt><dd><p>Sheduling latency is the <a class="reference internal" href="#term-Wall-clock-latency"><span class="xref std std-term">time</span></a> from
+<dt id="term-Scheduling-latency">Scheduling latency<a class="headerlink" href="#term-Scheduling-latency" title="Permalink to this term">¶</a></dt><dd><p>Scheduling latency is the <a class="reference internal" href="#term-Wall-clock-latency"><span class="xref std std-term">time</span></a> from
 a thread could, in principle, be execute (i.e., it’s <em>runnable</em>),
 to the time when it’s actually running on a CPU core.</p>
 </dd>
@@ -953,7 +953,7 @@ they are not <a class="reference internal" href="#term-Preemption-safety"><span 
 virtualization standard.</p>
 <p>With SR-IOV, the PCIe device is split into a physical function
 (PF) and a number of virtual functions (VFs).</p>
-<p>The PF is primarily used for adminstrative tasks. A VF is used
+<p>The PF is primarily used for administrative tasks. A VF is used
 to access the actual PCIe device function (e.g., sending and
 receiving packets, in case of a PCIe <a class="reference internal" href="#term-NIC"><span class="xref std std-term">NIC</span></a>).</p>
 <p>The PF is usually kept by the host, while the VFs are handed out
@@ -964,7 +964,7 @@ PCI-like device enumeration), or not at all.</p>
 <p>The PF/VF division also reflects on the driver structure, where
 one driver is responsible for the PF, and another for the VFs.
 Often, the PF driver resides in the kernel, while the VF driver
-may be either in userspace (e.g., in DPDK), or in the kernel.</p>
+may be either in user space (e.g., in DPDK), or in the kernel.</p>
 </dd>
 <dt id="term-SSH">SSH<a class="headerlink" href="#term-SSH" title="Permalink to this term">¶</a></dt><dd><p>Secure Shell (SSH) is a protocol for remote shell access and
 command execution. It may also be used as a secure transport
@@ -1019,7 +1019,7 @@ function. This may include running the RX path of an Ethernet
 driver and higher layers of the network stack, and marking a
 user space process to be run.</p>
 <p>Keeping interrupts disabled for a long time may cause issues if
-other interrupts occur. Keeping the core occuppied some
+other interrupts occur. Keeping the core occupied with some
 particular task which is not strictly required to handle the
 interrupt, but rather is just caused by it, may prevent the core
 from working on some more urgent task.</p>
@@ -1028,8 +1028,8 @@ two parts. One, the <em>top half</em>, is the actual ISR, does as
 little as possible, which usually translate to clearing the
 interrupt and deferring the rest of the processing to the
 <em>bottom half</em>.</p>
-<p>In Linux, there is a set of different mechanisms that qualifies
-as bottom halves (e.g., soft IRQs and tasklets).</p>
+<p>In Linux, there are a number of different mechanisms that
+qualifies as bottom halves (e.g., soft IRQs and tasklets).</p>
 </dd>
 <dt id="term-Transparent-huge-pages">Transparent huge pages<a class="headerlink" href="#term-Transparent-huge-pages" title="Permalink to this term">¶</a></dt><dd><p>Transparent huge pages (THP) is a Linux kernel feature which
 make a non-huge pages aware application use huge pages. The
@@ -1101,7 +1101,7 @@ applications. It optionally uses DPDK for packet I/O, but
 otherwise does not make use of DPDK as a platform.</p>
 </dd>
 <dt id="term-Wait-free-algorithm">Wait-free algorithm<a class="headerlink" href="#term-Wait-free-algorithm" title="Permalink to this term">¶</a></dt><dd><p>An wait-free algorithm is kind of <a class="reference internal" href="#term-Non-blocking-algorithm"><span class="xref std std-term">non-blocking algorithm</span></a>
-that guarantees that all threads involve make progress.</p>
+that guarantees that all threads involved make progress.</p>
 </dd>
 <dt id="term-Wall-clock-latency">Wall-clock latency<a class="headerlink" href="#term-Wall-clock-latency" title="Permalink to this term">¶</a></dt><dd><p>Wall-clock latency, or wall-time latency, is the latency in
 terms of the passage of physical time (i.e., what a wall clock
@@ -1158,7 +1158,7 @@ includes both instructions and data.</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="threading/threading.html">Threading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="work.html">Work Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="work/work.html">Work Scheduling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eth.html">Ethernet Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mbuf.html">The Packet Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="headers.html">Protocol Header Processing</a></li>

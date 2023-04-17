@@ -17,7 +17,7 @@ Data Plane Software Design
 
    intro
    threading/threading
-   work
+   work/work
    eth
    mbuf
    headers

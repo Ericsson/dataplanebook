@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+
+<html lang="en_US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Work Scheduling &#8212; Data Plane Software Design 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Ethernet Devices" href="../eth.html" />
+    <link rel="prev" title="Threading" href="../threading/threading.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="work-scheduling">
+<span id="id1"></span><h1>Work Scheduling<a class="headerlink" href="#work-scheduling" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This chapter discusses how to organize processing in the data plane,
+to achieve the appropriate level of <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a> and, as the
+end goal, meet the system’s characteristics requirements.</p>
+<p>The issue boils down to how to distribute work across multiple CPU
+cores, while maintaining correctness, cycle and energy efficiency and
+scalability.</p>
+<p>As discussed in the <a class="reference internal" href="../threading/threading.html#threading"><span class="std std-ref">chapter on threading</span></a>, a data
+plane application is generally required to set up a system of
+<a class="reference internal" href="../glossary.html#term-Operating-system-thread"><span class="xref std std-term">threads</span></a>-pinned-to-<a class="reference internal" href="../glossary.html#term-CPU-core"><span class="xref std std-term">cores</span></a> — a scheme which effectively disables operating system-level
+<a class="reference internal" href="../glossary.html#term-Multitasking"><span class="xref std std-term">multitasking</span></a>.</p>
+<p>After throwing the standard vehicle for load balancing out the window,
+the data plane application needs a replacement. That replacement is
+the topic of this chapter.</p>
+<p>The related but distinct question of how to decouple different
+protocol layers (and other modules) in the data plane application will
+be covered in a future chapter of <a class="reference internal" href="../modularization.html#modularization"><span class="std std-ref">Modularization</span></a>.</p>
+<p>Although the DPDK <a class="reference internal" href="../glossary.html#term-Service-cores-framework"><span class="xref std std-term">service cores framework</span></a> can be seen as a
+static load balancer, the primary function of that function is
+decoupling (and <a class="reference internal" href="../glossary.html#term-Concurrency"><span class="xref std std-term">concurrency</span></a>), and thus will be also be covered
+in that chapter.</p>
+</section>
+<section id="basic-concepts">
+<h2>Basic Concepts<a class="headerlink" href="#basic-concepts" title="Permalink to this headline">¶</a></h2>
+<section id="item-of-work">
+<h3>Item of Work<a class="headerlink" href="#item-of-work" title="Permalink to this headline">¶</a></h3>
+<p>This book will use the term <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">item of work</span></a> to denote the
+smallest unit of work handed to a <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>.</p>
+<p>A typical item of work consists of information on how the work
+scheduler treat this item, and a pointer to a packet (or a list of
+packets), and some additional meta data, like the application-level
+destination (identifying the processing stage).</p>
+<p>At a bare minimum, the an item of work handed from the work scheduler
+to the receiving party in the application must carry enough information
+so the that receiver knows what to do with it.</p>
+<p>Similarly, when an item of work is being added to the work scheduler,
+it must carry enough information so the that work scheduler knows what
+to do with it.</p>
+<p>An item of work may also represent a timeout event, a completion
+notification from an accelerator, or a request from <a class="reference internal" href="../glossary.html#term-Data-plane-control"><span class="xref std std-term">data plane
+control</span></a> to update a table, or retrieve some information about the
+state of the data plane.</p>
+<p>In DPDK <a class="reference external" href="https://doc.dpdk.org/api/rte__eventdev_8h.html">&lt;rte_eventdev.h&gt;</a> an item of work is
+referred to as an <em>event</em>.</p>
+<p>For non-scheduled data planes, the item of work simply consist of a
+pointer to the packet buffer (and its meta data).</p>
+<p>In the context of an operating system process scheduler, the item of
+work is a runnable process, thread, or (in the case of Linux)
+task. For the process scheduler, an item of work always contains a
+stack, register state (including a program counter). An item of work
+need not, and for the purpose of this chapter, does not.</p>
+<p>The way the application communicate details about how an item of work
+should be treated is also different between a process scheduler, and
+a data plane work scheduler.</p>
+</section>
+<section id="work-scheduler">
+<h3>Work Scheduler<a class="headerlink" href="#work-scheduler" title="Permalink to this headline">¶</a></h3>
+<p>For the purpose of this book, a work scheduler is a data plane fast
+path function that distributes <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">items of work</span></a>
+across the <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a>.</p>
+<p>The work scheduler takes as input a set of items of work, and decides
+how to schedule the tasks across available lcores, considering the
+constraints (ordering, atomicity guarantees).</p>
+<p>From a characteristics point of view, the overall goals of the work
+scheduler are:</p>
+<ul class="simple">
+<li><p>Maximize throughput (best-case, worst-case, and/or something in-between).</p></li>
+<li><p>Minimize <a class="reference internal" href="../glossary.html#term-Wall-clock-latency"><span class="xref std std-term">latency</span></a> (average and/or at the
+tail end).</p></li>
+<li><p>Maximize resource efficiency (e.g., power, CPU core count, or DRAM).</p></li>
+<li><p>Maximize fairness (or more general, maintain to appropriate quality
+of service, which may not be fair at all).</p></li>
+</ul>
+<p>Depending on the application, different weights will be placed on the
+different work scheduler sub goals.</p>
+<p>More in detail what kind of functionality (e.g., treatment) the work
+scheduler will provide, and how work is fed into and retrieved from
+the machinery varies depending on the work scheduler implementation.</p>
+<p>While this description may bring something like a work scheduler of
+for the scheduled pipeline to mind, a simple function such as
+<a class="reference internal" href="../glossary.html#term-RSS"><span class="xref std std-term">RSS</span></a> function of a term:<cite>NIC</cite> can also be made to serve as a
+work scheduler.</p>
+</section>
+</section>
+<section id="work-scheduling-models">
+<h2>Work Scheduling Models<a class="headerlink" href="#work-scheduling-models" title="Permalink to this headline">¶</a></h2>
+<section id="run-to-completion">
+<h3>Run to Completion<a class="headerlink" href="#run-to-completion" title="Permalink to this headline">¶</a></h3>
+<p>An application using <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane threading</span></a>, where each <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> is assigned one or more
+items of work, and continues process of those tasks, without any
+interruption, until they are finished. <em>Finished</em> here means that all
+application-internal state changes related to that input has occurred,
+and any and all output related to those set of inputs that can been
+produced, have been produced.</p>
+<p>Outputs which cannot be produced because some information is not yet
+available, or where the output must be produced at some particular
+time, is exempted.</p>
+<p>Thus, in a system implementing strict run-to-completion by this
+definition, a thread to not hand off work to another thread, provided
+the work could be performed immediately.</p>
+<p>The archetypal example of a run-to-completion DPDK data plane
+application is with a number of <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a>, one
+per CPU core. Each thread is assigned one RX and TX NIC queue. Upon
+receiving a packet, a thread picks up the packet, performs all the
+processing required (e.g., runs all the network layers), and ends
+producing a packet being sent out on one of the thread’s NIC TX
+queues, without any interruptions.</p>
+<p>A <a class="reference internal" href="../threading/threading.html#standard-threading"><span class="std std-ref">standard threading</span></a> model data plane
+application using <a class="reference internal" href="../glossary.html#term-Preemptable-thread"><span class="xref std std-term">preemptable threads</span></a> and
+blocking system function calls to access the network stack may seem to
+run-to-completion from strictly source code point of view. However,
+since the threads may be interrupted, this is not usually what’s meant
+with run-to-completion. The same is true for software using coroutines
+or other green threading techniques.</p>
+<section id="parallels-to-other-domains">
+<h4>Parallels to Other Domains<a class="headerlink" href="#parallels-to-other-domains" title="Permalink to this headline">¶</a></h4>
+<p>In general, run-to-completion is used to describe a system, where a
+thread is assigned a task and continues execution until the task is
+finished, without any interruptions.</p>
+<p>In the context of operating system process scheduling,
+run-to-completion is a synonym for threads being
+<a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">non-preeemptable</span></a>, and the use of
+cooperative multitasking (i.e., the running thread runs until it
+voluntarily gives up the CPU). As outline in the <a class="reference internal" href="../threading/threading.html#threading"><span class="std std-ref">Threading</span></a>
+chapter, data plane threads are never to be interrupted for any length
+of time, regardless of run-to-completion of some other work scheduling
+model is used, so this usage does not make sense if <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane
+threading</span></a> is used.</p>
+<p>Run-to-completion in the context of finite state machine machines
+means that a state machine finishes the processing of a particular
+event, before it initiates processing of the next. Such state machines
+are not parallel, while the data plane processing almost always is.
+DPDK Eventdev maps more closely to an actor model, with the difference
+that eventdev events are not the <em>only</em> means of communication between
+actors (shared memory is also allowed).</p>
+<p>In a single-threaded UNIX application also employs run-to-completion,
+in the sense no blocking system calls are made, and the processing of
+an event either finishes, or the thread stores whatever state is
+required for further, future, processing, and explicitly yields the
+thread to allow it to be reused to process some other event. It’s not
+run-to-completion in the sense that the threads are not preempted.</p>
+<p>This interruption-free operation is relevant from a performance point
+of view, and living without multitasking has software
+architecture-level impact.</p>
+</section>
+</section>
+</section>
+<section id="hardware-ingress-load-balancing">
+<h2>Hardware Ingress Load Balancing<a class="headerlink" href="#hardware-ingress-load-balancing" title="Permalink to this headline">¶</a></h2>
+<section id="receive-side-and-receive-flow-scaling">
+<h3>Receive Side and Receive Flow Scaling<a class="headerlink" href="#receive-side-and-receive-flow-scaling" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="dpdk-generic-flow">
+<h3>DPDK Generic Flow<a class="headerlink" href="#dpdk-generic-flow" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
+<section id="optimization-points">
+<h3>Optimization Points<a class="headerlink" href="#optimization-points" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Minimize packet header and buffer meta data core-to-core transition</p></li>
+<li><p>Minimize instruction cache footprint for a particular core</p></li>
+<li><p>Minimize cache working set related to per-flow, per-stage data</p></li>
+<li><p>Minimize cache working set related to per-stage data</p></li>
+</ul>
+</section>
+<section id="scheduled-pipeline">
+<h3>Scheduled Pipeline<a class="headerlink" href="#scheduled-pipeline" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="scheduling-type">
+<h3>Scheduling Type<a class="headerlink" href="#scheduling-type" title="Permalink to this headline">¶</a></h3>
+<section id="dpdk-eventdev">
+<h4>DPDK Eventdev<a class="headerlink" href="#dpdk-eventdev" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+</section>
+<section id="dpdk-service-cores">
+<h2>DPDK Service Cores<a class="headerlink" href="#dpdk-service-cores" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Data Plane Software Design</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../threading/threading.html">Threading</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Work Scheduling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-concepts">Basic Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#item-of-work">Item of Work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#work-scheduler">Work Scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#work-scheduling-models">Work Scheduling Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-to-completion">Run to Completion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#receive-side-and-receive-flow-scaling">Receive Side and Receive Flow Scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dpdk-generic-flow">DPDK Generic Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-points">Optimization Points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduled-pipeline">Scheduled Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduling-type">Scheduling Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dpdk-service-cores">DPDK Service Cores</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../eth.html">Ethernet Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mbuf.html">The Packet Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../headers.html">Protocol Header Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mem.html">Memory Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sync.html">Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cache.html">Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stats/stats.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../time.html">Timekeeping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../timers.html">Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crypto.html">Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modularization.html">Modularization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../control.html">Control Plane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slowpath.html">Slow Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../antipatterns.html">Anti Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../threading/threading.html" title="previous chapter">Threading</a></li>
+      <li>Next: <a href="../eth.html" title="next chapter">Ethernet Devices</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Ericsson AB.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/work/work.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
