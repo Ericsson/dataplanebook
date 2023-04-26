@@ -54,6 +54,10 @@ telecommunications network, that has largely fallen into disuse.
 As opposed to IP, ATM is connection-oriented on the <a class="reference internal" href="#term-Data-link-layer"><span class="xref std std-term">data
 link layer</span></a>.</p>
 </dd>
+<dt id="term-Atomic-scheduling"><a class="reference internal" href="work/work.html#atomic-scheduling"><span class="std std-ref">Atomic scheduling</span></a><a class="headerlink" href="#term-Atomic-scheduling" title="Permalink to this term">¶</a></dt><dd><p>An <a class="reference internal" href="#term-Item-of-work"><span class="xref std std-term">item of work</span></a> configured with atomic type scheduling
+is processed in order, in relation to other item of work in the
+same item of work flow.</p>
+</dd>
 <dt id="term-ARP">ARP<a class="headerlink" href="#term-ARP" title="Permalink to this term">¶</a></dt><dd><p>The Address Resolution Protocol (ARP) is used in conjunction
 with IPv4 for discovering the link layer (e.g., Ethernet MAC
 address) for a particular IPv4 address.</p>
@@ -490,6 +494,10 @@ layer protocol.</p>
 handles communication between different hosts on the same or
 different <a class="reference internal" href="#term-Layer-2"><span class="xref std std-term">layer 2</span></a> network segments. IPv4 and IPv6 and
 examples of network protocols.</p>
+</dd>
+<dt id="term-Layer-4">Layer 4<a class="headerlink" href="#term-Layer-4" title="Permalink to this term">¶</a></dt><dd><p>The transport layer is the fourth layer in the OSI model, and
+provides end-to-end communication services between
+applications. TCP is an example of a transport layer protocol.</p>
 </dd>
 <dt id="term-Lcore">Lcore<a class="headerlink" href="#term-Lcore" title="Permalink to this term">¶</a></dt><dd><p>A seemingly DPDK-specific abbreviation of <a class="reference internal" href="#term-Logical-core"><span class="xref std std-term">logical core</span></a>.</p>
 <p>The DPDK term is related to the generic hardware-level term,
@@ -942,6 +950,16 @@ parallel.</p>
 <dt id="term-SNMP">SNMP<a class="headerlink" href="#term-SNMP" title="Permalink to this term">¶</a></dt><dd><p>The Simple Network Management Protocol is a network management
 protocol for IP networks. Originally intended for configuration
 management, current-day use is primarily for network monitoring.</p>
+</dd>
+<dt id="term-Software-prefetching">Software prefetching<a class="headerlink" href="#term-Software-prefetching" title="Permalink to this term">¶</a></dt><dd><p>Software prefetching is a technique where the software gives
+explicit hints to the CPU data accesses it may do in the near
+future. This is to avoid a future expensive CPU stall, in case
+the CPU hardware prefetcher fails to deduced that a particular
+cache line is needed in time.</p>
+<p>In this book, software prefetching is short for <em>manual</em> software
+prefetching, where the programmer inserts prefetch instructions
+in the software source code. Software prefetching may also be used
+by compiler and runtime systems (e.g., a JIT Java VM).</p>
 </dd>
 <dt id="term-Spinlock">Spinlock<a class="headerlink" href="#term-Spinlock" title="Permalink to this term">¶</a></dt><dd><p>A type of lock where a thread failing to acquire a lock
 immediately retries, and keeps doing so (“spins”), until the

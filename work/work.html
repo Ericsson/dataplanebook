@@ -38,10 +38,10 @@
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>This chapter discusses how to organize processing in the data plane,
-to achieve the appropriate level of <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a> and, as the
-end goal, meet the system’s characteristics requirements.</p>
-<p>The issue boils down to how to distribute work across multiple CPU
-cores, while maintaining correctness, cycle and energy efficiency and
+in particular how achieve the appropriate level of <a class="reference internal" href="../glossary.html#term-Parallelism"><span class="xref std std-term">parallelism</span></a>
+and, in the end, meet the system’s characteristics requirements.</p>
+<p>The core issue is to how to distribute work across multiple CPU cores,
+while maintaining correctness, cycle and energy efficiency and
 scalability.</p>
 <p>As discussed in the <a class="reference internal" href="../threading/threading.html#threading"><span class="std std-ref">chapter on threading</span></a>, a data
 plane application is generally required to set up a system of
@@ -63,11 +63,11 @@ in that chapter.</p>
 <section id="item-of-work">
 <h3>Item of Work<a class="headerlink" href="#item-of-work" title="Permalink to this headline">¶</a></h3>
 <p>This book will use the term <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">item of work</span></a> to denote the
-smallest unit of work handed to a <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>.</p>
+smallest job assigned to a <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a>.</p>
 <p>A typical item of work consists of information on how the work
-scheduler treat this item, and a pointer to a packet (or a list of
-packets), and some additional meta data, like the application-level
-destination (identifying the processing stage).</p>
+scheduler should (or must) treat this item, and a pointer to a packet
+(or a list of packets), and some additional meta data, like the
+application-level destination (identifying the processing stage).</p>
 <p>At a bare minimum, the an item of work handed from the work scheduler
 to the receiving party in the application must carry enough information
 so the that receiver knows what to do with it.</p>
@@ -79,7 +79,9 @@ notification from an accelerator, or a request from <a class="reference internal
 control</span></a> to update a table, or retrieve some information about the
 state of the data plane.</p>
 <p>In DPDK <a class="reference external" href="https://doc.dpdk.org/api/rte__eventdev_8h.html">&lt;rte_eventdev.h&gt;</a> an item of work is
-referred to as an <em>event</em>.</p>
+referred to as an <em>event</em>. The same term is used by the <a class="reference external" href="https://openeventmachine.github.io/em-odp/">Open Event
+Machine</a>, a
+eventdev-like mechanism for <a class="reference internal" href="../intro.html#odp"><span class="std std-ref">Open Data Plane</span></a>.</p>
 <p>For non-scheduled data planes, the item of work simply consist of a
 pointer to the packet buffer (and its meta data).</p>
 <p>In the context of an operating system process scheduler, the item of
@@ -93,49 +95,185 @@ a data plane work scheduler.</p>
 </section>
 <section id="work-scheduler">
 <h3>Work Scheduler<a class="headerlink" href="#work-scheduler" title="Permalink to this headline">¶</a></h3>
-<p>For the purpose of this book, a work scheduler is a data plane fast
-path function that distributes <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">items of work</span></a>
-across the <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a>.</p>
+<p>The <em>work scheduler</em> of this book is a data plane fast path function
+that distributes <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">items of work</span></a> across
+<a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcores</span></a>.</p>
 <p>The work scheduler takes as input a set of items of work, and decides
-how to schedule the tasks across available lcores, considering the
-constraints (ordering, atomicity guarantees).</p>
-<p>From a characteristics point of view, the overall goals of the work
-scheduler are:</p>
+how best to distribute the work across available lcores, maintaing the
+constraints (e.g., ordering requirements) given by the application.</p>
+<p>From a characteristics point of view, the overall goal of the work
+scheduler can be summarized as:</p>
 <ul class="simple">
 <li><p>Maximize throughput (best-case, worst-case, and/or something in-between).</p></li>
 <li><p>Minimize <a class="reference internal" href="../glossary.html#term-Wall-clock-latency"><span class="xref std std-term">latency</span></a> (average and/or at the
 tail end).</p></li>
 <li><p>Maximize resource efficiency (e.g., power, CPU core count, or DRAM).</p></li>
-<li><p>Maximize fairness (or more general, maintain to appropriate quality
+<li><p>Maintain fairness (or more general, maintain appropriate quality
 of service, which may not be fair at all).</p></li>
 </ul>
 <p>Depending on the application, different weights will be placed on the
 different work scheduler sub goals.</p>
-<p>More in detail what kind of functionality (e.g., treatment) the work
-scheduler will provide, and how work is fed into and retrieved from
-the machinery varies depending on the work scheduler implementation.</p>
-<p>While this description may bring something like a work scheduler of
-for the scheduled pipeline to mind, a simple function such as
-<a class="reference internal" href="../glossary.html#term-RSS"><span class="xref std std-term">RSS</span></a> function of a term:<cite>NIC</cite> can also be made to serve as a
-work scheduler.</p>
+<p>Conceptually, data plane work scheduler is very similar to a generic
+operating system kernel process scheduler. See the <a class="reference internal" href="../threading/threading.html#process-scheduler"><span class="std std-ref">Process Scheduler</span></a> section.</p>
+<p>What kind of functionality (e.g., treatment) the work scheduler will
+provide, and how work is fed into and retrieved from the machinery
+varies depending on the work scheduler implementation.</p>
+<p>The work scheduler may be implemented in software (in the
+<a class="reference internal" href="../glossary.html#term-Data-plane-platform"><span class="xref std std-term">platform</span></a>, or the application), or in
+hardware, or a combination of the two.</p>
+<p>A data plane work scheduler may take many different forms, ranging
+from something that adhere to from <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/eventdev.html">Eventdev</a> to a
+relatively simple function such as <a class="reference internal" href="../glossary.html#term-RSS"><span class="xref std std-term">RSS</span></a> of <a class="reference internal" href="../glossary.html#term-NIC"><span class="xref std std-term">NIC</span></a>
+(combined with the appropriate configuration and RX queue setup).</p>
+</section>
+<section id="work-size">
+<h3>Work Size<a class="headerlink" href="#work-size" title="Permalink to this headline">¶</a></h3>
+<p>The per-packet <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> in the data plane is short
+compared to the cost of serving a request in most other types of
+network applications. See the section on <a class="reference internal" href="../intro.html#data-plane-applications"><span class="std std-ref">Data Plane Applications</span></a> for more on this topic.</p>
+<p>The items of work managed by the data plane work scheduler are
+dominated by items directly related to the (partial, or complete)
+processing of a particular packet. To improve work scheduling
+efficiency (among other things), an item of work may reference
+multiple packets. Furthermore, when the work scheduler hands over work
+to the application, it may do so in batches, to reduce scheduling
+overhead (and give ample opportunity for <a class="reference internal" href="../glossary.html#term-Software-prefetching"><span class="xref std std-term">software
+prefetching</span></a>).</p>
+<p>However, there also forces that work in the opposite direction, toward
+a preference of short (batches of) jobs:</p>
+<ul class="simple">
+<li><p>There are no means for the work scheduler to interrupt an on-going
+execution. This in turn will cause head-of-line blocking, where a
+low-priority job may prevent the work scheduler from immediately
+scheduling an arriving high-priority job for execution.</p></li>
+<li><p>A system could wait to gather a large batch of packets, to reap the
+efficiency benefits of batching. <a class="footnote-reference brackets" href="#vpp" id="id2">1</a> However, such buffering
+will add to the port-to-port <a class="reference internal" href="../glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>.</p></li>
+</ul>
+<p>One often-viable approach is to have a system where limited or no
+batching of packet (or items of work) occurs at low load, and
+increases with increased system capacity utilization. If the system is
+working at the limits of its capacity, a large amount of batching is
+usually the best option. At this operating point, the typically
+somewhat bursty nature of arriving packets will leave the system, at
+least at times, with a backlog, forcing the use of buffering (or
+dropping packets). Batching in this scenario allows the system to
+exploit the efficiency gains, potentially avoiding further buffering
+(and the associated increase in packet delays) to occur.</p>
+<p>For systems which can scale hardware resources (e.g., CPU cores) very
+quickly, it may be beneficial to keep the system running on
+fewer-than-available cores, and keep those cores relatively busy,
+leading to batching effects, and in turn higher power efficiency (at
+the cost of increased port-to-port wall-time latency experienced by
+forwarded packets).</p>
+</section>
+<section id="flow">
+<h3>Flow<a class="headerlink" href="#flow" title="Permalink to this headline">¶</a></h3>
+<p>The data plane work scheduler must often track relationships between
+an <a class="reference internal" href="../glossary.html#term-Item-of-work"><span class="xref std std-term">item of work</span></a> and other items (see the section on <a class="reference internal" href="#work-ordering"><span class="std std-ref">Work Ordering</span></a> and <a class="reference internal" href="#scheduling-types"><span class="std std-ref">Scheduling Types</span></a>).</p>
+<p>For tracking arrival order, or processing order, the concept of a
+<em>flow</em> is often useful. The flow of this chapter is often, but does
+not have to be, related to some flow-like concept in a network
+protocol layer.</p>
+<p>A common <em>flow</em> for applications operates in the Internet
+<a class="reference internal" href="../glossary.html#term-Network-protocol-suite"><span class="xref std std-term">network protocol suite</span></a> is that flows are made up of IP packets
+pertaining to the same TCP connection (or UDP flow), or all packets
+going in a particular direction, between two IP hosts.</p>
+<p>It’s often useful to map several network-level flows to a single item
+of work flow. This may be done both to reduce the number of flows the
+work scheduler must handle, or extend the ordering guarantees given by
+the different scheduling types to include more than one flow. One
+example is to classify both uplink and downlink TCP frames into the
+same atomic flow, to reduce synchronization overhead and cache
+locality for data pertaining to both directions, for that TCP
+connection.</p>
+<p>It’s also often useful to map a single network-level flow, in one
+particular direction, to multiple item of work flows, in an
+application implementing the pipeline pattern. Each such flow
+represent a processing stage. See the <a class="reference internal" href="#pipeline"><span class="std std-ref">Pipeline</span></a> section for
+more information.</p>
+<p>The term <em>ordering context</em> is sometimes (e.g., in <a class="reference internal" href="../glossary.html#term-NPU"><span class="xref std std-term">NPUs</span></a>)
+used for an item of work flow.</p>
+</section>
+<section id="work-ordering">
+<span id="id3"></span><h3>Work Ordering<a class="headerlink" href="#work-ordering" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a> performing packet forwarding (in a general
+sense) is almost always required to maintain some kind of order of
+packets coming in, and the corresponding packets going out. In other
+words, when packets arrive in some well-defined order at the
+<a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network function</span></a> ingress, any packets produced as a results of
+processing those packets, should egress the system in the same order.</p>
+<p><a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">Network function</span></a>-level packet ordering requirements directly
+translate into a set of requirements on the data plane work scheduler
+(and associated machinery, like a packet-to-flow classification
+function).</p>
+<p>Generally, causing reordering is not strictly prohibited, and its
+better to deliver out-of-order packets than to drop them. For example,
+in an IP network, a stream of packets originating from some particular
+host may be reordered as they traverse the network. Reordering of
+packets may result in serious performance degradations.</p>
+<p>For example, <a class="reference internal" href="../glossary.html#term-Layer-4"><span class="xref std std-term">Transport layer</span></a> protocols may infer
+packet loss from the arrival of out-of-order packets, and signaling to
+the remote peer retransmit the data.</p>
+<p>At a minimum, reordering incurs an addition processing cost on the end
+systems.</p>
+<p>Typically, the data plane application need not maintain a total order
+between input and output, but it’s enough to maintain the packets
+pertaining to the same network flow.</p>
+<p>Maintaining a total order of all packets may not even be preferably,
+since it would prevent the system prioritize some packets, over
+others. It could also cause head-of-line blocking, where a single
+time-consuming-to-process packet prevents other packets from being
+forwarded.</p>
+<p>A requirement to maintain the packet order from <a class="reference internal" href="../glossary.html#term-Network-function"><span class="xref std std-term">network
+function</span></a> input to output does not itself force the processing of
+packets to happen in order.</p>
+<p>In some cases, the actual work should (or must) be performed in the
+same order the packets arrived. One example is PDCP sequence number
+allocation, which generally should be done in the same order as the</p>
+<p>For a software work scheduler, it may be to more cycle-efficient to
+maintain order by also imposing in-order processing (i.e., one flow
+goes to one core, rather than one flow goes to many flows, and the
+resulting packets are reordered to restore the original arrival
+order).</p>
+<p>Work ordering is one of the aspects that differentiates a data plane
+work scheduler from a operating system process scheduler.</p>
+<section id="scheduling-types">
+<span id="id4"></span><h4>Scheduling Types<a class="headerlink" href="#scheduling-types" title="Permalink to this headline">¶</a></h4>
+<p>This chapter will reuse the terminology used by <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/eventdev.html">Eventdev</a>.</p>
+<section id="atomic-scheduling">
+<span id="id6"></span><h5>Atomic Scheduling<a class="headerlink" href="#atomic-scheduling" title="Permalink to this headline">¶</a></h5>
+</section>
+</section>
+</section>
+<section id="load-balancing">
+<h3>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h3>
+<p>Static versus Dynamic.</p>
 </section>
 </section>
 <section id="work-scheduling-models">
 <h2>Work Scheduling Models<a class="headerlink" href="#work-scheduling-models" title="Permalink to this headline">¶</a></h2>
 <section id="run-to-completion">
-<h3>Run to Completion<a class="headerlink" href="#run-to-completion" title="Permalink to this headline">¶</a></h3>
-<p>An application using <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane threading</span></a>, where each <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> is assigned one or more
-items of work, and continues process of those tasks, without any
-interruption, until they are finished. <em>Finished</em> here means that all
-application-internal state changes related to that input has occurred,
-and any and all output related to those set of inputs that can been
-produced, have been produced.</p>
+<span id="id7"></span><h3>Run to Completion<a class="headerlink" href="#run-to-completion" title="Permalink to this headline">¶</a></h3>
+<p>This section describes a simple work scheduling model, which in its
+most basic form, work isn’t really scheduled at all.</p>
+<p>The run-to-completion model entails:</p>
+<ol class="arabic simple">
+<li><p>Use <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane threading</span></a>.</p></li>
+<li><p>Have every <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL thread</span></a> poll a set of sources of work.</p></li>
+<li><p>Upon retrieving an item of work (e.g., by retrieving a packet from
+a <a class="reference internal" href="../glossary.html#term-NIC"><span class="xref std std-term">NIC</span></a> RX queue) the EAL thread will continue to
+work on this task, without interruption, until it is finished.</p></li>
+</ol>
+<p><em>Finished</em> here means that all application-internal state changes
+related a particular input has occurred, and any output related to
+those set of inputs that can been produced, have been produced.</p>
 <p>Outputs which cannot be produced because some information is not yet
 available, or where the output must be produced at some particular
 time, is exempted.</p>
 <p>Thus, in a system implementing strict run-to-completion by this
-definition, a thread to not hand off work to another thread, provided
-the work could be performed immediately.</p>
+definition, a thread can not hand off work to another thread, provided
+the work could be performed by the original thread.</p>
 <p>The archetypal example of a run-to-completion DPDK data plane
 application is with a number of <a class="reference internal" href="../glossary.html#term-EAL-thread"><span class="xref std std-term">EAL threads</span></a>, one
 per CPU core. Each thread is assigned one RX and TX NIC queue. Upon
@@ -147,53 +285,118 @@ queues, without any interruptions.</p>
 application using <a class="reference internal" href="../glossary.html#term-Preemptable-thread"><span class="xref std std-term">preemptable threads</span></a> and
 blocking system function calls to access the network stack may seem to
 run-to-completion from strictly source code point of view. However,
-since the threads may be interrupted, this is not usually what’s meant
-with run-to-completion. The same is true for software using coroutines
-or other green threading techniques.</p>
+since the threads may be interrupted, such a design fails to qualify
+as run-to-completion according to this definition. The same is true
+for software using coroutines or other green threading techniques.</p>
+<p>The driving force for this nearly interruption-free operation is
+performance, living without multitasking has software
+architecture-level impact.</p>
 <section id="parallels-to-other-domains">
 <h4>Parallels to Other Domains<a class="headerlink" href="#parallels-to-other-domains" title="Permalink to this headline">¶</a></h4>
 <p>In general, run-to-completion is used to describe a system, where a
 thread is assigned a task and continues execution until the task is
 finished, without any interruptions.</p>
 <p>In the context of operating system process scheduling,
-run-to-completion is a synonym for threads being
-<a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">non-preeemptable</span></a>, and the use of
-cooperative multitasking (i.e., the running thread runs until it
-voluntarily gives up the CPU). As outline in the <a class="reference internal" href="../threading/threading.html#threading"><span class="std std-ref">Threading</span></a>
-chapter, data plane threads are never to be interrupted for any length
-of time, regardless of run-to-completion of some other work scheduling
-model is used, so this usage does not make sense if <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane
-threading</span></a> is used.</p>
+run-to-completion is a synonym cooperative multitasking, where a
+thread is never <a class="reference internal" href="../glossary.html#term-Non-preemptable-thread"><span class="xref std std-term">preempted</span></a> and runs
+until it voluntarily gives up the CPU. As outline in the
+<a class="reference internal" href="../threading/threading.html#threading"><span class="std std-ref">Threading</span></a> chapter, data plane threads are never supposed to be
+interrupted for any length of time, regardless if run-to-completion or
+some other work scheduling model is used, so this usage does not make
+sense if <a class="reference internal" href="../threading/threading.html#data-plane-threading"><span class="std std-ref">data plane threading</span></a> is used.</p>
 <p>Run-to-completion in the context of finite state machine machines
 means that a state machine finishes the processing of a particular
 event, before it initiates processing of the next. Such state machines
-are not parallel, while the data plane processing almost always is.
-DPDK Eventdev maps more closely to an actor model, with the difference
+are not parallel, while the data plane processing almost always is.</p>
+<p>DPDK Eventdev maps more closely to an actor model, with the difference
 that eventdev events are not the <em>only</em> means of communication between
-actors (shared memory is also allowed).</p>
+actors (e.g., using shared memory is also allowed).</p>
 <p>In a single-threaded UNIX application also employs run-to-completion,
 in the sense no blocking system calls are made, and the processing of
 an event either finishes, or the thread stores whatever state is
 required for further, future, processing, and explicitly yields the
 thread to allow it to be reused to process some other event. It’s not
 run-to-completion in the sense that the threads are not preempted.</p>
-<p>This interruption-free operation is relevant from a performance point
-of view, and living without multitasking has software
-architecture-level impact.</p>
+</section>
+<section id="properties">
+<h4>Properties<a class="headerlink" href="#properties" title="Permalink to this headline">¶</a></h4>
+<p>Pros</p>
+<ul class="simple">
+<li><p>Straight-forward implementation</p></li>
+<li><p>No expensive hand-offs between cores</p></li>
+<li><p>Trivial maintain input packet order</p></li>
+</ul>
+<p>Cons</p>
+<ul class="simple">
+<li><p>Higher larger data and instruction cache pressure than some
+alternatives.</p></li>
+<li><p>Must be extended with some load balancing mechanism to allow the use
+of multiple CPU cores.</p></li>
+<li><p>Contention for flow-level and/or network layer-related data
+structures may be higher than alternatives.</p></li>
+</ul>
 </section>
 </section>
+<section id="static-ingress-load-balancing">
+<span id="id8"></span><h3>Static Ingress Load Balancing<a class="headerlink" href="#static-ingress-load-balancing" title="Permalink to this headline">¶</a></h3>
+<p>The source of work in a data plane is primarily incoming packets.
+Packets come in a <a class="reference internal" href="../glossary.html#term-NIC"><span class="xref std std-term">NIC</span></a> RX queue, or the equivalent in case I/O
+is virtualized (e.g., a memif port).</p>
+<p>In case only a single NIC, with a single port, and a single RX queue
+is available, the run-to-completion application cannot put more than
+one <a class="reference internal" href="../glossary.html#term-Fast-path-lcore"><span class="xref std std-term">fast path lcore</span></a> to work.</p>
+<p>In case the system has more ports, more cores may be used. The act of
+mapping ports (as the associated RX queue) is a form of static load
+balancing. In case all packets come in on one port, all but one of the
+system’s CPU cores will remain idle.</p>
+<p>Static ingress load balancing is a technique which can be used to turn
+the basic run-to-completion into a more useful tool.  Both static and
+<a class="reference internal" href="#dynamic-ingress-load-balancing"><span class="std std-ref">dynamic</span></a> may also be employed
+by any of the pipeline models.</p>
+<section id="receive-side-scaling">
+<h4>Receive Side Scaling<a class="headerlink" href="#receive-side-scaling" title="Permalink to this headline">¶</a></h4>
+<p>An early implementation of hardware-based ingress load balancing is
+<a class="reference internal" href="../glossary.html#term-RSS"><span class="xref std std-term">Receive Side Scaling (RSS)</span></a>, first implemented on early
+NICs with multiple RX queues.</p>
+<p>The use of RSS requires that multiple RX queues are configured on the
+NIC. When RSS is used in an operating system kernel, a one-to-one
+correspondens between queue and CPU core is usually maintained, and
+the queue-to-core mapping is static. However, in a data plane
+application, it may be of value to have more RX queues than cores, to
+allow for a limited form of load balancing.</p>
+<p>When RSS is employed, the NIC identifies the flow of traffic to which
+the packet belongs by examining specific fields in the packet’s header
+(e.g., the source and destination IP addresses and transport protocol
+port numbers).</p>
+<p>The RSS function hash (usually a Toeplitz hash) those fields, and uses
+the hash value as an index to a RX queue.</p>
+<p>RSS can serve in the role of an <a class="reference internal" href="../glossary.html#term-Atomic-scheduling"><span class="xref std std-term">atomic</span></a>
+type scheduler, where the item of work flow is computed by taking a
+hash (e.g., of the packet’s source and destination IP addresses).</p>
+<p>RSS works best in scenarios with many smaller flows (in the sense of
+the RSS classifier). In scenario very few large RSS-level flows, there
+is a substaional risk of uneven load distribution, where. In scenarios
+where there is only a single input flow, RSS is of no use.</p>
+<section id="collisions">
+<h5>Collisions<a class="headerlink" href="#collisions" title="Permalink to this headline">¶</a></h5>
 </section>
-<section id="hardware-ingress-load-balancing">
-<h2>Hardware Ingress Load Balancing<a class="headerlink" href="#hardware-ingress-load-balancing" title="Permalink to this headline">¶</a></h2>
-<section id="receive-side-and-receive-flow-scaling">
-<h3>Receive Side and Receive Flow Scaling<a class="headerlink" href="#receive-side-and-receive-flow-scaling" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="receive-flow-scaling">
+<h4>Receive Flow Scaling<a class="headerlink" href="#receive-flow-scaling" title="Permalink to this headline">¶</a></h4>
 </section>
 <section id="dpdk-generic-flow">
-<h3>DPDK Generic Flow<a class="headerlink" href="#dpdk-generic-flow" title="Permalink to this headline">¶</a></h3>
+<h4>DPDK Generic Flow<a class="headerlink" href="#dpdk-generic-flow" title="Permalink to this headline">¶</a></h4>
 </section>
+<section id="id9">
+<h4>Properties<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+</section>
+<section id="dynamic-ingress-load-balancing">
+<span id="id10"></span><h2>Dynamic Ingress Load Balancing<a class="headerlink" href="#dynamic-ingress-load-balancing" title="Permalink to this headline">¶</a></h2>
 </section>
 <section id="pipeline">
-<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
+<span id="id11"></span><h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
 <section id="optimization-points">
 <h3>Optimization Points<a class="headerlink" href="#optimization-points" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -205,16 +408,23 @@ architecture-level impact.</p>
 </section>
 <section id="scheduled-pipeline">
 <h3>Scheduled Pipeline<a class="headerlink" href="#scheduled-pipeline" title="Permalink to this headline">¶</a></h3>
-</section>
-<section id="scheduling-type">
-<h3>Scheduling Type<a class="headerlink" href="#scheduling-type" title="Permalink to this headline">¶</a></h3>
 <section id="dpdk-eventdev">
-<h4>DPDK Eventdev<a class="headerlink" href="#dpdk-eventdev" title="Permalink to this headline">¶</a></h4>
+<span id="scheduling-type"></span><h4>DPDK Eventdev<a class="headerlink" href="#dpdk-eventdev" title="Permalink to this headline">¶</a></h4>
 </section>
 </section>
 </section>
 <section id="dpdk-service-cores">
 <h2>DPDK Service Cores<a class="headerlink" href="#dpdk-service-cores" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="vpp"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>Such a feature may not only be used to reduce work scheduling
+overhead.  If the buffering also includes some clever reordering of
+packets (i.e., work), so that packets pertaining to the same flow
+are kept together, this will improve temporal locality of memory
+accesses, and also allows for <a class="reference internal" href="../glossary.html#term-Vector-packet-processing"><span class="xref std std-term">vector packet processing</span></a>.</p>
+</dd>
+</dl>
 </section>
 </section>
 
@@ -244,21 +454,21 @@ architecture-level impact.</p>
 <li class="toctree-l2"><a class="reference internal" href="#basic-concepts">Basic Concepts</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#item-of-work">Item of Work</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#work-scheduler">Work Scheduler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#work-size">Work Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flow">Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#work-ordering">Work Ordering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-balancing">Load Balancing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#work-scheduling-models">Work Scheduling Models</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#run-to-completion">Run to Completion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#static-ingress-load-balancing">Static Ingress Load Balancing</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#hardware-ingress-load-balancing">Hardware Ingress Load Balancing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#receive-side-and-receive-flow-scaling">Receive Side and Receive Flow Scaling</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dpdk-generic-flow">DPDK Generic Flow</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#dynamic-ingress-load-balancing">Dynamic Ingress Load Balancing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#optimization-points">Optimization Points</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scheduled-pipeline">Scheduled Pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scheduling-type">Scheduling Type</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#dpdk-service-cores">DPDK Service Cores</a></li>

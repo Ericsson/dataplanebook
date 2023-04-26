@@ -30,6 +30,11 @@ Glossary
       As opposed to IP, ATM is connection-oriented on the :term:`data
       link layer`.
 
+   :ref:`Atomic scheduling <Atomic Scheduling>`
+      An :term:`item of work` configured with atomic type scheduling
+      is processed in order, in relation to other item of work in the
+      same item of work flow.
+
    ARP
       The Address Resolution Protocol (ARP) is used in conjunction
       with IPv4 for discovering the link layer (e.g., Ethernet MAC
@@ -561,6 +566,11 @@ Glossary
       handles communication between different hosts on the same or
       different :term:`layer 2` network segments. IPv4 and IPv6 and
       examples of network protocols.
+
+   Layer 4
+      The transport layer is the fourth layer in the OSI model, and
+      provides end-to-end communication services between
+      applications. TCP is an example of a transport layer protocol.
 
    Lcore
       A seemingly DPDK-specific abbreviation of :term:`logical core`.
@@ -1122,6 +1132,18 @@ Glossary
       The Simple Network Management Protocol is a network management
       protocol for IP networks. Originally intended for configuration
       management, current-day use is primarily for network monitoring.
+
+   Software prefetching
+      Software prefetching is a technique where the software gives
+      explicit hints to the CPU data accesses it may do in the near
+      future. This is to avoid a future expensive CPU stall, in case
+      the CPU hardware prefetcher fails to deduced that a particular
+      cache line is needed in time.
+
+      In this book, software prefetching is short for *manual* software
+      prefetching, where the programmer inserts prefetch instructions
+      in the software source code. Software prefetching may also be used
+      by compiler and runtime systems (e.g., a JIT Java VM).
 
    Spinlock
       A type of lock where a thread failing to acquire a lock
