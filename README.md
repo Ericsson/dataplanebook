@@ -1,9 +1,9 @@
 # Data Plane Software Design
 
-This Git repository is planned to hold a book tentatively titled *Data
-Plane Software Design*, in source form.
+This Git repository holds the source text of the *Data Plane Software
+Design* book.
 
-There is not much here yet. Only a skeleton structure, and very little
+Available at this time is the basic structure, and a limited amount of
 actual content.
 
 ## Source Format
