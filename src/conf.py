@@ -20,6 +20,7 @@ extensions = [
     'sphinx.ext.imgmath',
     'sphinx.ext.githubpages',
     'sphinxcontrib.plantuml',
+    'sphinxcontrib.inkscapeconverter',
     'sphinxcontrib.spelling',
 ]
 
