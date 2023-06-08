@@ -10,13 +10,13 @@ Work Scheduling
 Introduction
 ============
 
-This chapter discusses how to organize processing in the data plane,
-in particular how achieve the appropriate level of :term:`parallelism`
-and, in the end, meet the system's characteristics requirements.
+This chapter investigates how to organize processing in the data
+plane.
 
-The core issue is to how to distribute work across multiple CPU cores,
-while maintaining correctness, cycle and energy efficiency and
-scalability.
+The primary concern is the distribution of work across CPU cores and
+accelerators in an as cycle- and energy-efficiency and scalable was as
+possible, while maintaining correctness and the appropriate
+:term:`network function`-level black-box behavior.
 
 As discussed in the :ref:`chapter on threading <Threading>`, a data
 plane application is generally required to set up a system of
@@ -24,36 +24,53 @@ plane application is generally required to set up a system of
 core>` — a scheme which effectively disables operating system-level
 :term:`multitasking`.
 
-After throwing the standard vehicle for load balancing out the window,
+With the standard vehicle for load balancing thrown out the window,
 the data plane application needs a replacement. That replacement is
 the topic of this chapter.
 
 The related but distinct question of how to decouple different
 protocol layers (and other modules) in the data plane application will
-be covered in a future chapter of :ref:`Modularization`.
-
-Although the DPDK :term:`service cores framework` can be seen as a
-static load balancer, the primary function of that function is
-decoupling (and :term:`concurrency`), and thus will be also be covered
-in that chapter.
+be covered in a future chapter of :ref:`Modularization`. The DPDK
+:term:`service cores framework` will also be the subject of that
+future chapter, since its primary function is decoupling (and
+:term:`concurrency`).
 
 Basic Concepts
 ==============
 
+This section introduces essential terminology, enabling a concise and
+precise discussion on data plane work scheduling.
+
 Item of Work
 ------------
 
-This book will use the term :term:`item of work` to denote the
-smallest job assigned to a :term:`EAL thread`.
+This book uses the term :term:`item of work` to denote the smallest
+job assigned to an :term:`EAL thread`.
 
-A typical item of work consists of information on how the work
-scheduler should (or must) treat this item, and a pointer to a packet
-(or a list of packets), and some additional meta data, like the
+An item of work generally consists of two things.
+
+One is the data required to allow the work scheduler to give the item
+of work the appropraite treatment. This information will be provided
+by the work *producer*, at the time of work creation.
+
+
+Producer Information
+^^^^^^^^^^^^^^^^^^^^
+
+1. Information to the work scheduler can treat this item of work
+   appropriately.
+2. Enough information so that the work consumer can perform the work.
+   1. Data to facilitating the item of work to be dispatched to a function.
+   1. Pointer to a packet buffer (or a list of packet buffers [#vector]_) or similar.
+
+An item of work consists of information on how the work scheduler
+should (or must) treat this item, and a pointer to a packet (or a list
+of packets [#vector]_), and some additional meta data, like the
 application-level destination (identifying the processing stage).
 
 At a bare minimum, the an item of work handed from the work scheduler
-to the receiving party in the application must carry enough information
-so the that receiver knows what to do with it.
+to the receiving party in the application must carry enough
+information so that the receiver knows what to do with it.
 
 Similarly, when an item of work is being added to the work scheduler,
 it must carry enough information so the that work scheduler knows what
@@ -67,7 +84,7 @@ state of the data plane.
 In DPDK `<rte_eventdev.h>
 <https://doc.dpdk.org/api/rte__eventdev_8h.html>`_ an item of work is
 referred to as an *event*. The same term is used by the `Open Event
-Machine <https://openeventmachine.github.io/em-odp/>`_, a
+Machine <https://openeventmachine.github.io/em-odp/>`_, an
 eventdev-like mechanism for :ref:`ODP`.
 
 For non-scheduled data planes, the item of work simply consist of a
@@ -100,16 +117,18 @@ scheduler can be summarized as:
 * Maximize throughput (best-case, worst-case, and/or something in-between).
 * Minimize :term:`latency <Wall-clock latency>` (average and/or at the
   tail end).
-* Maximize resource efficiency (e.g., power, CPU core count, or DRAM).
+* Maximize resource efficiency (e.g., power, CPU cycles, or DRAM bandwidth).
 * Maintain fairness (or more general, maintain appropriate quality
   of service, which may not be fair at all).
+* Provide the appropriate application programming model, to maximize
+  developer efficiency and minimize development cost.
 
 Depending on the application, different weights will be placed on the
 different work scheduler sub goals.
 
-Conceptually, data plane work scheduler is very similar to a generic
-operating system kernel process scheduler. See the :ref:`Process
-Scheduler` section.
+Conceptually, the data plane work scheduler performs a task very
+similar to that of an operating system kernel process scheduler. See
+the :ref:`Process Scheduler` section.
 
 What kind of functionality (e.g., treatment) the work scheduler will
 provide, and how work is fed into and retrieved from the machinery
@@ -171,6 +190,8 @@ leading to batching effects, and in turn higher power efficiency (at
 the cost of increased port-to-port wall-time latency experienced by
 forwarded packets).
 
+.. _Flow:
+
 Flow
 ----
 
@@ -183,10 +204,12 @@ For tracking arrival order, or processing order, the concept of a
 not have to be, related to some flow-like concept in a network
 protocol layer.
 
-A common *flow* for applications operates in the Internet
-:term:`network protocol suite` is that flows are made up of IP packets
-pertaining to the same TCP connection (or UDP flow), or all packets
-going in a particular direction, between two IP hosts.
+For data plane applications implementing some part of the Internet
+:term:`network protocol suite` flows are often defined in terms IP
+packets assoicated with the same TCP connection (or UDP flow), packets
+coming in on the same link-layer interface (receiving the same QoS
+classification), or all packets going in a particular direction,
+between two IP hosts.
 
 It's often useful to map several network-level flows to a single item
 of work flow. This may be done both to reduce the number of flows the
@@ -197,11 +220,15 @@ same atomic flow, to reduce synchronization overhead and cache
 locality for data pertaining to both directions, for that TCP
 connection.
 
-It's also often useful to map a single network-level flow, in one
-particular direction, to multiple item of work flows, in an
-application implementing the pipeline pattern. Each such flow
-represent a processing stage. See the :ref:`Pipeline` section for
-more information.
+It's also often useful to map a single network-level stream of
+packets, in one particular direction, to multiple item of work flows,
+in an application implementing the pipeline pattern. Each such flow
+represent a processing stage. See the :ref:`Pipeline` section for more
+information.
+
+Note also that such a network-level stream not stay intact across the
+pipeline. For example, it may "fan out" and become multiple
+independent flows in higher-numbered processing stages.
 
 The term *ordering context* is sometimes (e.g., in :term:`NPUs <NPU>`)
 used for an item of work flow.
@@ -252,7 +279,7 @@ packets to happen in order.
 
 In some cases, the actual work should (or must) be performed in the
 same order the packets arrived. One example is PDCP sequence number
-allocation, which generally should be done in the same order as the
+allocation, which generally must be performed in packet arrival order.
 
 For a software work scheduler, it may be to more cycle-efficient to
 maintain order by also imposing in-order processing (i.e., one flow
@@ -268,7 +295,7 @@ work scheduler from a operating system process scheduler.
 Scheduling Types
 ^^^^^^^^^^^^^^^^
 
-This chapter will reuse the terminology used by `Eventdev
+This chapter reuses the terminology used by `Eventdev
 <https://doc.dpdk.org/guides/prog_guide/eventdev.html>`_.
 
 .. _Atomic Scheduling:
@@ -276,12 +303,61 @@ This chapter will reuse the terminology used by `Eventdev
 Atomic Scheduling
 """""""""""""""""
 
+Atomic scheduling means that work that a stream of items of work are
+processed serially, in order, provided they belong to the same
+:ref:`flow <Flow>`.
 
+Thus, two items of work belonging to the same flow will never be
+processed in :term:`parallel <parallelism>` on two different cores.
 
-Load Balancing
---------------
+Atomic scheduling also does not imply that all items of work of some
+particular flow will be scheduled to the same core, across time. For
+example, the work scheduler is free to schedule item of work 0 of flow
+0 to core 0, and item of work 1 of flow 0 on core 1, provided the
+processing of item of work 0 has finished before the processing of
+item of work 1 is initiated.
 
-Static versus Dynamic.
+To avoid costly cache misses to flow-related data, it is often
+beneficial to attempt to keep the same flow on the same core, provided
+that core is not too busy.
+
+Atomic scheduling may be used to guarantee ordering of items of work
+(and often, in the end, packets from input to output).
+
+Atomic scheduling allows the data plane application to safely access
+data structure related the item of work's flow (and that flow only),
+without the use any further synchronization (e.g., a per-flow
+:term:`spinlock`).
+
+Atomic scheduling does not imply that the processing of some
+network-level stream of related packets (e.g., an IPsec tunnel) need
+necessarily be completely serial. If such processing is divided up
+into multiple stages, each pipeline stage gives some opportunity for
+parallelism.
+
+Ordered Scheduling
+""""""""""""""""""
+
+Ordered scheduling means that items of work from the same flow may be
+scheduled to different cores and be processed in :term:`parallel
+<parallelism>`.
+
+The resulting items of work of such parallel processing, in the form
+of more items of work, is reordered (i.e., reshuffle to fit the
+original order of the items of work from which they derived), before
+they progress to the next stage.
+
+Ordered scheduling allows for a high degree of parallelism (i.e., the
+use of many CPU cores and hardware accelerators) even when the flows
+are few.
+
+Parallel
+""""""""
+
+Parallel scheduling means that the scheduler is free to schedule any
+item of work to any core, in any order.
+
+In parallel scheduling, the goal is simply to keep the cores busy.
 
 Work Scheduling Models
 ======================
@@ -291,20 +367,22 @@ Work Scheduling Models
 Run to Completion
 -----------------
 
+XXX: Rename sequential?
+
 This section describes a simple work scheduling model, which in its
 most basic form, work isn't really scheduled at all.
 
 The run-to-completion model entails:
 
-1. Use :ref:`data plane threading <Data Plane Threading>`.
-2. Have every :term:`EAL thread` poll a set of sources of work.
+1. The use of :ref:`data plane threading <Data Plane Threading>`.
+2. Every :term:`EAL thread` poll a set of sources of work.
 3. Upon retrieving an item of work (e.g., by retrieving a packet from
    a :term:`NIC` RX queue) the EAL thread will continue to
    work on this task, without interruption, until it is finished.
 
 *Finished* here means that all application-internal state changes
-related a particular input has occurred, and any output related to
-those set of inputs that can been produced, have been produced.
+related a particular input has been performed, and any output related
+to those set of inputs that can been produced, have been produced.
 
 Outputs which cannot be produced because some information is not yet
 available, or where the output must be produced at some particular
@@ -342,7 +420,7 @@ thread is assigned a task and continues execution until the task is
 finished, without any interruptions.
 
 In the context of operating system process scheduling,
-run-to-completion is a synonym cooperative multitasking, where a
+run-to-completion is a synonym to cooperative multitasking, where a
 thread is never :term:`preempted <Non-preemptable thread>` and runs
 until it voluntarily gives up the CPU. As outline in the
 :ref:`Threading` chapter, data plane threads are never supposed to be
@@ -384,6 +462,76 @@ Cons
 * Contention for flow-level and/or network layer-related data
   structures may be higher than alternatives.
 
+.. _Pipeline:
+
+Pipeline
+========
+
+In the pipeline architecture, the processing an arriving packet (or
+some other input data plane application stimuli) is broken down into
+several steps - referred to as *stages*.
+
+Typically, a single item of work will be created to finish the first
+stage of processing for a particular packet, then upon finishing
+processing this stage, another will be created. This process continues
+until the last stage has been reached. For applications where all
+packets (or other stimuli resulting in work), all items of work could
+be created, but if so is done, they most likely must be performed in
+order.
+
+The processing of each stage, for each packet, is an :term:`item of
+work`.
+
+Item of work being issued which are being issued to the work scheduler
+are normally treated different if they are a contiation of a
+processing already started for a packet, or a new job. This
+distiniction is there allow the system for being set up in such a way,
+that, in face of overload, tend to finish whatever multi-item-of-work
+task which started, over starting new jobs.
+
+Load balancing
+--------------
+
+The simplest model is static load balancing. Consider a data plane
+application with two pipelines stages.
+
+Parallism
+---------
+
+Compared with the :ref:`run-to-completion <Run to Completion>` model,
+provides parallelism for processing of one *flow*.
+
+Flow Parallism
+^^^^^^^^^^^^^^
+
+Packet Parallism
+^^^^^^^^^^^^^^^^
+
+
+Usually, the domain logic processing requirements are so, a the
+different stages for a particular packet cannot be paralleised,
+because there is a dependency between stage <N> and stage <N+1>
+processing.
+
+For example, in a data plane application that terminates an IPsec
+tunnel and certain TCP flow carried inside this tunnel, the IPsec
+processing (e.g., decapsulation and decryption) must have completed
+before TCP processing can commence.
+
+
+Optimization Points
+-------------------
+
+* Minimize packet header and buffer meta data core-to-core transition
+* Minimize instruction cache footprint for a particular core
+* Minimize cache working set related to per-flow, per-stage data
+* Minimize cache working set related to per-stage data
+
+Scheduled Pipeline
+------------------
+
+.. _Scheduling Type:
+
 .. _Static Ingress Load Balancing:
 
 Static Ingress Load Balancing
@@ -398,7 +546,7 @@ is available, the run-to-completion application cannot put more than
 one :term:`fast path lcore` to work.
 
 In case the system has more ports, more cores may be used. The act of
-mapping ports (as the associated RX queue) is a form of static load
+<mapping ports (as the associated RX queue) is a form of static load
 balancing. In case all packets come in on one port, all but one of the
 system's CPU cores will remain idle.
 
@@ -455,32 +603,11 @@ Properties
 Dynamic Ingress Load Balancing
 ==============================
 
-.. _Pipeline:
-
-Pipeline
-========
-
-Optimization Points
--------------------
-
-* Minimize packet header and buffer meta data core-to-core transition
-* Minimize instruction cache footprint for a particular core
-* Minimize cache working set related to per-flow, per-stage data
-* Minimize cache working set related to per-stage data
-
-
-Scheduled Pipeline
-------------------
-
-.. _Scheduling Type:
-
-DPDK Eventdev
-^^^^^^^^^^^^^
-
-DPDK Service Cores
-==================
-
 .. rubric:: Footnotes
+
+.. [#vector]
+  Such a list of packets is often referred to as a *vector*, as in
+  :term:`vector packet processing`.
 
 .. [#vpp]
   Such a feature may not only be used to reduce work scheduling
@@ -488,3 +615,8 @@ DPDK Service Cores
   packets (i.e., work), so that packets pertaining to the same flow
   are kept together, this will improve temporal locality of memory
   accesses, and also allows for :term:`vector packet processing`.
+
+.. [#flow-affinity]
+  Such scheduler behavior is sometimes referred to as maintaining
+  affinity, but is different from :term:`processor affinity` in the
+  sense it's not a strict requirement, rather a performance heuristic.

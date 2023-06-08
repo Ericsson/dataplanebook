@@ -552,8 +552,8 @@ control plane or management plane components.
 
 This book will refer to this entity as a *network function*. This is
 usually equivalent to a network *node*, although there are networks
-where the prevailing terminology is that a logical node is made up of
-multiple network functions.
+where the prevailing terminology allows for a logical node being
+composed of multiple network functions.
 
 The network function may carry its own operating system kernel, to be
 deployed in a Virtual Machine (VM), in which case it's referred to as a
