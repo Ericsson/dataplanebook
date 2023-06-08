@@ -1,18 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en_US">
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Synchronization &#8212; Data Plane Software Design 0.0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Caches" href="cache.html" />
@@ -34,21 +32,21 @@
           <div class="body" role="main">
             
   <section id="synchronization">
-<span id="id1"></span><h1>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this heading">¶</a></h1>
 <section id="staying-safe">
-<h2>Staying Safe<a class="headerlink" href="#staying-safe" title="Permalink to this headline">¶</a></h2>
+<h2>Staying Safe<a class="headerlink" href="#staying-safe" title="Permalink to this heading">¶</a></h2>
 <section id="thread-safety">
-<h3>Thread Safety<a class="headerlink" href="#thread-safety" title="Permalink to this headline">¶</a></h3>
+<h3>Thread Safety<a class="headerlink" href="#thread-safety" title="Permalink to this heading">¶</a></h3>
 </section>
 <section id="asynchronous-signal-safety">
-<h3>Asynchronous Signal Safety<a class="headerlink" href="#asynchronous-signal-safety" title="Permalink to this headline">¶</a></h3>
+<h3>Asynchronous Signal Safety<a class="headerlink" href="#asynchronous-signal-safety" title="Permalink to this heading">¶</a></h3>
 </section>
 <section id="preemption-safety">
-<h3>Preemption Safety<a class="headerlink" href="#preemption-safety" title="Permalink to this headline">¶</a></h3>
+<h3>Preemption Safety<a class="headerlink" href="#preemption-safety" title="Permalink to this heading">¶</a></h3>
 </section>
 </section>
 <section id="considerations">
-<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this headline">¶</a></h2>
+<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Read access frequency, and cardinality.</p></li>
 <li><p>Write access frequency, and cardinality.</p></li>
@@ -58,25 +56,25 @@
 <p>Messaging Versus Shared Memory</p>
 </section>
 <section id="amdahl-s-law">
-<h2>Amdahl’s Law<a class="headerlink" href="#amdahl-s-law" title="Permalink to this headline">¶</a></h2>
+<h2>Amdahl’s Law<a class="headerlink" href="#amdahl-s-law" title="Permalink to this heading">¶</a></h2>
 <section id="critical-section-length-and-impact">
-<h3>Critical Section Length and Impact<a class="headerlink" href="#critical-section-length-and-impact" title="Permalink to this headline">¶</a></h3>
+<h3>Critical Section Length and Impact<a class="headerlink" href="#critical-section-length-and-impact" title="Permalink to this heading">¶</a></h3>
 </section>
 </section>
 <section id="c11-atomics">
-<h2>C11 Atomics<a class="headerlink" href="#c11-atomics" title="Permalink to this headline">¶</a></h2>
+<h2>C11 Atomics<a class="headerlink" href="#c11-atomics" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="sequence-locks">
-<h2>Sequence Locks<a class="headerlink" href="#sequence-locks" title="Permalink to this headline">¶</a></h2>
+<h2>Sequence Locks<a class="headerlink" href="#sequence-locks" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="spinlocks-and-ticketlocks">
-<h2>Spinlocks and Ticketlocks<a class="headerlink" href="#spinlocks-and-ticketlocks" title="Permalink to this headline">¶</a></h2>
+<h2>Spinlocks and Ticketlocks<a class="headerlink" href="#spinlocks-and-ticketlocks" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="read-copy-update">
-<h2>Read-Copy-Update<a class="headerlink" href="#read-copy-update" title="Permalink to this headline">¶</a></h2>
+<h2>Read-Copy-Update<a class="headerlink" href="#read-copy-update" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="per-core-data-structures">
-<h2>Per Core Data Structures<a class="headerlink" href="#per-core-data-structures" title="Permalink to this headline">¶</a></h2>
+<h2>Per Core Data Structures<a class="headerlink" href="#per-core-data-structures" title="Permalink to this heading">¶</a></h2>
 <p>(Really per-thread data structures in DPDK.)</p>
 </section>
 </section>
@@ -157,7 +155,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -174,7 +172,7 @@
       &copy;2022, Ericsson AB.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

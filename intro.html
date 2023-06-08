@@ -1,18 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en_US">
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Introduction &#8212; Data Plane Software Design 0.0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Threading" href="threading/threading.html" />
@@ -34,7 +32,7 @@
           <div class="body" role="main">
             
   <section id="introduction">
-<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
 <p><em>Section author: Mattias Rönnblom &lt;<a class="reference external" href="mailto:mattias&#46;ronnblom&#37;&#52;&#48;ericsson&#46;com">mattias<span>&#46;</span>ronnblom<span>&#64;</span>ericsson<span>&#46;</span>com</a>&gt;</em></p>
 <p>This text is an attempt at a guide to the structure and implementation
 of data plane applications. The focus lies on the part of the software
@@ -45,7 +43,7 @@ budget. This book is about life in the fast path.</p>
 <a class="reference internal" href="#dpdk"><span class="std std-ref">Data Plane Development Kit</span></a> (DPDK) platform, most patterns and principles apply more
 widely, such as the network stack of an operating system kernel.</p>
 <section id="audience">
-<span id="id2"></span><h2>Audience<a class="headerlink" href="#audience" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Audience<a class="headerlink" href="#audience" title="Permalink to this heading">¶</a></h2>
 <p>This book is written for software developers, software architects and
 system engineers. The assumption is that the reader possesses general
 software development skills, including good knowledge of the C
@@ -53,7 +51,7 @@ language, and basic understanding of operating system level concepts,
 computer networks, and computer processors.</p>
 </section>
 <section id="networking-planes">
-<span id="id3"></span><h2>Networking Planes<a class="headerlink" href="#networking-planes" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Networking Planes<a class="headerlink" href="#networking-planes" title="Permalink to this heading">¶</a></h2>
 <p>The functionality of a computer network can divided into three logical
 layers; the data, control and management plane.</p>
 <p class="plantuml">
@@ -80,7 +78,7 @@ primarily handles control plane type tasks, and the Centralized Unit
 User Plane (CU-UP) handles the data plane.</p>
 <p>In an IP network router, the separation into planes may exist only
 internally (or indeed, not at all). The protocols and means of
-communication between the different planes are proprietary <a class="footnote-reference brackets" href="#rfc5810" id="id4">1</a>
+communication between the different planes are proprietary <a class="footnote-reference brackets" href="#rfc5810" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>
 .</p>
 <p>A rule of a thumb for what type of processing goes into which plane is
 the rate of change, or rate of operations, the process entails.</p>
@@ -92,7 +90,7 @@ million of packets per second, a couple of thousands control plane
 operations per second, and a handful of management plane type
 operations per second.</p>
 <section id="data-plane">
-<span id="id5"></span><h3>Data Plane<a class="headerlink" href="#data-plane" title="Permalink to this headline">¶</a></h3>
+<span id="id5"></span><h3>Data Plane<a class="headerlink" href="#data-plane" title="Permalink to this heading">¶</a></h3>
 <p>The <em>data plane</em> the part of the network through which the actual
 user data traverse. A <em>user</em> here is an application on some end system
 (in a TCP/IP network, a <em>host</em>).</p>
@@ -101,7 +99,7 @@ IP routers or <a class="reference internal" href="glossary.html#term-Layer-2"><s
 plane</span></a>, in the telecommunications sphere.</p>
 </section>
 <section id="control-plane">
-<span id="id6"></span><h3>Control Plane<a class="headerlink" href="#control-plane" title="Permalink to this headline">¶</a></h3>
+<span id="id6"></span><h3>Control Plane<a class="headerlink" href="#control-plane" title="Permalink to this heading">¶</a></h3>
 <p>The <em>control plane</em> manages network topology and connection
 establishment (e.g., for networks connection-oriented at the data
 link, network or transport layer).</p>
@@ -116,7 +114,7 @@ mobility and bearer management for <a class="reference internal" href="glossary.
 release of virtual circuits (VCs).</p>
 </section>
 <section id="management-plane">
-<span id="id7"></span><h3>Management Plane<a class="headerlink" href="#management-plane" title="Permalink to this headline">¶</a></h3>
+<span id="id7"></span><h3>Management Plane<a class="headerlink" href="#management-plane" title="Permalink to this heading">¶</a></h3>
 <p>The management plane includes functionality for configuration and
 performance management of the network and its nodes.</p>
 <p>In an IP router, the management plane may have clients, servers or
@@ -133,7 +131,7 @@ of this book.</p>
 </section>
 </section>
 <section id="data-plane-applications">
-<span id="id8"></span><h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Data Plane Applications<a class="headerlink" href="#data-plane-applications" title="Permalink to this heading">¶</a></h2>
 <p>For the purpose of this book, a <em>data plane application</em> is a piece of
 software which implements a part of the data plane, on a particular
 node in the network.</p>
@@ -180,7 +178,7 @@ systems, 5G <a class="reference internal" href="glossary.html#term-CN"><span cla
 balancers are all examples of systems which user data processing may
 be realized as one or more data plane applications.</p>
 <section id="low-latency-non-data-plane-applications">
-<h3>Low Latency Non Data Plane Applications<a class="headerlink" href="#low-latency-non-data-plane-applications" title="Permalink to this headline">¶</a></h3>
+<h3>Low Latency Non Data Plane Applications<a class="headerlink" href="#low-latency-non-data-plane-applications" title="Permalink to this heading">¶</a></h3>
 <p>There are types of applications, for example low-latency financial
 trading applications, that, even though they are not a part of the
 implementation of the network, still can make use technologies and
@@ -192,7 +190,7 @@ sort, may qualify as a data plane application, although in the
 literal sense it is not.</p>
 </section>
 <section id="low-capacity-data-plane">
-<h3>Low Capacity Data Plane<a class="headerlink" href="#low-capacity-data-plane" title="Permalink to this headline">¶</a></h3>
+<h3>Low Capacity Data Plane<a class="headerlink" href="#low-capacity-data-plane" title="Permalink to this heading">¶</a></h3>
 <p>The are data plane applications that have comparably lax performance
 requirements, both in terms of throughput, <a class="reference internal" href="glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a>
 and efficient use of computer hardware. Thus, they can avoid many of
@@ -204,7 +202,7 @@ comes to the choice of programming languages and program structure.</p>
 book.</p>
 </section>
 <section id="data-plane-development-kit">
-<span id="dpdk"></span><h3>Data Plane Development Kit<a class="headerlink" href="#data-plane-development-kit" title="Permalink to this headline">¶</a></h3>
+<span id="dpdk"></span><h3>Data Plane Development Kit<a class="headerlink" href="#data-plane-development-kit" title="Permalink to this heading">¶</a></h3>
 <p>The <a class="reference external" href="https://www.dpdk.org/">Data Plane Development Kit</a> (DPDK) is an
 Open Source software platform for data plane applications. DPDK serves
 in the role of the <a class="reference internal" href="glossary.html#term-Data-plane-platform"><span class="xref std std-term">data plane platform</span></a> for the applications of
@@ -247,7 +245,7 @@ replaced with a general-purpose multi-core CPU complex, augmented with
 various networking-specific accelerators and the occasional CPU
 instruction set architecture (ISA) extension.</p>
 <section id="open-data-plane">
-<span id="odp"></span><h4>Open Data Plane<a class="headerlink" href="#open-data-plane" title="Permalink to this headline">¶</a></h4>
+<span id="odp"></span><h4>Open Data Plane<a class="headerlink" href="#open-data-plane" title="Permalink to this heading">¶</a></h4>
 <p>DPDK has largely dislodged the <a class="reference external" href="https://opendataplane.org/">Open Data Plane</a> (ODP). ODP is a project with a similar
 goal, but grew inside the non-x86 and <a class="reference internal" href="glossary.html#term-DPU"><span class="xref std std-term">data processing
 unit</span></a> (DPU) ecosystem. Part of the rationale for ODP was that
@@ -256,7 +254,7 @@ processors, but DPDK has since gradually caught up with ODP.</p>
 </section>
 </section>
 <section id="data-plane-fast-path">
-<span id="fast-path"></span><h3>Data Plane Fast Path<a class="headerlink" href="#data-plane-fast-path" title="Permalink to this headline">¶</a></h3>
+<span id="fast-path"></span><h3>Data Plane Fast Path<a class="headerlink" href="#data-plane-fast-path" title="Permalink to this heading">¶</a></h3>
 <p>A common pattern is to split the per-packet data plane processing
 logic into two parts: the <em>fast path</em> and the <em>slow path</em>.</p>
 <p>The fast path is designed to handle the bulk of the packets. The
@@ -277,7 +275,7 @@ platform like <a class="reference internal" href="glossary.html#term-VPP"><span 
 dedicated CPU cores.</p>
 </section>
 <section id="data-plane-slow-path">
-<span id="slow-path"></span><h3>Data Plane Slow Path<a class="headerlink" href="#data-plane-slow-path" title="Permalink to this headline">¶</a></h3>
+<span id="slow-path"></span><h3>Data Plane Slow Path<a class="headerlink" href="#data-plane-slow-path" title="Permalink to this heading">¶</a></h3>
 <p>The slow path handles <a class="reference internal" href="glossary.html#term-Exception-traffic"><span class="xref std std-term">exception traffic</span></a>. For network stacks
 taking a <a class="reference internal" href="glossary.html#term-Flow-cache"><span class="xref std std-term">flow cache</span></a> approach, such as <a class="reference internal" href="glossary.html#term-Open-vSwitch"><span class="xref std std-term">Open vSwitch</span></a>,
 the exception packets consists of the first packet encountered in a
@@ -310,7 +308,7 @@ the packets are crafted in such a way, they all require expensive slow
 path processing.</p>
 </section>
 <section id="data-plane-control">
-<span id="id11"></span><h3>Data Plane Control<a class="headerlink" href="#data-plane-control" title="Permalink to this headline">¶</a></h3>
+<span id="id11"></span><h3>Data Plane Control<a class="headerlink" href="#data-plane-control" title="Permalink to this heading">¶</a></h3>
 <p>The data plane fast and slow path handles the processing of data plane
 packets, but there are other kinds of input to and output from a data
 plane application.</p>
@@ -343,7 +341,7 @@ serving in the data plane control role. Such usage of the word is
 misleading. The <a class="reference internal" href="glossary.html#term-Slow-path"><span class="xref std std-term">slow path</span></a> handles user data (only slower),
 which is distinct from the task of data plane control.</p>
 <section id="control-threads">
-<span id="id12"></span><h4>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this headline">¶</a></h4>
+<span id="id12"></span><h4>Control Threads<a class="headerlink" href="#control-threads" title="Permalink to this heading">¶</a></h4>
 <p>In data plane applications that follows the DPDK pattern with one (and
 only one) thread per CPU core, it usually makes sense to have
 additional threads in the same process to terminate interfaces to the
@@ -363,11 +361,11 @@ for such threads.</p>
 </section>
 </section>
 <section id="reference-architectures">
-<h3>Reference Architectures<a class="headerlink" href="#reference-architectures" title="Permalink to this headline">¶</a></h3>
+<h3>Reference Architectures<a class="headerlink" href="#reference-architectures" title="Permalink to this heading">¶</a></h3>
 <p>This sections contains some examples of how a data plane application
 can be organized.</p>
 <section id="reference-architecture-a">
-<h4>Reference Architecture A<a class="headerlink" href="#reference-architecture-a" title="Permalink to this headline">¶</a></h4>
+<h4>Reference Architecture A<a class="headerlink" href="#reference-architecture-a" title="Permalink to this heading">¶</a></h4>
 <p>This example shows an data plane application architecture where data
 plane control is split into two parts; one agent inside the fast path
 process, and another, with the bulk of the domain logic, as a separate
@@ -417,7 +415,7 @@ fp --&gt; kernel_stack : Slow Path
 </p>
 </section>
 <section id="reference-architecture-b">
-<h4>Reference Architecture B<a class="headerlink" href="#reference-architecture-b" title="Permalink to this headline">¶</a></h4>
+<h4>Reference Architecture B<a class="headerlink" href="#reference-architecture-b" title="Permalink to this heading">¶</a></h4>
 <p>This architecture groups data plane control and the fast path into the
 same application, deployed in the same process.</p>
 <p>Architecture B is also more centralized in that it does not employ the
@@ -460,7 +458,7 @@ cp --&gt; dpc
 </section>
 </section>
 <section id="network-function">
-<span id="id13"></span><h2>Network Function<a class="headerlink" href="#network-function" title="Permalink to this headline">¶</a></h2>
+<span id="id13"></span><h2>Network Function<a class="headerlink" href="#network-function" title="Permalink to this heading">¶</a></h2>
 <p>A data plane application is usually packaged and deployed together
 with a number of supporting platform type functions, providing
 services such as process monitoring and management, and log
@@ -468,8 +466,8 @@ handling. The data plane application may also be co-located with
 control plane or management plane components.</p>
 <p>This book will refer to this entity as a <em>network function</em>. This is
 usually equivalent to a network <em>node</em>, although there are networks
-where the prevailing terminology is that a logical node is made up of
-multiple network functions.</p>
+where the prevailing terminology allows for a logical node being
+composed of multiple network functions.</p>
 <p>The network function may carry its own operating system kernel, to be
 deployed in a Virtual Machine (VM), in which case it’s referred to as a
 Virtualized Network Function (VNF).</p>
@@ -487,9 +485,9 @@ carefully selected appliance hardware, may facilitate application
 portability across all above-mentioned deployments.</p>
 </section>
 <section id="hardware-platforms">
-<h2>Hardware Platforms<a class="headerlink" href="#hardware-platforms" title="Permalink to this headline">¶</a></h2>
+<h2>Hardware Platforms<a class="headerlink" href="#hardware-platforms" title="Permalink to this heading">¶</a></h2>
 <section id="processor">
-<h3>Processor<a class="headerlink" href="#processor" title="Permalink to this headline">¶</a></h3>
+<h3>Processor<a class="headerlink" href="#processor" title="Permalink to this heading">¶</a></h3>
 <p>This books concerns itself with software for the kind of processor
 that is capable, at least in principle, to run a general-purpose
 operating system.</p>
@@ -505,23 +503,23 @@ in DPDK that prevents the utilization of such such extensions, would
 they exist.</p>
 </section>
 <section id="accelerators">
-<h3>Accelerators<a class="headerlink" href="#accelerators" title="Permalink to this headline">¶</a></h3>
+<h3>Accelerators<a class="headerlink" href="#accelerators" title="Permalink to this heading">¶</a></h3>
 </section>
 <section id="memory">
-<h3>Memory<a class="headerlink" href="#memory" title="Permalink to this headline">¶</a></h3>
+<h3>Memory<a class="headerlink" href="#memory" title="Permalink to this heading">¶</a></h3>
 </section>
 </section>
 <section id="people">
-<h2>People<a class="headerlink" href="#people" title="Permalink to this headline">¶</a></h2>
+<h2>People<a class="headerlink" href="#people" title="Permalink to this heading">¶</a></h2>
 <section id="why-data-plane-programming-is-easy">
-<h3>Why Data Plane Programming is Easy<a class="headerlink" href="#why-data-plane-programming-is-easy" title="Permalink to this headline">¶</a></h3>
+<h3>Why Data Plane Programming is Easy<a class="headerlink" href="#why-data-plane-programming-is-easy" title="Permalink to this heading">¶</a></h3>
 <p>Data plane software development, generally speaking, gives the
 programmer an easy problem, from a domain logic point of view, to
 solve in a demanding environment, with demanding characteristics
 requirement.</p>
 </section>
 <section id="why-data-plane-programming-is-hard">
-<h3>Why Data Plane Programming is Hard<a class="headerlink" href="#why-data-plane-programming-is-hard" title="Permalink to this headline">¶</a></h3>
+<h3>Why Data Plane Programming is Hard<a class="headerlink" href="#why-data-plane-programming-is-hard" title="Permalink to this heading">¶</a></h3>
 <p>One reason why writing data plane code is hard because
 high-performance, parallel programming is hard. C, which is generally
 still the language of choice in this domain, is no big help here, but
@@ -549,7 +547,7 @@ wrong. A further complication is that bugs caused by <a class="reference interna
 reproduce and debug.</p>
 </section>
 <section id="staffing-data-plane-projects">
-<h3>Staffing Data Plane Projects<a class="headerlink" href="#staffing-data-plane-projects" title="Permalink to this headline">¶</a></h3>
+<h3>Staffing Data Plane Projects<a class="headerlink" href="#staffing-data-plane-projects" title="Permalink to this heading">¶</a></h3>
 <p>In essence, the typical data plane software project takes on a small
 task - in terms of man hours - but a difficult one. Manning a project
 with people without the appropriate skills, and attempting to
@@ -571,14 +569,15 @@ that you don’t need very many people.</p>
 <p>If there’s anywhere the lessons of the <a class="reference internal" href="glossary.html#term-Mythical-Man-Month"><span class="xref std std-term">Mythical Man-Month</span></a>
 applies, it’s in the context of data plane software development.</p>
 <p class="rubric">Footnotes</p>
-<dl class="footnote brackets">
-<dt class="label" id="rfc5810"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
-<dd><p>Attempts have been made to standardize the separation
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="rfc5810" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">1</a><span class="fn-bracket">]</span></span>
+<p>Attempts have been made to standardize the separation
 of control and data plane and the protocols used to communicate
 between the planes in an IP router. See
 <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc5810.txt">RFC 5810</a>.</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </section>
 </section>
 </section>
@@ -673,7 +672,7 @@ between the planes in an IP router. See
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -690,7 +689,7 @@ between the planes in an IP router. See
       &copy;2022, Ericsson AB.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

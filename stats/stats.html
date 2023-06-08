@@ -1,18 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en_US">
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Statistics &#8212; Data Plane Software Design 0.0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Timekeeping" href="../time.html" />
@@ -34,7 +32,7 @@
           <div class="body" role="main">
             
   <section id="statistics">
-<span id="id1"></span><h1>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading">¶</a></h1>
 <p><em>Section author: Mattias Rönnblom &lt;<a class="reference external" href="mailto:mattias&#46;ronnblom&#37;&#52;&#48;ericsson&#46;com">mattias<span>&#46;</span>ronnblom<span>&#64;</span>ericsson<span>&#46;</span>com</a>&gt;</em></p>
 <p>The topic of this chapter is operational statistics for the data plane
 <a class="reference internal" href="../glossary.html#term-Fast-path"><span class="xref std std-term">fast path</span></a>.</p>
@@ -56,7 +54,7 @@ whole.</p>
 performance requirements are less stringent, and are out of scope for
 this chapter.</p>
 <section id="counters">
-<h2>Counters<a class="headerlink" href="#counters" title="Permalink to this headline">¶</a></h2>
+<h2>Counters<a class="headerlink" href="#counters" title="Permalink to this heading">¶</a></h2>
 <p>In a <a class="reference internal" href="../glossary.html#term-SNMP"><span class="xref std std-term">SNMP</span></a> <a class="reference internal" href="../glossary.html#term-MIB"><span class="xref std std-term">MIB</span></a>, <em>counters</em> are non-negative integers
 that monotonically increase, until they wrap upon exceeding some
 maximum value (usually 2^32-1 or 2^64-1). A <em>gauge</em> is a non-negative
@@ -85,7 +83,7 @@ be oblivious to what entities access the data and for what purpose,
 and what protocols are being used.</p>
 </section>
 <section id="use-cases">
-<h2>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h2>
+<h2>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this heading">¶</a></h2>
 <p>Data plane statistics can be used for a number of different purposes,
 including:</p>
 <ul class="simple">
@@ -100,7 +98,7 @@ purpose for the network as a whole. The counters may for example be
 used for billing, or as input for automated or manual network
 optimization.</p>
 <section id="telemetry">
-<h3>Telemetry<a class="headerlink" href="#telemetry" title="Permalink to this headline">¶</a></h3>
+<h3>Telemetry<a class="headerlink" href="#telemetry" title="Permalink to this heading">¶</a></h3>
 <p>Data plane statistics can be used as basis for network <em>telemetry</em>.
 Telemetry means network nodes provides statistics to a central
 location, usually using a push model. This information may then in
@@ -110,7 +108,7 @@ not know if its statistics is being used for telemetry.</p>
 </section>
 </section>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
 <p>There are a number of aspects to consider, when specifying
 requirements for fast path statistics:</p>
 <ul class="simple">
@@ -125,9 +123,9 @@ requirements for fast path statistics:</p>
 cost</p></li>
 </ul>
 <section id="performance">
-<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h3>
+<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this heading">¶</a></h3>
 <section id="time-efficiency">
-<span id="id2"></span><h4>Time Efficiency<a class="headerlink" href="#time-efficiency" title="Permalink to this headline">¶</a></h4>
+<span id="id2"></span><h4>Time Efficiency<a class="headerlink" href="#time-efficiency" title="Permalink to this heading">¶</a></h4>
 <p>The typical data plane application has a range from a couple of
 hundred clock cycles worth of <a class="reference internal" href="../glossary.html#term-Processing-latency"><span class="xref std std-term">processing latency</span></a> per packet
 for <a class="reference internal" href="../glossary.html#term-Low-touch-application"><span class="xref std std-term">low touch</span></a> applications, up to an
@@ -149,7 +147,7 @@ applications spend roughly the same amount of <a class="reference internal" href
 cycles for every counter they need to update. The more elaborate
 logic, the more cycles are spent, and the more there is a need to
 account for what is going on, in order to, for example, profile or
-debug the application, or the network. <a class="footnote-reference brackets" href="#cyclesvslogic" id="id3">1</a> Thus
+debug the application, or the network. <a class="footnote-reference brackets" href="#cyclesvslogic" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Thus
 a high touch application tend to update more counters per packet
 than does its low touch cousin.</p>
 <p>The next assumption is that no more than 5% of the total per-packet
@@ -169,7 +167,7 @@ path, the statistics feature alone will consume several order of
 magnitudes more than the budget <em>for the whole application</em>, assuming
 the fast path is allocated to a handful of cores or more.</p>
 <section id="vector-processing">
-<h5>Vector Processing<a class="headerlink" href="#vector-processing" title="Permalink to this headline">¶</a></h5>
+<h5>Vector Processing<a class="headerlink" href="#vector-processing" title="Permalink to this heading">¶</a></h5>
 <p>If the fast path processing is organized as per the <a class="reference internal" href="../glossary.html#term-Vector-packet-processing"><span class="xref std std-term">vector
 packet processing</span></a> design pattern, the
 counter update overhead can potentially be reduced.</p>
@@ -180,7 +178,7 @@ once.</p>
 </section>
 </section>
 <section id="space-efficiency">
-<span id="id4"></span><h4>Space Efficiency<a class="headerlink" href="#space-efficiency" title="Permalink to this headline">¶</a></h4>
+<span id="id4"></span><h4>Space Efficiency<a class="headerlink" href="#space-efficiency" title="Permalink to this heading">¶</a></h4>
 <p>It’s not unusual to see data plane applications which track (or
 otherwise manage) large amounts of some kind of flows. Such flows may
 be TCP connections, HTTP connections, PDCP bearers, IPsec tunnels, or
@@ -227,7 +225,7 @@ at the time of prototyping, the real network stack <a class="reference internal"
 logic</span></a> and the rest of the fast path is not yet in place.</p>
 </section>
 <section id="flow-affinity">
-<h4>Flow Affinity<a class="headerlink" href="#flow-affinity" title="Permalink to this headline">¶</a></h4>
+<h4>Flow Affinity<a class="headerlink" href="#flow-affinity" title="Permalink to this heading">¶</a></h4>
 <p>An aspect to consider when choosing statistics implementation for
 per-flow counters is whether or not the <a class="reference internal" href="../glossary.html#term-Work-scheduler"><span class="xref std std-term">work scheduler</span></a> employed
 in the fast path maintains flow-to-core affinity.</p>
@@ -250,7 +248,7 @@ generally having a significant positive effect on overall fast path
 performance.</p>
 </section>
 <section id="parallel-flow-processing">
-<h4>Parallel Flow Processing<a class="headerlink" href="#parallel-flow-processing" title="Permalink to this headline">¶</a></h4>
+<h4>Parallel Flow Processing<a class="headerlink" href="#parallel-flow-processing" title="Permalink to this heading">¶</a></h4>
 <p>Another important aspect to consider for per-flow counters is whether
 or not packets pertaining to a particular flow are processed in
 parallel. If a large flow is spread across multiple cores, the
@@ -264,7 +262,7 @@ need to be solved regardless.</p>
 </section>
 </section>
 <section id="update-propagation-delay">
-<h3>Update Propagation Delay<a class="headerlink" href="#update-propagation-delay" title="Permalink to this headline">¶</a></h3>
+<h3>Update Propagation Delay<a class="headerlink" href="#update-propagation-delay" title="Permalink to this heading">¶</a></h3>
 <p><em>Update propagation delay</em> in this chapter refers to the
 <a class="reference internal" href="../glossary.html#term-Wall-clock-latency"><span class="xref std std-term">wall-clock latency</span></a> between the point in time when the counted
 event occurred, until the counter is updated and available to a
@@ -290,7 +288,7 @@ propagation delay.</p>
 </section>
 </section>
 <section id="organization">
-<h2>Organization<a class="headerlink" href="#organization" title="Permalink to this headline">¶</a></h2>
+<h2>Organization<a class="headerlink" href="#organization" title="Permalink to this heading">¶</a></h2>
 <p>A common and straightforward way of organizing counters are as one or
 more nested C structs. Addressing an individual counter in a C struct
 is very efficient, since the offset, in relation to the beginning of
@@ -323,7 +321,7 @@ whether or not the statistics data type should be kept in a single
 instance (or an instance per module, in the modularized case), or an
 instance per lcore.</p>
 <section id="separate-versus-integrated-counters">
-<h3>Separate versus Integrated Counters<a class="headerlink" href="#separate-versus-integrated-counters" title="Permalink to this headline">¶</a></h3>
+<h3>Separate versus Integrated Counters<a class="headerlink" href="#separate-versus-integrated-counters" title="Permalink to this heading">¶</a></h3>
 <p>A design decision to make is if the counters should be an integral
 part of other network stack state, or kept separate (possibly together
 with statistics from other modules).</p>
@@ -362,7 +360,7 @@ self-contained or spread across many different chunks of memory.</p>
 </section>
 </section>
 <section id="synchronization">
-<h2>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this headline">¶</a></h2>
+<h2>Synchronization<a class="headerlink" href="#synchronization" title="Permalink to this heading">¶</a></h2>
 <p>This chapter describes a number of approaches to counter
 implementation, with a focus on writer-writer synchronization (i.e.,
 synchronization between different lcore worker threads updating the
@@ -385,26 +383,26 @@ fictitious Example Protocol (EP). EP has packets and flows, and
 counters on both a global level, and on a per-flow basis.</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#define EP_MAX_SESSIONS (1000)</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">stats</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">stats</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Needless to say, a real application will have a more counters,
 organized into more struct types.</p>
 <section id="shared-non-synchronized-counters">
-<span id="id5"></span><h3>Shared Non Synchronized Counters<a class="headerlink" href="#shared-non-synchronized-counters" title="Permalink to this headline">¶</a></h3>
+<span id="id5"></span><h3>Shared Non Synchronized Counters<a class="headerlink" href="#shared-non-synchronized-counters" title="Permalink to this heading">¶</a></h3>
 <p>One approach to counter synchronization is to ignore the issue
 altogether. The responsible architect might mumble something about
 <a class="reference internal" href="../glossary.html#term-Load"><span class="xref std std-term">loads</span></a> and <a class="reference internal" href="../glossary.html#term-Store"><span class="xref std std-term">stores</span></a> up to 64-bits always
@@ -416,18 +414,18 @@ poorly - a less than ideal combination.</p>
 <p>In order for an lcore worker thread to increment a counter, it will
 just call the update function, which in turn will do a normal
 C integer addition.</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>GCC 10.3.0 compiling for a Cascade Lake generation x86_64 CPU will
@@ -484,51 +482,51 @@ x86_64 cores, loses a whopping ~18% of the global packet count updates
 when the fast path is running at max capacity.</p>
 </section>
 <section id="shared-atomic-counters">
-<span id="id6"></span><h3>Shared Atomic Counters<a class="headerlink" href="#shared-atomic-counters" title="Permalink to this headline">¶</a></h3>
+<span id="id6"></span><h3>Shared Atomic Counters<a class="headerlink" href="#shared-atomic-counters" title="Permalink to this heading">¶</a></h3>
 <p>The correctness issue with <a class="reference internal" href="#shared-non-synchronized-counters"><span class="std std-ref">Shared Non Synchronized Counters</span></a> can
 easily be addressed by using an <em>atomic</em> add for the counter producer
 and an <em>atomic</em> <a class="reference internal" href="../glossary.html#term-Load"><span class="xref std std-term">load</span></a> for the consumer side.</p>
 <p>In this solution, there is only a single instance of the statistics
 struct, accessed by using atomic instructions.</p>
 <section id="arithmetic-operations">
-<h4>Arithmetic Operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this headline">¶</a></h4>
+<h4>Arithmetic Operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this heading">¶</a></h4>
 <p>Below is the <code class="docutils literal notranslate"><span class="pre">ep_stats_update()</span></code> function updated to use atomic
 operations:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">,</span><span class="w"></span>
-<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">,</span>
+<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">,</span><span class="w"></span>
-<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="w">	</span><span class="n">__atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">,</span>
+<span class="w">			   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="reading">
-<h4>Reading<a class="headerlink" href="#reading" title="Permalink to this headline">¶</a></h4>
+<h4>Reading<a class="headerlink" href="#reading" title="Permalink to this heading">¶</a></h4>
 <p>Reading counter values is very straight-forward and <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption
 safe</span></a>:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_session_read</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"></span>
-<span class="w">		      </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_session_read</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span>
+<span class="w">		      </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"></span>
-<span class="w">				       </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"></span>
-<span class="w">					</span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span>
+<span class="w">				       </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span>
+<span class="w">					</span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The use of atomic loads does not impact performance, but does
@@ -540,21 +538,21 @@ turn allows for a counter update to sneak in between the loads,
 wreaking havoc with correctness.</p>
 </section>
 <section id="reset">
-<h4>Reset<a class="headerlink" href="#reset" title="Permalink to this headline">¶</a></h4>
+<h4>Reset<a class="headerlink" href="#reset" title="Permalink to this heading">¶</a></h4>
 <p>A counter read can be combined with a counter reset by using an atomic
 exchange operation.</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_session_reset</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"></span>
-<span class="w">		       </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_session_reset</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span>
+<span class="w">		       </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_exchange_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">					   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_exchange_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">					    </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_exchange_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">					   </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__atomic_exchange_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">					    </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This approach does not guarantee consistency across multiple, related
@@ -568,7 +566,7 @@ may lead to counter changes to be lost, since combined, those two
 operations are no atomic.</p>
 </section>
 <section id="inter-counter-consistency">
-<h4>Inter Counter Consistency<a class="headerlink" href="#inter-counter-consistency" title="Permalink to this headline">¶</a></h4>
+<h4>Inter Counter Consistency<a class="headerlink" href="#inter-counter-consistency" title="Permalink to this heading">¶</a></h4>
 <p>Shared atomic counters does not guarantee atomicity across multiple
 counters. Thus, a reader might see a <code class="docutils literal notranslate"><span class="pre">total_bytes</span></code> which has been
 updated with the length of a certain packet, but a <code class="docutils literal notranslate"><span class="pre">total_pkts</span></code>
@@ -582,7 +580,7 @@ well-defined order (using a different C11 memory model), does not
 help.</p>
 </section>
 <section id="id7">
-<h4>Performance<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<h4>Performance<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
 <p>Shared atomic counters perform well if there is little or no
 contention on the cache line where the counters reside. For counters
 that are updated frequently (e.g., for every packet) by multiple CPU
@@ -591,7 +589,7 @@ cache line ownership transfers incurred.</p>
 </section>
 </section>
 <section id="shared-lock-protected-counters">
-<span id="id8"></span><h3>Shared Lock Protected Counters<a class="headerlink" href="#shared-lock-protected-counters" title="Permalink to this headline">¶</a></h3>
+<span id="id8"></span><h3>Shared Lock Protected Counters<a class="headerlink" href="#shared-lock-protected-counters" title="Permalink to this heading">¶</a></h3>
 <p>Another way to extend the <a class="reference internal" href="#shared-non-synchronized-counters"><span class="std std-ref">Shared Non Synchronized Counters</span></a>
 approach into something that actually works is to do the obvious: add
 a lock.  The lock would be used to serialize both writer and reader
@@ -601,9 +599,9 @@ depending on how <a class="reference internal" href="../glossary.html#term-Work-
 implemented, this may yield some performance benefits.</p>
 <p>If this pattern is used, the statistics struct is supplemented with a
 <a class="reference internal" href="../glossary.html#term-Spinlock"><span class="xref std std-term">spinlock</span></a>:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">stats</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">stats</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span>
 
-<span class="k">static</span><span class="w"> </span><span class="n">rte_spinlock</span><span class="w"> </span><span class="n">stats_lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RTE_SPINLOCK_INITIALIZER</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="n">rte_spinlock</span><span class="w"> </span><span class="n">stats_lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RTE_SPINLOCK_INITIALIZER</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The above example keeps the lock separate from the data, but the lock
@@ -616,7 +614,7 @@ around statistics, including the lock may not make sense.</p>
 pthread mutex is taken at the point a thread is attempting to acquire
 it, the thread is put to sleep by the kernel. A process context is
 very costly, and putting DPDK lcore worker threads to sleep usually
-doesn’t make sense <a class="footnote-reference brackets" href="#sleep" id="id9">2</a>.</p>
+doesn’t make sense <a class="footnote-reference brackets" href="#sleep" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
 <p>For improved fairness, a ticket lock could be used in place of the
 spinlock.</p>
 <p>Fine-grained parallelism allows for more parallelism (see
@@ -634,31 +632,31 @@ becomes significant in high-contention cases.</p>
 store machine instruction (or something along those lines), the lock
 may cause significant overhead.</p>
 <section id="id10">
-<h4>Arithmetic Operations<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<h4>Arithmetic Operations<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
 <p>Adding to one or more counters is only a matter of taking the lock,
 and perform whatever operations are required, after which the
 lock is released.</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="id11">
-<h4>Reading<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<h4>Reading<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h4>
 <p>Reading counter values is very straight-forward, but <em>not</em>
 <a class="reference internal" href="../glossary.html#term-Preemption-safety"><span class="xref std std-term">preemption safe</span></a>. In case the reader thread
 is preempted when it has acquired the lock, but not yet released it,
@@ -668,20 +666,20 @@ is re-scheduled and may continue processing and release the lock.</p>
 <p>Thus, care must be taken that the <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a> (or some
 other reader) is not preempted, at least not for any long duration of
 time.</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_session_read</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"></span>
-<span class="w">		      </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_session_read</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span>
+<span class="w">		      </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">;</span>
+<span class="w">	</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The above example includes acquiring and releasing the lock as a part
@@ -691,7 +689,7 @@ reader may read a large amount of counters, without taking the
 overhead for a large number of lock and unlock calls.</p>
 </section>
 <section id="id12">
-<h4>Reset<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<h4>Reset<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h4>
 <p>The transactional nature of accessing the statistics that the lock
 enables makes supporting counter reset trivial, including maintaining
 consistency across multiple, related counters.</p>
@@ -706,33 +704,33 @@ thread</span></a> wanting to reset all, or a subset of, the statistics would:</p
 <li><p>Store zeros to the counter variables</p></li>
 <li><p>Release the statistics lock</p></li>
 </ol>
-<p>The implementation could look something like <a class="footnote-reference brackets" href="#id31" id="id13">3</a>:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_lock</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<p>The implementation could look something like <a class="footnote-reference brackets" href="#id31" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_lock</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_unlock</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ep_stats_unlock</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats_lock</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_reset</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ep_stats_reset</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">	    </span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="id14">
-<h4>Inter Counter Consistency<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<h4>Inter Counter Consistency<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
 <p>A benefit with <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> is the ability to
 support consistency cross an arbitrary number of counters. For
 example, the <code class="docutils literal notranslate"><span class="pre">ep_stats_update()</span></code> function will guarantee that the
@@ -740,7 +738,7 @@ total and per-session packet count are updated atomically. A properly
 implemented reader will never see data inconsistent in this regard.</p>
 </section>
 <section id="id15">
-<h4>Performance<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<h4>Performance<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h4>
 <p>For counters which are incremented for most or all packets,
 <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> suffers from the same issue as
 <a class="reference internal" href="#shared-non-synchronized-counters"><span class="std std-ref">Shared Non Synchronized Counters</span></a> and <a class="reference internal" href="#shared-atomic-counters"><span class="std std-ref">Shared Atomic Counters</span></a>.  Ownership of cache lines that holds the state of such
@@ -756,7 +754,7 @@ for counters incremented on a per-packet basis, or similar frequency.</p>
 </section>
 </section>
 <section id="shared-counters-with-per-core-buffering">
-<span id="id16"></span><h3>Shared Counters with Per Core Buffering<a class="headerlink" href="#shared-counters-with-per-core-buffering" title="Permalink to this headline">¶</a></h3>
+<span id="id16"></span><h3>Shared Counters with Per Core Buffering<a class="headerlink" href="#shared-counters-with-per-core-buffering" title="Permalink to this heading">¶</a></h3>
 <p>The primary performance issue with <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> is the high contention for the lock, or set of locks, that
 protect counters that are frequently updated, from many or all lcore
 worker cores.</p>
@@ -786,17 +784,17 @@ cache line ping-pong of the alternatives.</p>
 Thus, the introduction of a small statistics framework module to is
 warranted, to manage this complexity. The API to such a framework
 could look something like:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">stat_wb_schedule_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">stat_wb_schedule_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">stat_wb_hint_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">stat_wb_hint_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">stat_wb_try_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">stat_wb_try_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">stat_wb_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">stat_wb_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">stat_wb_schedule_add64()</span></code> function schedules a 64-bit add
@@ -832,120 +830,120 @@ timer is needed.</p>
 <span class="cp">#define STAT_WB_SOFT_THRESHOLD (STAT_WB_MAX_SIZE / 2)</span>
 <span class="cp">#define STAT_WB_MAX_HINTS (64)</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">hints</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">num_add64_ops</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="w"> </span><span class="n">add64_ops</span><span class="p">[</span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">];</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">hints</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">num_add64_ops</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="w"> </span><span class="n">add64_ops</span><span class="p">[</span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">];</span>
+<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="n">lcore_wbs</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="n">lcore_wbs</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span>
 
-<span class="k">static</span><span class="w"> </span><span class="n">rte_spinlock_t</span><span class="w"> </span><span class="n">stat_lock</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="n">rte_spinlock_t</span><span class="w"> </span><span class="n">stat_lock</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
-<span class="n">lcore_wb</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span>
+<span class="n">lcore_wb</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span><span class="w"></span>
-<span class="w">	</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_wbs</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span><span class="w"></span>
+<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span>
+<span class="w">	</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_wbs</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">wb</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">wb</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="n">flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">force</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="n">flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">force</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">force</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rte_spinlock_trylock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">force</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">)</span>
+<span class="w">		</span><span class="n">rte_spinlock_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">);</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rte_spinlock_trylock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">add64_ops</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"></span>
+<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">add64_ops</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
 
-<span class="w">		</span><span class="o">*</span><span class="n">op</span><span class="o">-&gt;</span><span class="n">counter</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">op</span><span class="o">-&gt;</span><span class="n">operand</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="o">*</span><span class="n">op</span><span class="o">-&gt;</span><span class="n">counter</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">op</span><span class="o">-&gt;</span><span class="n">operand</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_spinlock_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stat_lock</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="n">try_flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">flush</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="n">try_flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">flush</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="n">force_flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">flush</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="n">force_flush</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">flush</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="n">schedule_add64</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span><span class="w"></span>
-<span class="w">	       </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">add64_ops</span><span class="p">[</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">	    </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="p">.</span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"></span>
-<span class="w">		</span><span class="p">.</span><span class="n">operand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">operand</span><span class="w"></span>
-<span class="w">	</span><span class="p">};</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="n">schedule_add64</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span>
+<span class="w">	       </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">add64_ops</span><span class="p">[</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">]</span><span class="w"> </span><span class="o">=</span>
+<span class="w">	    </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb_add64_op</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="p">.</span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span>
+<span class="w">		</span><span class="p">.</span><span class="n">operand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">operand</span>
+<span class="w">	</span><span class="p">};</span>
 
-<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">STAT_WB_SOFT_THRESHOLD</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_SIZE</span><span class="p">)</span>
+<span class="w">		</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">STAT_WB_SOFT_THRESHOLD</span><span class="p">)</span>
+<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">schedule_add64</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">schedule_add64</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="n">stat_wb_hint_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="n">stat_wb_hint_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_HINTS</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"></span>
-<span class="w">		</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">STAT_WB_MAX_HINTS</span><span class="p">)</span>
+<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
+<span class="w">	</span><span class="k">else</span>
+<span class="w">		</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">hints</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="n">stat_wb_try_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="n">stat_wb_try_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span>
 
-<span class="w">	</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="n">stat_wb_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="n">stat_wb_flush</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span>
 
-<span class="w">	</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This implementation uses the DPDK pattern of keeping per-lcore data
@@ -955,70 +953,70 @@ array. This is convenient and makes for a clean API, but does prohibit
 any non-lcore worker threads from performing counter updates (a
 non-lcore thread does not have an lcore id) via the write buffer.</p>
 <section id="id17">
-<h4>Arithmetic Operations<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<h4>Arithmetic Operations<a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h4>
 <p>The use of the <code class="docutils literal notranslate"><span class="pre">stat_wb.h</span></code> API to increment a set of counters could
 look like this:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="n">stat_wb_schedule_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>To slightly improve performance, primarily by amortizing the function
 call overhead, and more importantly, the lcore id <a class="reference internal" href="../glossary.html#term-TLS"><span class="xref std std-term">TLS</span></a> lookup,
 across multiple counter updates a multiple-counter update function may
 be introduced:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">stat_wb_schedule_add64_m</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">num_ops</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span><span class="w"></span>
-<span class="w">	</span><span class="kt">va_list</span><span class="w"> </span><span class="n">ap</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">stat_wb_schedule_add64_m</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">num_ops</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">stat_wb</span><span class="w"> </span><span class="o">*</span><span class="n">wb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lcore_wb</span><span class="p">();</span>
+<span class="w">	</span><span class="kt">va_list</span><span class="w"> </span><span class="n">ap</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">STAT_WB_MAX_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_ops</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">STAT_WB_SOFT_THRESHOLD</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">STAT_WB_MAX_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_ops</span><span class="p">)</span>
+<span class="w">		</span><span class="n">force_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wb</span><span class="o">-&gt;</span><span class="n">num_add64_ops</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">STAT_WB_SOFT_THRESHOLD</span><span class="p">)</span>
+<span class="w">		</span><span class="n">try_flush</span><span class="p">(</span><span class="n">wb</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">va_start</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="n">num_ops</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">va_start</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="n">num_ops</span><span class="p">);</span>
 
-<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_ops</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_ops</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter</span><span class="p">;</span>
+<span class="w">		</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span>
 
-<span class="w">		</span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">operand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="p">);</span>
+<span class="w">		</span><span class="n">operand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">ap</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="p">);</span>
 
-<span class="w">		</span><span class="n">schedule_add64</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="n">schedule_add64</span><span class="p">(</span><span class="n">wb</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">operand</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="n">va_end</span><span class="p">(</span><span class="n">ap</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">va_end</span><span class="p">(</span><span class="n">ap</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This function allows incrementing multiple counters in one call. With
 this addition to the <code class="docutils literal notranslate"><span class="pre">stat_wb.h</span></code> API, <code class="docutils literal notranslate"><span class="pre">ep_stats_update</span></code> could be
 modified to use the new function:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">stat_wb_schedule_add64_m</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
-<span class="w">			</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">			</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pkt_size</span><span class="p">,</span><span class="w"></span>
-<span class="w">			</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">			</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pkt_size</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">stat_wb_schedule_add64_m</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span>
+<span class="w">			</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">			</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pkt_size</span><span class="p">,</span>
+<span class="w">			</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">			</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pkt_size</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Beyond the potential performance benefits, this function allows the
@@ -1027,22 +1025,22 @@ counter struct. For this to work, the write buffer buffer must be at
 least the size of the largest counter update transaction.</p>
 </section>
 <section id="id18">
-<h4>Reading<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<h4>Reading<a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h4>
 <p>Reading counters is done in the same manner as in the <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> pattern.</p>
 <p>Reader preemption safety is still a concern.</p>
 </section>
 <section id="id19">
-<h4>Reset<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<h4>Reset<a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h4>
 <p>For resetting counters, the developer is left with the same options as
 in the <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> approach.</p>
 </section>
 <section id="id20">
-<h4>Inter Counter Consistency<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
+<h4>Inter Counter Consistency<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h4>
 <p>In terms providing a consistent view on a set of related counters, or
 even all counters, the same opportunities as in <a class="reference internal" href="#shared-lock-protected-counters"><span class="std std-ref">Shared Lock Protected Counters</span></a> exist.</p>
 </section>
 <section id="id21">
-<h4>Performance<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
+<h4>Performance<a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h4>
 <p><a class="reference internal" href="#shared-counters-with-per-core-buffering"><span class="std std-ref">Shared Counters with Per Core Buffering</span></a> is space efficient,
 while maintaining fairly good cycle efficiency, both for counters
 which are primarily updated by one core, and counters which are
@@ -1069,12 +1067,12 @@ situation where a thread (e.g., another lcore worker thread, or a
 <a class="reference internal" href="../glossary.html#term-Control-thread"><span class="xref std std-term">control thread</span></a>) holds the lock for a relatively long time.</p></li>
 </ul>
 <p>Moving the <code class="docutils literal notranslate"><span class="pre">stat_wb</span></code> functions, in particular the add function, to
-the API header file may slightly improve the performance <a class="footnote-reference brackets" href="#nogain" id="id22">4</a> in
+the API header file may slightly improve the performance <a class="footnote-reference brackets" href="#nogain" id="id22" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> in
 non-<a class="reference internal" href="../glossary.html#term-LTO"><span class="xref std std-term">LTO</span></a> builds, since then the function may be inlined by the
 compiler.</p>
 </section>
 <section id="propagation-delay">
-<h4>Propagation Delay<a class="headerlink" href="#propagation-delay" title="Permalink to this headline">¶</a></h4>
+<h4>Propagation Delay<a class="headerlink" href="#propagation-delay" title="Permalink to this heading">¶</a></h4>
 <p>Per-core buffering may introduce a noticeable delay between the
 counted event occurring, and the time when the counter is updated and
 the results are available to a potential reader.</p>
@@ -1087,7 +1085,7 @@ process. In low-load situations, the lcore is usually asked by the
 situation, the statistics overhead will increase, since the flush
 operation is performed with relatively few counter updates
 buffered. However, the demand for the fast path to be CPU cycle
-efficient is lower during low load. <a class="footnote-reference brackets" href="#nodemand" id="id23">5</a> During high load, the
+efficient is lower during low load. <a class="footnote-reference brackets" href="#nodemand" id="id23" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> During high load, the
 lcore worker will start to experience larger batches, and counter
 flushes will contain more operations, reducing per-counter update
 overhead.</p>
@@ -1102,7 +1100,7 @@ will be less than ~13 us.</p>
 </section>
 </section>
 <section id="per-core-counters">
-<span id="id24"></span><h3>Per Core Counters<a class="headerlink" href="#per-core-counters" title="Permalink to this headline">¶</a></h3>
+<span id="id24"></span><h3>Per Core Counters<a class="headerlink" href="#per-core-counters" title="Permalink to this heading">¶</a></h3>
 <p>In DPDK, per-core data structures (usually in the form of nested C
 struct) are usually implemented by having as many instances of the
 struct as the maximum number of support DPDK lcores
@@ -1128,20 +1126,20 @@ Thread Local Storage (TLS) directly, instead</p>
 similar struct definition as <a class="reference internal" href="#shared-non-synchronized-counters"><span class="std std-ref">Shared Non Synchronized Counters</span></a>.</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#define EP_MAX_SESSIONS (1000)</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">RTE_MAX_LCORE</span><span class="p">];</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -1155,36 +1153,36 @@ cache line will partly defeat the purpose of using per-core data
 structures. False sharing does not affect correctness.</p>
 </div>
 <section id="id25">
-<h4>Arithmetic Operations<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<h4>Arithmetic Operations<a class="headerlink" href="#id25" title="Permalink to this heading">¶</a></h4>
 <p>Since the statistics are duplicated across all lcores, no
 lcore-to-lcore writer synchronization is required.</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="nf">stats_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter_value</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">new_value</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">stats_add64</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">counter_value</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">operand</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">new_value</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">new_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">counter_value</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">new_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">counter_value</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">operand</span><span class="p">;</span>
 
-<span class="w">        </span><span class="n">__atomic_store_n</span><span class="p">(</span><span class="n">counter_value</span><span class="p">,</span><span class="w"> </span><span class="n">new_value</span><span class="p">,</span><span class="w"> </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">__atomic_store_n</span><span class="p">(</span><span class="n">counter_value</span><span class="p">,</span><span class="w"> </span><span class="n">new_value</span><span class="p">,</span><span class="w"> </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span><span class="w"></span>
+<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span>
 
-<span class="w">	</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span>
+<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
+<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="n">stats_add64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>To guarantee that the counter is written atomically (e.g., to avoid a
@@ -1200,7 +1198,7 @@ penalty on all DPDK-supported compilers and CPU architectures. See the
 section of reading below for more information on this topic.</p>
 </section>
 <section id="id26">
-<h4>Reading<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<h4>Reading<a class="headerlink" href="#id26" title="Permalink to this heading">¶</a></h4>
 <p>To retrieve the value of a counter, a reader needs to take a sum over
 all instances of that counter, in all the per-core statistics structs.</p>
 <p>A reader may choose to either iterate over all possible lcores (i.e.,
@@ -1210,25 +1208,25 @@ read-side operation is usually not very performance sensitive, so it
 makes sense to do whatever results in the cleanest code.</p>
 <p>Here’s an example, using the per-counter accessor function design
 style:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"></span>
-<span class="nf">stats_get_lcore_total_bytes</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">uint64_t</span>
+<span class="nf">stats_get_lcore_total_bytes</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">__atomic_load_n</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">__ATOMIC_RELAXED</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="kt">uint64_t</span><span class="w"></span>
-<span class="nf">ep_stats_get_total_bytes</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="kt">uint64_t</span>
+<span class="nf">ep_stats_get_total_bytes</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lcore_id</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">RTE_LCORE_MAX</span><span class="p">;</span><span class="w"> </span><span class="n">lcore_ide</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">stats_get_lcore_total_bytes</span><span class="p">(</span><span class="n">lcore_id</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lcore_id</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">RTE_LCORE_MAX</span><span class="p">;</span><span class="w"> </span><span class="n">lcore_ide</span><span class="o">++</span><span class="p">)</span>
+<span class="w">		</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">stats_get_lcore_total_bytes</span><span class="p">(</span><span class="n">lcore_id</span><span class="p">);</span>
 
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>To guarantee that the counter is read atomically (e.g., so that a
@@ -1258,7 +1256,7 @@ nor 4294967296, but 8589934591.</p>
 <p>This phenomena is known as load or store <em>tearing</em>.</p>
 </section>
 <section id="id27">
-<h4>Inter Counter Consistency<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
+<h4>Inter Counter Consistency<a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h4>
 <p>The atomic store used by the counter producer thread (e.g., the lcore
 worker) is only atomic for a particular counter, and the statistics
 may be in a transient state of inconsistency, seen over a set of
@@ -1281,44 +1279,44 @@ of the per-core counter approach is still required, adding one or more
 statistics data may be an option.</p>
 <div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#define EP_MAX_SESSIONS (1000)</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkts</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">rte_seqcount_t</span><span class="w"> </span><span class="n">sc</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">rte_seqcount_t</span><span class="w"> </span><span class="n">sc</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="n">sessions</span><span class="p">[</span><span class="n">EP_MAX_SESSIONS</span><span class="p">];</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">total_pkts</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">__rte_cache_aligned</span><span class="p">;</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">RTE_LCORE_MAX</span><span class="p">];</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">RTE_LCORE_MAX</span><span class="p">];</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ep_stats_update</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">lcore_id</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">;</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span><span class="w"></span>
+<span class="w">	</span><span class="n">lcore_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_lcore_id</span><span class="p">();</span>
 
-<span class="w">	</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
+<span class="w">	</span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lcore_stats</span><span class="p">[</span><span class="n">lcore_id</span><span class="p">];</span>
+<span class="w">	</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
 
-<span class="w">	</span><span class="n">rte_seqcount_begin_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_seqcount_begin_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span>
 
-<span class="w">	</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="o">++</span><span class="p">;</span>
+<span class="w">	</span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pkt_size</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">rte_seqcount_end_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">rte_seqcount_end_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>In this solution, the neither the loads nor the stores need be atomic,
@@ -1332,23 +1330,23 @@ number of memory barriers. On a Total Store Order (TSO) <a class="reference inte
 needed. On a weakly ordered CPU (e.g. ARM), actual barrier
 instructions are required.</p>
 <p>The reader side will look something like:</p>
-<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">uint64_t</span><span class="w"></span>
-<span class="nf">ep_stats_get_session_stats</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sn</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="kt">uint64_t</span>
+<span class="nf">ep_stats_get_session_stats</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">stats</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">ep_session_stats</span><span class="w"> </span><span class="o">*</span><span class="n">session_stats</span><span class="w"> </span><span class="o">=</span>
+<span class="w">		</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">];</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sn</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">sn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_seqcount_read_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">do</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">sn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rte_seqcount_read_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">);</span>
 
-<span class="w">		</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">;</span><span class="w"></span>
+<span class="w">		</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">pkts</span><span class="p">;</span>
+<span class="w">		</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_stats</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">;</span>
 
-<span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">rte_seqcount_read_retry</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">,</span><span class="w"> </span><span class="n">sn</span><span class="p">));</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">rte_seqcount_read_retry</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">sc</span><span class="p">,</span><span class="w"> </span><span class="n">sn</span><span class="p">));</span>
 
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This pattern represents an unorthodox use of a sequence counter, which
@@ -1363,11 +1361,11 @@ lock, the level of contentions will be very low, and thus the overhead
 to acquire the lock will be as well.</p>
 </section>
 <section id="id28">
-<h4>Performance<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<h4>Performance<a class="headerlink" href="#id28" title="Permalink to this heading">¶</a></h4>
 <p>Keeping per-core instances of statistics data structures is generally
 the most CPU cycle-efficient way to implement counters.</p>
 <p>Add a sequence counter or a spinlock to improve consistency adds
-overhead, but from what the <a class="reference internal" href="#performance-comparison"><span class="std std-ref">micro benchmarks</span></a> suggests, it is very small. <a class="footnote-reference brackets" href="#ignorantauthor" id="id29">6</a></p>
+overhead, but from what the <a class="reference internal" href="#performance-comparison"><span class="std std-ref">micro benchmarks</span></a> suggests, it is very small. <a class="footnote-reference brackets" href="#ignorantauthor" id="id29" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p>
 <p>The largest threat to the viability of the <a class="reference internal" href="#per-core-counters"><span class="std std-ref">Per Core Counters</span></a>
 approach is space efficiency. The amount of statistics memory grows
 linearly with the lcore worker count. This is not an issue in cases
@@ -1379,7 +1377,7 @@ CPU cores, especially on memory-constrained systems.</p>
 </section>
 </section>
 <section id="performance-comparison">
-<span id="id30"></span><h3>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this headline">¶</a></h3>
+<span id="id30"></span><h3>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this heading">¶</a></h3>
 <p>The relative performance of the different approaches to counter
 implementation varies with a number of factors.</p>
 <ul class="simple">
@@ -1424,7 +1422,7 @@ updates (i.e., the lock is only taken once). In some applications, the
 lock may need to be acquired for every counter update, and thus many
 times for a single packet.</p>
 <section id="system-under-test-hardware">
-<h4>System under Test Hardware<a class="headerlink" href="#system-under-test-hardware" title="Permalink to this headline">¶</a></h4>
+<h4>System under Test Hardware<a class="headerlink" href="#system-under-test-hardware" title="Permalink to this heading">¶</a></h4>
 <p>The “Cascade Lake Xeon” is a server with a 20-core Intel Xeon Gold
 6230N CPU. To improve determinism, the Intel Turbo function is disabled,
 and all CPU cores run the nominal clock frequency - 2,3 GHz. The
@@ -1443,21 +1441,10 @@ explain.</p>
 application and DPDK was compiled with``-O3 -march=native``.</p>
 </section>
 <section id="benchmark-results">
-<h4>Benchmark Results<a class="headerlink" href="#benchmark-results" title="Permalink to this headline">¶</a></h4>
+<h4>Benchmark Results<a class="headerlink" href="#benchmark-results" title="Permalink to this heading">¶</a></h4>
 <p>The counter update overhead is expressed in CPU core cycles.</p>
 <table class="docutils align-default" id="id32">
 <caption><span class="caption-text">Per-counter Update Overhead</span><a class="headerlink" href="#id32" title="Permalink to this table">¶</a></caption>
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>CPU</p></th>
 <th class="head"><p>Worker Core Count</p></th>
@@ -1506,11 +1493,11 @@ application and DPDK was compiled with``-O3 -march=native``.</p>
 <p>The different benchmark programs use the various implements the
 various patterns described earlier in this chapter, in a manner very
 similar to the example code.</p>
-<table class="colwidths-given docutils align-default" id="id33">
+<table class="docutils align-default" id="id33">
 <caption><span class="caption-text">Benchmark Counter Implementation Descriptions</span><a class="headerlink" href="#id33" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 75%" />
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Test case name</p></th>
@@ -1544,34 +1531,39 @@ variant described in <a class="reference internal" href="#per-core-counters"><sp
 </section>
 </section>
 <section id="device-statistics">
-<h2>Device Statistics<a class="headerlink" href="#device-statistics" title="Permalink to this headline">¶</a></h2>
+<h2>Device Statistics<a class="headerlink" href="#device-statistics" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="metrics-library">
-<h2>Metrics Library<a class="headerlink" href="#metrics-library" title="Permalink to this headline">¶</a></h2>
+<h2>Metrics Library<a class="headerlink" href="#metrics-library" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="telemetry-library">
-<h2>Telemetry Library<a class="headerlink" href="#telemetry-library" title="Permalink to this headline">¶</a></h2>
+<h2>Telemetry Library<a class="headerlink" href="#telemetry-library" title="Permalink to this heading">¶</a></h2>
 <p class="rubric">Footnotes</p>
-<dl class="footnote brackets">
-<dt class="label" id="cyclesvslogic"><span class="brackets"><a class="fn-backref" href="#id3">1</a></span></dt>
-<dd><p>The reverse is not necessarily true. For example, applications that
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="cyclesvslogic" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>The reverse is not necessarily true. For example, applications that
 copy, encrypt or decrypt the packet payload will have generally
 have high processing latency, but not at the cost of increased
 domain logic complexity or more counter updates.</p>
-</dd>
-<dt class="label" id="sleep"><span class="brackets"><a class="fn-backref" href="#id9">2</a></span></dt>
-<dd><p>Exceptions are, among other, some energy efficiency-related scenarios.</p>
-</dd>
-<dt class="label" id="id31"><span class="brackets"><a class="fn-backref" href="#id13">3</a></span></dt>
-<dd><p>It’s unclear to the author what is the appropriate semantics
+</aside>
+<aside class="footnote brackets" id="sleep" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">2</a><span class="fn-bracket">]</span></span>
+<p>Exceptions are, among other, some energy efficiency-related scenarios.</p>
+</aside>
+<aside class="footnote brackets" id="id31" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">3</a><span class="fn-bracket">]</span></span>
+<p>It’s unclear to the author what is the appropriate semantics
 for the flow reset should be, in regards to global counters.
 E.g., should the flow’s packets be deducted from <code class="docutils literal notranslate"><span class="pre">total_pkts</span></code>?</p>
-</dd>
-<dt class="label" id="nogain"><span class="brackets"><a class="fn-backref" href="#id22">4</a></span></dt>
-<dd><p>The author’s experience is that the performance gains are slight indeed.</p>
-</dd>
-<dt class="label" id="nodemand"><span class="brackets"><a class="fn-backref" href="#id23">5</a></span></dt>
-<dd><p>The reader might ask herself, why there is any demand at all to be
+</aside>
+<aside class="footnote brackets" id="nogain" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id22">4</a><span class="fn-bracket">]</span></span>
+<p>The author’s experience is that the performance gains are slight indeed.</p>
+</aside>
+<aside class="footnote brackets" id="nodemand" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">5</a><span class="fn-bracket">]</span></span>
+<p>The reader might ask herself, why there is any demand at all to be
 efficient in low-load situations, as long as you stay under 100%
 CPU utilization. For traditional, always busy-polling DPDK-based
 designs there may be none. However, if the fast path uses CPU power
@@ -1579,13 +1571,14 @@ management, remaining efficient at low load may allow the
 application to put more worker lcores to sleep, or reduce to an
 even lower core operating frequency, that it could have done
 otherwise.</p>
-</dd>
-<dt class="label" id="ignorantauthor"><span class="brackets"><a class="fn-backref" href="#id29">6</a></span></dt>
-<dd><p>The author does not have any practical experience with the use
+</aside>
+<aside class="footnote brackets" id="ignorantauthor" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id29">6</a><span class="fn-bracket">]</span></span>
+<p>The author does not have any practical experience with the use
 spinlock-protected or sequence counter-protected <em>per-core</em>
 statistics in real applications.</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -1675,7 +1668,7 @@ statistics in real applications.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -1692,7 +1685,7 @@ statistics in real applications.</p>
       &copy;2022, Ericsson AB.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
